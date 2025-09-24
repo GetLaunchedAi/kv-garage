@@ -1,0 +1,187 @@
+---
+layout: "base.html"
+description: "Meta description for the page"
+metaTitle: "Midwest Flooring Suppliers"
+tagTitle: "Services"
+title: "Services"
+preloadImg: "/images/landing-1920w.webp"
+preloadCSS: "/css/shop.css"
+permalink: "shop/"
+eleventyNavigation:
+  key: Shop
+  order: 200
+---
+
+
+
+<!-- ============================================ -->
+<!--                    LANDING                   -->
+<!-- ============================================ -->
+
+<section id="int-hero">
+    <h1 id="home-h">Our Products</h1>
+    {% image './src/images/contactbannerimg.png', 'call center employees', '', 'lazy', '(max-width: 400px) 400px,
+    (max-width: 850px) 850px,
+    1920px'%}
+</section>
+<!-- ============================================ -->
+<!--                Filters (by category)         -->
+<!-- ============================================ -->
+<section id="catalog-filters" class="filters" aria-label="Filter products by category">
+  <div class="filters__wrap">
+    <button class="filter is-active" data-cat="">All</button>
+    <div id="filterChips"></div>
+  </div>
+</section>
+<!-- ============================================ -->
+<!--                Products (from URL)           -->
+<!-- ============================================ -->
+
+<!-- DEV -->
+<!-- <section id="catalog" class="grid" data-src="http://localhost:8080/products.json">
+  <p class="muted" style="grid-column:1/-1">Loading products…</p>
+</section> -->
+<!-- Production -->
+<section id="catalog" class="grid" data-src="/products.json">
+  <p class="muted" style="grid-column:1/-1">Loading products…</p>
+</section>
+
+<script>
+(function () {
+  const root = document.getElementById('catalog');
+  const DATA_URL = root.getAttribute('data-src') || '/products.json';
+
+  const chipWrap = document.getElementById('filterChips');
+  const filtersBar = document.getElementById('catalog-filters');
+
+  // const IS_DEV = /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+  const IS_DEV = /^phpstack-1518311-5868490\.cloudwaysapps\.com$/.test(location.hostname);
+
+  const safeSlug = s => String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
+  const toTitle = s => String(s||'').replace(/[-_]+/g,' ').replace(/\w\S*/g,t=>t[0].toUpperCase()+t.slice(1));
+
+  const productUrl = (p) => {
+    const id = p.slug || p.id || safeSlug(p.title || p.name || 'item');
+    return IS_DEV ? `/product/?slug=${encodeURIComponent(id)}` : `/products/${encodeURIComponent(id)}/`;
+  };
+
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const slug = s => String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
+  const money = v => (typeof v === 'number' && !Number.isNaN(v)) ? v.toFixed(2) : (parseFloat(v)||0).toFixed(2);
+
+  // Replace your current `card` function with this one
+function card(p) {
+  const id   = p.id || p.sku || slug(p.slug || p.title || p.name || 'item');
+  const name = p.title || p.name || id;
+  const href = productUrl(p);                   // PDP link
+  const img  = p.image || '/images/placeholder.jpg';
+  const desc = p.description || '';
+  const price = p.price ?? p.base_price ?? 0;
+
+  return `
+    <article class="product-card" style="border:1px solid var(--border,#eee);padding:12px;border-radius:12px">
+      <a href="${esc(href)}">
+        <img src="${esc(img)}" alt="${esc(p.imageAlt || name)}" loading="lazy" />
+      </a>
+      <h3><a href="${esc(href)}">${esc(name)}</a></h3>
+      <p class="price">$${money(price)}</p>
+      <p class="desc">${esc(desc)}</p>
+      <!-- NOTE: plain link class, not "snipcart-add-item" -->
+      <a class="add-to-cart" href="${esc(href)}">Add to cart</a>
+    </article>`;
+}
+
+
+  // ------- State -------
+  let ALL = [];
+  let ACTIVE_CAT = '';
+  let filtersBound = false; // <— prevent multiple listeners
+
+  // ------- URL helpers -------
+  function readCatFromURL(){
+    return new URLSearchParams(location.search).get('cat') || '';
+  }
+  function writeCatToURL(cat){
+    const url = new URL(location.href);
+    if (cat) url.searchParams.set('cat', cat);
+    else url.searchParams.delete('cat');
+    history.replaceState(null, '', url.toString());
+  }
+
+  // ------- Filtering -------
+  function categoriesFrom(list){
+    const set = new Set();
+    list.forEach(p => {
+      if (p && p.category) set.add(String(p.category));
+      if (Array.isArray(p?.categories)) p.categories.forEach(c => set.add(String(c)));
+    });
+    return Array.from(set).sort((a,b)=>a.localeCompare(b));
+  }
+
+  function renderFilters(list){
+    const cats = categoriesFrom(list);
+    chipWrap.innerHTML = cats.map(c =>
+      `<button class="filter" data-cat="${esc(c)}">${esc(toTitle(c))}</button>`
+    ).join('');
+
+    setActiveFilter(ACTIVE_CAT);
+
+    // IMPORTANT: attach a persistent delegated listener (no {once:true})
+    if (!filtersBound) {
+      filtersBar.addEventListener('click', (e) => {
+        const btn = e.target.closest('.filter');
+        if (!btn) return;
+        const cat = btn.dataset.cat || '';
+        ACTIVE_CAT = cat;
+        setActiveFilter(cat);
+        renderProducts();
+        writeCatToURL(cat ? safeSlug(cat) : '');
+      });
+      filtersBound = true;
+    }
+  }
+
+  function setActiveFilter(cat){
+    filtersBar.querySelectorAll('.filter').forEach(b => b.classList.remove('is-active'));
+    const sel = cat ? `.filter[data-cat="${CSS.escape(cat)}"]` : '.filter[data-cat=""]';
+    const activeBtn = filtersBar.querySelector(sel);
+    // also mark the "All" chip if no cat
+    if (!cat) filtersBar.querySelector('.filter[data-cat=""]')?.classList.add('is-active');
+    if (activeBtn) activeBtn.classList.add('is-active');
+  }
+
+  function inCategory(p, cat){
+    if (!cat) return true;
+    const c1 = p?.category ? String(p.category) : null;
+    const arr = Array.isArray(p?.categories) ? p.categories.map(String) : [];
+    return c1 === cat || arr.includes(cat);
+  }
+
+  function renderProducts(){
+    const items = ALL.filter(p => inCategory(p, ACTIVE_CAT));
+    root.innerHTML = items.length
+      ? items.map(card).join('')
+      : `<p class="muted" style="grid-column:1/-1">No products in this category.</p>`;
+  }
+
+  // ------- Init -------
+  (async function init() {
+    try {
+      const res = await fetch(`${DATA_URL}${DATA_URL.includes('?') ? '&' : '?'}cb=${Date.now()}`, { cache: 'no-store' });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      ALL = Array.isArray(data) ? data : (Array.isArray(data.products) ? data.products : []);
+      const urlCat = readCatFromURL();
+      if (urlCat) {
+        const byLabel = categoriesFrom(ALL).find(c => safeSlug(c) === safeSlug(urlCat) || c === urlCat);
+        ACTIVE_CAT = byLabel || '';
+      }
+      renderFilters(ALL);
+      renderProducts();
+    } catch (err) {
+      console.error('Failed to load products:', err);
+      root.innerHTML = `<p class="muted" style="grid-column:1/-1">Failed to load products.</p>`;
+    }
+  })();
+})();
+</script>

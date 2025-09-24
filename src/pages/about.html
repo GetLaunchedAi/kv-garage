@@ -1,0 +1,188 @@
+---
+layout: "base.html"
+description: "Meta description for the page"
+metaTitle: "Midwest Flooring Suppliers"
+tagTitle: "About"
+preloadImg: "/images/bannerimg.png"
+preloadCSS: "/css/about.css"
+permalink: "about/"
+eleventyNavigation:
+  key: About Us
+  order: 300
+---
+
+<!-- Enter html code below -->
+
+<!-- ============================================ -->
+<!--                    LANDING                   -->
+<!-- ============================================ -->
+
+<section id="int-hero">
+  <h1 id="home-h">About Us</h1>
+  {% image './src/images/aboutbannerimg.png', 'vinyl floors', '', 'lazy',
+  '(max-width: 850px) 850px, 1920px'%}
+</section>
+
+<!-- ============================================ -->
+<!--                 Side By Side                 -->
+<!-- ============================================ -->
+
+<section id="sbs">
+  <div class="cs-container">
+    <!-- Left Image Section -->
+    <div class="cs-left">
+      {% image './src/images/about_img_0.png', 'flooring', 'cs-picture
+      cs-picture1', 'lazy'%} {% image './src/images/about_img_1.png',
+      'flooring', 'cs-picture cs-picture2', 'lazy'%}
+    </div>
+    <!-- Right Content Section-->
+    <div class="cs-right">
+      <span class="cs-topper">About Us</span>
+      <h2 class="cs-title">About Midwest Flooring Suppliers</h2>
+      <p class="cs-text">
+        Midwest Flooring Suppliers is a family-owned business built on
+        integrity, craftsmanship, and decades of hands-on experience in the
+        flooring industry. We proudly supply durable, stylish flooring solutions
+        for homes and commercial spaces across the Midwest.
+      </p>
+      <p class="cs-text">
+        What sets us apart? We source products directly from the
+        manufacturer—saving our customers up to 40% compared to big-box
+        retailers. Our team also handles every installation directly, never
+        relying on subcontractors, to ensure consistent quality and
+        accountability from start to finish.
+      </p>
+
+      <div class="cs-flex-group">
+        <p class="cs-flex-p">
+          I’m Patrick Bisimwa, founder of Midwest Flooring Suppliers. From day
+          one, my goal has been to provide honest pricing, dependable service,
+          and a better customer experience than the big chains. We treat every
+          project like it’s our own—and that’s a promise we stand behind every
+          day.
+        </p>
+        <span class="cs-name">Patrick Bisimwa</span>
+        <span class="cs-job">Founder & CEO</span>
+        <img
+          class="cs-quote-icon"
+          loading="lazy"
+          decoding="async"
+          src="https://csimg.nyc3.digitaloceanspaces.com/SideBySide/quote-white.svg"
+          alt="quote icon"
+          width="136"
+          height="77"
+        />
+      </div>
+
+      <!-- <a href="/about" class="button-solid">More About Us</a> -->
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ -->
+<!--                    FAQ                       -->
+<!-- ============================================ -->
+
+<section id="faq-326">
+  <div class="cs-container">
+    <div class="cs-content">
+      <span class="cs-topper">FAQs</span>
+      <h2 class="cs-title">Frequently Asked Questions</h2>
+    </div>
+    <div class="cs-flex-group">
+      <ul class="cs-faq-group">
+        <li class="cs-faq-item active">
+          <button class="cs-button">
+            <span class="cs-button-text">
+              What types of flooring do you supply?
+            </span>
+          </button>
+          <p class="cs-item-p">
+            Midwest Flooring Suppliers offers a full range of flooring products
+            including hardwood, laminate, luxury vinyl plank, carpet, tile, and
+            commercial-grade options from trusted brands.
+          </p>
+        </li>
+        <li class="cs-faq-item">
+          <button class="cs-button">
+            <span class="cs-button-text">
+              Do you provide delivery services?
+            </span>
+          </button>
+          <p class="cs-item-p">
+            Yes. We offer dependable delivery throughout the Midwest, ensuring
+            your flooring materials arrive safely and on schedule to keep your
+            project moving forward.
+          </p>
+        </li>
+        <li class="cs-faq-item">
+          <button class="cs-button">
+            <span class="cs-button-text">
+              Can you assist with choosing the right product?
+            </span>
+          </button>
+          <p class="cs-item-p">
+            Absolutely. Our experienced team will guide you in selecting the
+            right flooring based on your space, style, usage needs, and budget.
+            We’re here to help you make confident decisions.
+          </p>
+        </li>
+        <li class="cs-faq-item">
+          <button class="cs-button">
+            <span class="cs-button-text">
+              Do you work with contractors and builders?
+            </span>
+          </button>
+          <p class="cs-item-p">
+            Yes. We proudly support contractors, designers, and builders with
+            bulk pricing, fast turnaround, and consistent product availability
+            for residential and commercial builds.
+          </p>
+        </li>
+        <li class="cs-faq-item">
+          <button class="cs-button">
+            <span class="cs-button-text">
+              What makes Midwest Flooring Suppliers different?
+            </span>
+          </button>
+          <p class="cs-item-p">
+            We’re a family-owned business offering direct-from-manufacturer
+            pricing—up to 40% less than big-box stores. Our installations are
+            handled by our own trusted team, never subcontractors, ensuring
+            consistent quality and accountability from start to finish.
+          </p>
+        </li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<script>
+  const faqItems = Array.from(document.querySelectorAll(".cs-faq-item"));
+  for (const item of faqItems) {
+    const onClick = () => {
+      item.classList.toggle("active");
+    };
+    item.addEventListener("click", onClick);
+  }
+</script>
+
+<!-- ============================================ -->
+<!--             Final Call to Action             -->
+<!-- ============================================ -->
+
+<section id="cta">
+  <div class="container">
+    <h2 class="title">
+      Get It Done <br />
+      With Us Today
+    </h2>
+    <p>
+      Big ideas start with a simple conversation. Reach out today and let’s get
+      your project on the books.
+    </p>
+    <a href="/contact/" class="button-solid">Free Estimate</a>
+  </div>
+  {% image './src/images/final_home_img.png', 'car engine', '', 'lazy',
+  '(max-width: 400px) 400px, (max-width: 850px) 850px, 1920'%}
+</section>

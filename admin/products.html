@@ -1,0 +1,856 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <title>Products Editor</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --b: #e5e7eb;
+      --muted: #6b7280;
+      --ok: #0a7f2e;
+      --bad: #b00020;
+    }
+
+    body {
+      font: 14px/1.5 system-ui, -apple-system, Segoe UI, Montserrat, sans-serif;
+      max-width: 1100px;
+      margin: 24px auto;
+      padding: 0 12px;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: .5rem;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 10px
+    }
+
+    .mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace
+    }
+
+    .ok {
+      color: var(--ok)
+    }
+
+    .bad {
+      color: var(--bad)
+    }
+
+    .card {
+      border: 1px solid var(--b);
+      border-radius: 12px;
+      padding: 14px;
+      margin: 12px 0
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 140px 1fr;
+      gap: 10px;
+      align-items: start;
+      margin: 6px 0
+    }
+
+    .row label {
+      color: var(--muted)
+    }
+
+    input[type=text],
+    input[type=number],
+    textarea {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 8px;
+      border: 1px solid var(--b);
+      border-radius: 8px
+    }
+
+    textarea {
+      min-height: 80px
+    }
+
+    .list {
+      border: 1px dashed var(--b);
+      border-radius: 10px;
+      padding: 10px;
+      margin-top: 4px
+    }
+
+    .list-item {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      margin: 6px 0
+    }
+
+    .list-2col {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+      gap: 8px;
+      margin: 6px 0
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 12px
+    }
+
+    .actions {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap
+    }
+
+    button {
+      padding: 8px 10px;
+      border: 1px solid var(--b);
+      background: #fff;
+      border-radius: 8px;
+      cursor: pointer
+    }
+
+    .danger {
+      border-color: #fca5a5;
+      color: #b91c1c
+    }
+
+    .small {
+      padding: 4px 8px;
+      font-size: 12px
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px
+    }
+
+    @media (max-width: 800px) {
+      .grid {
+        grid-template-columns: 1fr
+      }
+
+      .row {
+        grid-template-columns: 1fr
+      }
+    }
+
+    .pill {
+      display: inline-flex;
+      padding: 2px 8px;
+      border: 1px solid var(--b);
+      border-radius: 999px;
+      margin: 2px 6px 0 0
+    }
+
+    .uploader {
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 12px;
+      margin: 12px 0;
+      background: #fff
+    }
+
+    .upl-label {
+      display: block;
+      font-weight: 700;
+      margin-bottom: 8px
+    }
+
+    .upl-row {
+      display: flex;
+      gap: 8px;
+      align-items: center
+    }
+
+    .upl-row input[type="file"] {
+      flex: 1
+    }
+
+    .upl-preview {
+      margin-top: 10px
+    }
+
+    .upl-preview img {
+      max-width: 220px;
+      max-height: 220px;
+      object-fit: contain;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      background: #f7f8fb;
+      padding: 6px
+    }
+
+    .upl-msg {
+      margin-top: 8px;
+      font-size: 13px;
+      color: #6b7280
+    }
+
+    .upl-url-label {
+      display: block;
+      margin-top: 10px;
+      font-size: 13px;
+      color: #374151
+    }
+
+    #imageUrl {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Products Editor</h1>
+
+  <div class="toolbar">
+    <button id="add">+ Add product</button>
+    <button id="save">💾 Save</button>
+    <button id="reload">↻ Reload</button>
+    <label>Owner token: <input id="token" type="password" placeholder="paste once…" /></label>
+    <label><input id="showPw" type="checkbox" /> show</label>
+    <span id="status" class="mono"></span>
+  </div>
+
+  <div id="list"></div>
+
+  <template id="card-tpl">
+    <div class="card">
+      <div class="grid">
+        <div>
+          <div class="row"><label>id *</label><input data-k="id" type="text" class="mono" /></div>
+          <div class="row"><label>slug *</label><input data-k="slug" type="text" class="mono" /></div>
+          <div class="row"><label>name *</label><input data-k="name" type="text" /></div>
+          <div class="row"><label>category</label><input data-k="category" type="text" /></div>
+          <!-- <div class="row"><label>image</label><input data-k="image" type="text" placeholder="/images/products/..." /></div> -->
+
+        </div>
+        <section class="uploader">
+  <label class="upl-label">Product Image</label>
+
+  <div class="upl-row">
+    <input type="file" class="uplFile" accept="image/*">
+    <button type="button" class="uplBtn">Upload</button>
+  </div>
+
+  <div class="upl-preview uplPreview" hidden>
+    <img class="uplImg" alt="Preview">
+  </div>
+
+  <div class="upl-msg uplMsg" aria-live="polite"></div>
+</section>
+
+        <div>
+          <div class="row"><label>price (nullable)</label><input data-k="price" type="number" step="0.01"
+              placeholder="leave blank for null" /></div>
+          <div class="row"><label>strength (nullable)</label><input data-k="strength" type="text"
+              placeholder="e.g., 10mg or leave blank" /></div>
+          <div class="row"><label>units (nullable)</label><input data-k="units" type="text"
+              placeholder="e.g., mg/ml or leave blank" /></div>
+        </div>
+      </div>
+
+      <div class="row">
+        <label>bullets</label>
+        <div class="list" data-k="bullets">
+          <div class="muted">One per line item.</div>
+          <div class="items"></div>
+          <div class="actions"><button class="small" data-add="bullets">+ Add bullet</button></div>
+        </div>
+      </div>
+
+      <div class="row">
+        <label>forms</label>
+        <div class="list" data-k="forms">
+          <div class="muted">Array of strings (e.g., pill, liquid).</div>
+          <div class="items"></div>
+          <div class="actions"><button class="small" data-add="forms">+ Add form</button></div>
+        </div>
+      </div>
+
+      <div class="row">
+        <label>ranges</label>
+        <div class="list" data-k="ranges">
+          <div class="muted">Each item has <b>label</b> and nullable <b>price</b>.</div>
+          <div class="items"></div>
+          <div class="actions"><button class="small" data-add="ranges">+ Add range</button></div>
+        </div>
+      </div>
+
+      <div class="row">
+        <label>chemInfo</label>
+        <div class="list" data-k="chemInfo">
+          <div class="muted">Key/value pairs.</div>
+          <div class="items"></div>
+          <div class="actions"><button class="small" data-add="chemInfo">+ Add chem field</button></div>
+        </div>
+      </div>
+
+      <div class="row">
+        <label>labResults</label>
+        <div class="list" data-k="labResults">
+          <div class="muted">Enter URLs or identifiers (freeform strings).</div>
+          <div class="items"></div>
+          <div class="actions"><button class="small" data-add="labResults">+ Add lab result</button></div>
+        </div>
+      </div>
+
+      <div class="actions" style="margin-top:6px">
+        <button class="danger" data-act="del">🗑️ Delete product</button>
+        <span class="muted">Changes are local until you press <b>Save</b> above.</span>
+      </div>
+    </div>
+  </template>
+
+
+<script>
+
+const DATA_URL = '/products.json';
+const SAVE_URL = '/api/save-products.php';
+
+const els = {
+  list: document.querySelector('#list'),
+  add: document.querySelector('#add'),
+  save: document.querySelector('#save'),
+  reload: document.querySelector('#reload'),
+  token: document.querySelector('#token'),
+  showPw: document.querySelector('#showPw'),
+  status: document.querySelector('#status'),
+};
+
+els.token.value = localStorage.getItem('ADMIN_TOKEN') || '';
+els.token.addEventListener('input', () => localStorage.setItem('ADMIN_TOKEN', els.token.value));
+els.showPw.addEventListener('change', () => els.token.type = els.showPw.checked ? 'text' : 'password');
+
+function status(msg, ok=true){
+  els.status.textContent = msg;
+  els.status.className = (ok ? 'mono ok' : 'mono bad');
+}
+
+function deepClone(o){ return JSON.parse(JSON.stringify(o)); }
+function uniq(arr){ return Array.from(new Set(arr)); }
+
+async function sha1HexOfString(str){
+  if (!crypto?.subtle) return '';
+  const data = new TextEncoder().encode(str);
+  const hashBuffer = await crypto.subtle.digest('SHA-1', data);
+  const bytes = new Uint8Array(hashBuffer);
+  return Array.from(bytes, b => b.toString(16).padStart(2,'0')).join('');
+}
+
+/* State about original JSON shape (to preserve on save) */
+let originalText = '';
+let originalRoot = null;
+let originalKeyForProducts = null;
+let originalWasArray = false;
+let etag = '';
+let products = [];
+
+/* Load and detect structure (same logic as before) */
+async function load(){
+  status('Loading…');
+  const res = await fetch(DATA_URL, { cache: 'no-store' });
+  if (!res.ok){ status(`Failed to load (${res.status})`, false); return; }
+  originalText = await res.text();
+  const sha = await sha1HexOfString(originalText);
+  etag = sha ? `"${sha}"` : '';
+  let parsed;
+  try { parsed = JSON.parse(originalText); } catch (e) { status('products.json is not valid JSON.', false); return; }
+
+  if (Array.isArray(parsed)) {
+    originalWasArray = true; originalRoot = null; originalKeyForProducts = null;
+    products = parsed.map(deepClone);
+    status('Loaded (array)');
+    render(); return;
+  }
+
+  if (parsed && typeof parsed === 'object'){
+    const preferKeys = ['products','items','data'];
+    let found = null;
+    for (const k of preferKeys) if (Array.isArray(parsed[k])) { found = k; break; }
+    if (!found) {
+      for (const [k,v] of Object.entries(parsed)) {
+        if (Array.isArray(v) && v.length>0 && v.every(it => typeof it === 'object')) { found = k; break; }
+      }
+    }
+    if (found) {
+      originalWasArray = false; originalRoot = parsed; originalKeyForProducts = found;
+      products = parsed[found].map(deepClone);
+      status(`Loaded (object -> "${found}")`);
+      render(); return;
+    }
+    const candidateValues = Object.values(parsed).filter(v => typeof v==='object' && !Array.isArray(v));
+    if (candidateValues.length>0) {
+      originalWasArray = false; originalRoot = parsed; originalKeyForProducts = null;
+      products = candidateValues.map(deepClone);
+      status('Loaded (object values treated as products)');
+      render(); return;
+    }
+  }
+
+  originalWasArray = false; originalRoot = null; originalKeyForProducts = null;
+  products = [];
+  status('Loaded (no products found) — starting empty');
+  render();
+}
+
+/* -------------------------
+   RENDER: builds only the Properties section per card
+   ------------------------- */
+function render(){
+  els.list.innerHTML = '';
+  products.forEach((p, idx) => {
+    const card = document.createElement('div');
+    card.className = 'card';
+
+    // header row: show friendly identifier and quick actions
+    const header = document.createElement('div');
+    header.style.display = 'flex';
+    header.style.justifyContent = 'space-between';
+    header.style.alignItems = 'center';
+    header.style.marginBottom = '10px';
+
+    const title = document.createElement('div');
+    title.innerHTML = `<strong>${String(p.name || p.title || p.slug || p.id || 'Product')}</strong><div class="muted" style="font-size:12px">${String(p.id || p.sku || '')}</div>`;
+    header.appendChild(title);
+
+    const headerActions = document.createElement('div');
+    headerActions.style.display = 'flex'; headerActions.style.gap = '6px';
+
+    const renameProductBtn = document.createElement('button');
+    renameProductBtn.className = 'small';
+    renameProductBtn.textContent = 'Rename product';
+    renameProductBtn.addEventListener('click', () => {
+      const newName = prompt('New product name', p.name || p.title || '');
+      if (newName !== null) {
+        // prefer to set `name` key
+        p.name = newName.trim();
+        render();
+      }
+    });
+    headerActions.appendChild(renameProductBtn);
+
+    const delProductBtn = document.createElement('button');
+    delProductBtn.className = 'danger small';
+    delProductBtn.textContent = 'Delete product';
+    delProductBtn.addEventListener('click', () => {
+      if (!confirm(`Delete product "${p.name || p.id || p.title || ''}"?`)) return;
+      products.splice(idx,1);
+      render();
+    });
+    headerActions.appendChild(delProductBtn);
+
+    header.appendChild(headerActions);
+    card.appendChild(header);
+
+    // PROPERTIES title and container
+    const propsTitle = document.createElement('div');
+    propsTitle.innerHTML = '<strong>Properties</strong>';
+    propsTitle.style.marginBottom = '8px';
+    card.appendChild(propsTitle);
+
+    const propsContainer = document.createElement('div');
+    propsContainer.className = 'props-list';
+    propsContainer.style.display = 'grid';
+    propsContainer.style.rowGap = '8px';
+    card.appendChild(propsContainer);
+
+    // We'll always show options (structured) first if present OR as empty editable area
+    if (!Array.isArray(p.options)) p.options = p.options ?? null; // keep null => option to add
+    renderOptionsSection(propsContainer, p, () => rebuildPropsArea(propsContainer, p));
+
+    // Render remaining top-level keys except 'options' (in deterministic order)
+    function rebuildPropsArea(container, productObj) {
+      // remove all direct children after the options section (we'll re-render them)
+      // options section is the first child; we'll clear everything after it
+      while (container.children.length > 1) container.removeChild(container.lastChild);
+
+      const reservedFirst = new Set(['options']);
+      const keys = Object.keys(productObj).filter(k => !reservedFirst.has(k)).sort();
+
+      // prefer to render a few common keys with nicer labels first
+      const preferOrder = ['id','sku','slug','name','title','category','price','currency','url','image'];
+      const ordered = [];
+      for (const k of preferOrder) if (keys.includes(k)) { ordered.push(k); keys.splice(keys.indexOf(k),1); }
+      // then the remainder
+      ordered.push(...keys);
+
+      ordered.forEach(key => {
+        const row = document.createElement('div');
+        row.style.display = 'grid';
+        row.style.gridTemplateColumns = '140px 1fr auto';
+        row.style.gap = '8px';
+        row.style.alignItems = 'center';
+
+        const label = document.createElement('label');
+        label.textContent = key;
+        label.style.color = '#374151';
+        label.style.fontSize = '13px';
+        row.appendChild(label);
+
+        const valCell = document.createElement('div');
+
+        const val = productObj[key];
+
+        // primitives
+        if (typeof val === 'boolean') {
+          const chk = document.createElement('input');
+          chk.type = 'checkbox';
+          chk.checked = !!val;
+          chk.addEventListener('change', ()=> { productObj[key] = chk.checked; });
+          valCell.appendChild(chk);
+        } else if (typeof val === 'number') {
+          const num = document.createElement('input');
+          num.type = 'number';
+          num.value = String(val);
+          num.addEventListener('input', ()=> {
+            const raw = num.value.trim();
+            productObj[key] = raw === '' ? null : Number(raw);
+          });
+          valCell.appendChild(num);
+        } else if (typeof val === 'string' || val === null) {
+          const txt = document.createElement('input');
+          txt.type = 'text';
+          txt.value = val == null ? '' : String(val);
+          txt.addEventListener('input', ()=> {
+            const raw = txt.value;
+            productObj[key] = raw === '' ? null : raw;
+          });
+          valCell.appendChild(txt);
+        } else if (Array.isArray(val)) {
+          // array of primitives? make a simple list editor
+          if (val.every(x => typeof x === 'string' || typeof x === 'number' || x === null)) {
+            const listWrap = document.createElement('div');
+            listWrap.style.display = 'grid'; listWrap.style.rowGap = '6px';
+            const itemsDiv = document.createElement('div');
+            itemsDiv.style.display = 'grid'; itemsDiv.style.rowGap = '6px';
+            function rerenderList(){
+              itemsDiv.innerHTML = '';
+              val.forEach((it,i) => {
+                const itemRow = document.createElement('div');
+                itemRow.style.display='flex'; itemRow.style.gap='6px';
+                const input = document.createElement('input');
+                input.type = (typeof it === 'number') ? 'number' : 'text';
+                input.value = it == null ? '' : String(it);
+                input.addEventListener('input', ()=> { val[i] = input.value === '' ? null : (input.type==='number' ? Number(input.value) : input.value); });
+                const rem = document.createElement('button'); rem.className='small danger'; rem.textContent='Remove';
+                rem.addEventListener('click', ()=> { val.splice(i,1); rerenderList(); });
+                itemRow.appendChild(input); itemRow.appendChild(rem);
+                itemsDiv.appendChild(itemRow);
+              });
+            }
+            const addBtn = document.createElement('button'); addBtn.className='small'; addBtn.textContent = '+ Add';
+            addBtn.addEventListener('click', ()=> { val.push(''); rerenderList(); });
+            listWrap.appendChild(itemsDiv); listWrap.appendChild(addBtn);
+            rerenderList();
+            valCell.appendChild(listWrap);
+          } else {
+            // array of objects — show compact JSON-free editors per element (key/value pairs)
+            const arrWrap = document.createElement('div');
+            arrWrap.style.display = 'grid'; arrWrap.style.rowGap = '8px';
+            val.forEach((obj, oi) => {
+              const subCard = document.createElement('div');
+              subCard.style.border = '1px solid #e5e7eb'; subCard.style.padding='8px'; subCard.style.borderRadius='8px';
+              const subHeader = document.createElement('div'); subHeader.style.display='flex'; subHeader.style.justifyContent='space-between';
+              subHeader.innerHTML = `<div style="font-weight:600; font-size:13px">Item ${oi+1}</div>`;
+              const remBtn = document.createElement('button'); remBtn.className='small danger'; remBtn.textContent='Remove';
+              remBtn.addEventListener('click', ()=> { val.splice(oi,1); rebuildPropsArea(propsContainer, productObj); });
+              subHeader.appendChild(remBtn);
+              subCard.appendChild(subHeader);
+
+              // show each key in the object as small key/value rows
+              const keys = Object.keys(obj || {});
+              keys.forEach(k => {
+                const subRow = document.createElement('div');
+                subRow.style.display='grid'; subRow.style.gridTemplateColumns='1fr 2fr auto'; subRow.style.gap='8px'; subRow.style.marginTop='6px';
+                const subLabel = document.createElement('div'); subLabel.textContent = k; subLabel.style.fontSize='13px';
+                const subValCell = document.createElement('div');
+                const subVal = obj[k];
+                const inpt = document.createElement('input'); inpt.type='text'; inpt.value = subVal == null ? '' : String(subVal);
+                inpt.addEventListener('input', ()=> { obj[k] = inpt.value === '' ? null : inpt.value; });
+                subValCell.appendChild(inpt);
+                const subActions = document.createElement('div');
+                const delKeyBtn = document.createElement('button'); delKeyBtn.className='small danger'; delKeyBtn.textContent='Remove';
+                delKeyBtn.addEventListener('click', ()=> { delete obj[k]; rebuildPropsArea(propsContainer, productObj); });
+                subActions.appendChild(delKeyBtn);
+                subRow.appendChild(subLabel); subRow.appendChild(subValCell); subRow.appendChild(subActions);
+                subCard.appendChild(subRow);
+              });
+
+              // add new key to object
+              const addKeyBtn = document.createElement('button'); addKeyBtn.className='small'; addKeyBtn.textContent='+ Add field';
+              addKeyBtn.addEventListener('click', ()=> {
+                const newK = prompt('New field key for this item');
+                if (!newK) return;
+                obj[newK] = '';
+                rebuildPropsArea(propsContainer, productObj);
+              });
+              subCard.appendChild(addKeyBtn);
+
+              arrWrap.appendChild(subCard);
+            });
+
+            // add new element
+            const addElemBtn = document.createElement('button'); addElemBtn.className='small'; addElemBtn.textContent = '+ Add item';
+            addElemBtn.addEventListener('click', ()=> { val.push({}); rebuildPropsArea(propsContainer, productObj); });
+
+            valCell.appendChild(arrWrap); valCell.appendChild(addElemBtn);
+          }
+        } else if (typeof val === 'object' && val !== null) {
+          // object: render key/value pairs (no JSON field)
+          const objWrap = document.createElement('div'); objWrap.style.display='grid'; objWrap.style.rowGap='6px';
+          Object.keys(val).forEach(k => {
+            const kvRow = document.createElement('div'); kvRow.style.display='grid'; kvRow.style.gridTemplateColumns='1fr 2fr auto'; kvRow.style.gap='8px';
+            const lab = document.createElement('div'); lab.textContent = k; lab.style.fontSize='13px';
+            const inpt = document.createElement('input'); inpt.type='text'; inpt.value = val[k] == null ? '' : String(val[k]);
+            inpt.addEventListener('input', ()=> { val[k] = inpt.value === '' ? null : inpt.value; });
+            const acts = document.createElement('div');
+            const rem = document.createElement('button'); rem.className='small danger'; rem.textContent='Remove';
+            rem.addEventListener('click', ()=> { delete val[k]; rebuildPropsArea(propsContainer, productObj); });
+            acts.appendChild(rem);
+            kvRow.appendChild(lab); kvRow.appendChild(inpt); kvRow.appendChild(acts);
+            objWrap.appendChild(kvRow);
+          });
+          const addFieldBtn = document.createElement('button'); addFieldBtn.className='small'; addFieldBtn.textContent = '+ Add field';
+          addFieldBtn.addEventListener('click', ()=> {
+            const newK = prompt('New property key for object');
+            if (!newK) return;
+            val[newK] = '';
+            rebuildPropsArea(propsContainer, productObj);
+          });
+          valCell.appendChild(objWrap); valCell.appendChild(addFieldBtn);
+        } else {
+          // fallback
+          const txt = document.createElement('input'); txt.type='text'; txt.value = String(val ?? '');
+          txt.addEventListener('input', ()=> { productObj[key] = txt.value; });
+          valCell.appendChild(txt);
+        }
+
+        const actions = document.createElement('div');
+        actions.style.display='flex'; actions.style.gap='6px';
+        const renameBtn = document.createElement('button'); renameBtn.className='small'; renameBtn.textContent='Rename';
+        renameBtn.addEventListener('click', ()=> {
+          const newKey = prompt('Rename property', key);
+          if (!newKey || newKey === key) return;
+          if (productObj[newKey] !== undefined && !confirm(`${newKey} exists — overwrite?`)) return;
+          productObj[newKey] = productObj[key];
+          delete productObj[key];
+          rebuildPropsArea(propsContainer, productObj);
+        });
+        const removeBtn = document.createElement('button'); removeBtn.className='small danger'; removeBtn.textContent='Remove';
+        removeBtn.addEventListener('click', ()=> {
+          if (!confirm(`Remove property "${key}"?`)) return;
+          delete productObj[key]; rebuildPropsArea(propsContainer, productObj);
+        });
+        actions.appendChild(renameBtn); actions.appendChild(removeBtn);
+
+        row.appendChild(valCell); row.appendChild(actions);
+        container.appendChild(row);
+      });
+
+      // extras under the property list: add property, add bullet quick action
+      const extrasRow = document.createElement('div'); extrasRow.style.marginTop='8px'; extrasRow.style.display='flex'; extrasRow.style.gap='8px';
+      const addPropBtn = document.createElement('button'); addPropBtn.className='small'; addPropBtn.textContent = '+ Add property';
+      addPropBtn.addEventListener('click', ()=> {
+        const k = prompt('New property key (e.g. vendor)');
+        if (!k) return;
+        const key = k.trim();
+        if (productObj.hasOwnProperty(key)){ alert('Property exists'); return; }
+        const t = prompt('Type? (string/number/boolean/list/options/object)', 'string') || 'string';
+        if (t==='number') productObj[key] = null;
+        else if (t==='boolean') productObj[key] = false;
+        else if (t==='list') productObj[key] = [];
+        else if (t==='options') productObj[key] = []; // empty options
+        else if (t==='object') productObj[key] = {};
+        else productObj[key] = '';
+        rebuildPropsArea(container, productObj);
+      });
+      const addBulletBtn = document.createElement('button'); addBulletBtn.className='small'; addBulletBtn.textContent = '+ Add bullet';
+      addBulletBtn.addEventListener('click', ()=> {
+        if (!Array.isArray(productObj.bullets)) productObj.bullets = [];
+        productObj.bullets.push('');
+        rebuildPropsArea(container, productObj);
+      });
+      extrasRow.appendChild(addPropBtn); extrasRow.appendChild(addBulletBtn);
+      container.appendChild(extrasRow);
+    }
+
+    // initially build the rest
+    rebuildPropsArea(propsContainer, p);
+
+    // append card to list
+    els.list.appendChild(card);
+  });
+}
+
+/* -------------------------
+   OPTIONS renderer (structured editor)
+   options: [ { name: "...", values: [ { value: "...", price_delta: 0 }, ... ] }, ... ]
+   ------------------------- */
+function renderOptionsSection(container, productObj, onChange){
+  const section = document.createElement('div');
+  section.style.marginBottom = '8px';
+
+  const label = document.createElement('div'); label.textContent = 'options'; label.style.fontSize='13px'; label.style.color='#374151';
+  section.appendChild(label);
+
+  const wrap = document.createElement('div'); wrap.style.display='grid'; wrap.style.rowGap='8px'; wrap.style.marginTop='6px';
+  section.appendChild(wrap);
+
+  // ensure productObj.options exists as array or null
+  if (productObj.options == null) {
+    const addOptionsBtn = document.createElement('button'); addOptionsBtn.className = 'small'; addOptionsBtn.textContent = '+ Add options';
+    addOptionsBtn.addEventListener('click', ()=> {
+      productObj.options = [];
+      render(); // re-render whole view to show options area
+    });
+    wrap.appendChild(addOptionsBtn);
+    container.appendChild(section);
+    return;
+  }
+
+  function rerender(){
+    wrap.innerHTML = '';
+    productObj.options.forEach((opt, oi) => {
+      const optCard = document.createElement('div');
+      optCard.style.border = '1px solid #e5e7eb'; optCard.style.padding='8px'; optCard.style.borderRadius='8px';
+
+      // option header (name + remove)
+      const h = document.createElement('div'); h.style.display='flex'; h.style.justifyContent='space-between'; h.style.alignItems='center';
+      const nameIn = document.createElement('input'); nameIn.type = 'text'; nameIn.value = opt.name ?? ''; nameIn.style.fontWeight='600';
+      nameIn.addEventListener('input', ()=> { opt.name = nameIn.value; });
+      h.appendChild(nameIn);
+
+      const hdrActions = document.createElement('div'); hdrActions.style.display='flex'; hdrActions.style.gap='6px';
+      const addValBtn = document.createElement('button'); addValBtn.className='small'; addValBtn.textContent = '+ Value';
+      addValBtn.addEventListener('click', ()=> { if (!Array.isArray(opt.values)) opt.values = []; opt.values.push({ value:'', price_delta: 0 }); rerender(); });
+      const remOptBtn = document.createElement('button'); remOptBtn.className='small danger'; remOptBtn.textContent='Remove Option';
+      remOptBtn.addEventListener('click', ()=> { if (!confirm('Remove this option?')) return; productObj.options.splice(oi,1); rerender(); });
+      hdrActions.appendChild(addValBtn); hdrActions.appendChild(remOptBtn);
+      h.appendChild(hdrActions);
+
+      optCard.appendChild(h);
+
+      // values (list)
+      const valsWrap = document.createElement('div'); valsWrap.style.marginTop='8px'; valsWrap.style.display='grid'; valsWrap.style.rowGap='6px';
+      if (Array.isArray(opt.values)) {
+        opt.values.forEach((v, vi) => {
+          const vRow = document.createElement('div'); vRow.style.display='grid'; vRow.style.gridTemplateColumns='1fr 140px auto'; vRow.style.gap='8px'; vRow.style.alignItems='center';
+          const valueInput = document.createElement('input'); valueInput.type='text'; valueInput.value = v.value ?? '';
+          valueInput.addEventListener('input', ()=> { v.value = valueInput.value; });
+
+          const priceInput = document.createElement('input'); priceInput.type='number'; priceInput.step='0.01';
+          priceInput.value = (v.price_delta == null ? 0 : v.price_delta);
+          priceInput.addEventListener('input', ()=> {
+            const raw = priceInput.value.trim();
+            v.price_delta = raw === '' ? 0 : Number(raw);
+          });
+
+          const valActions = document.createElement('div');
+          valActions.style.display='flex'; valActions.style.gap='6px';
+          const remValBtn = document.createElement('button'); remValBtn.className='small danger'; remValBtn.textContent='Remove';
+          remValBtn.addEventListener('click', ()=> { opt.values.splice(vi,1); rerender(); });
+          valActions.appendChild(remValBtn);
+
+          vRow.appendChild(valueInput); vRow.appendChild(priceInput); vRow.appendChild(valActions);
+          valsWrap.appendChild(vRow);
+        });
+      } else {
+        // if not an array, initialize
+        opt.values = [];
+      }
+      optCard.appendChild(valsWrap);
+
+      wrap.appendChild(optCard);
+    });
+
+    // add new option button
+    const addOpt = document.createElement('button'); addOpt.className='small'; addOpt.textContent = '+ Add option';
+    addOpt.addEventListener('click', ()=> { productObj.options.push({ name:'', values: [ { value:'', price_delta:0 } ] }); rerender(); });
+    wrap.appendChild(addOpt);
+  }
+
+  rerender();
+  container.appendChild(section);
+}
+
+/* -------------------------
+   Add product, validation, save (preserve original shape)
+   ------------------------- */
+function addProduct(){
+  const id = `prod_${Date.now()}`;
+  products.unshift({ id, name:'', price:null });
+  render();
+}
+
+function validate(){
+  for (const p of products){
+    if (typeof p !== 'object' || p === null) return 'Each product must be an object.';
+    const hasId = p.id || p.sku || p.slug || p.name || p.title;
+    if (!hasId) return 'Each product should have an identifier (id/sku/slug/name/title).';
+    // ensure options are well-formed if present
+    if (p.options && !Array.isArray(p.options)) return 'options must be an array if present.';
+    if (Array.isArray(p.options)) {
+      for (const opt of p.options) {
+        if (typeof opt !== 'object' || !('name' in opt)) return 'Each option must be an object with a name.';
+        if (!Array.isArray(opt.values)) return 'Option.values must be an array.';
+      }
+    }
+  }
+  return null;
+}
+
+async function save(){
+  const token = els.token.value.trim();
+  if (!token){ status('Missing owner token', false); return; }
+  const err = validate();
+  if (err){ status(err, false); return; }
+  status('Saving…');
+
+  let payloadObj;
+  if (originalWasArray) payloadObj = products;
+  else if (originalRoot && originalKeyForProducts) {
+    const copy = deepClone(originalRoot);
+    copy[originalKeyForProducts] = products;
+    payloadObj = copy;
+  } else if (originalRoot && !originalKeyForProducts) {
+    const copy = deepClone(originalRoot);
+    copy.products = products;
+    payloadObj = copy;
+  } else {
+    payloadObj = { products: products };
+  }
+
+  const payloadText = JSON.stringify(payloadObj, null, 2);
+  const headers = { 'Content-Type':'application/json', 'X-Admin-Token': token };
+  if (etag) headers['If-Match'] = etag;
+
+  const res = await fetch(SAVE_URL, { method:'POST', headers, body: payloadText });
+  if (res.status === 412) { status('File changed on server. Click Reload, re-apply changes, then Save.', false); return; }
+  if (!res.ok) { status(`Save failed (${res.status})`, false); return; }
+  const data = await res.json().catch(()=>({}));
+  if (data && data.etag) etag = data.etag;
+  status('Saved ✅');
+}
+
+/* wire buttons */
+els.add.addEventListener('click', addProduct);
+els.reload.addEventListener('click', load);
+els.save.addEventListener('click', save);
+
+/* initial load */
+load();
+</script>
+
+
+
+</body>
+
+</html>
