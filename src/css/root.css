@@ -4,12 +4,13 @@
 /* Mobile */
 @media only screen and (min-width: 0em) {
   :root {
-    --primary: #4b494a;
-    /* Charcoal Gray */
-    --primaryShade: #6f6e70;
-    /* Soft Graphite */
-    --primaryDark: #2f2e2f;
-    /* Deep Charcoal */
+    --primary: #60a5fa;
+    /* Light Sky Blue */
+--primaryShade: #93c5fd;
+    /* Soft Powder Blue */
+--primaryDark: #3b82f6;
+    /* Classic Blue */
+
     --bodyTextColor: #4e4b66;
     --bodyTextColorWhite: #fafbfc;
     --headerColor: #1a1a1a;
