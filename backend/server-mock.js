@@ -40,6 +40,75 @@ app.get('/api/orders', (req, res) => {
 });
 
 // Mock pack details endpoint
+// Main packs endpoint - returns all packs
+app.get('/api/packs', (req, res) => {
+  const mockPacks = [
+    {
+      id: '1',
+      name: 'Starter Pack',
+      slug: 'starter-pack',
+      type: 'starter',
+      price: 299.99,
+      deposit_price: 149.99,
+      number_of_units: 250,
+      estimated_resale_value: 750,
+      description: 'Perfect for new resellers looking to get started in the tech liquidation business. This pack contains a curated mix of mobile accessories, cables, and small electronics.',
+      short_description: 'Curated mix of mobile accessories and small electronics',
+      image_url: '/images/packs/starter-pack.jpg',
+      status: 'limited',
+      available_quantity: 3,
+      reserved_quantity: 2,
+      created_at: new Date().toISOString()
+    },
+    {
+      id: '2',
+      name: 'Reseller Pack',
+      slug: 'reseller-pack',
+      type: 'reseller',
+      price: 599.99,
+      deposit_price: 299.99,
+      number_of_units: 500,
+      estimated_resale_value: 1500,
+      description: 'Ideal for established resellers looking to scale their business. This pack includes a diverse mix of consumer electronics, accessories, and trending tech items.',
+      short_description: 'Diverse mix of consumer electronics and trending tech',
+      image_url: '/images/packs/reseller-pack.jpg',
+      status: 'limited',
+      available_quantity: 7,
+      reserved_quantity: 1,
+      created_at: new Date().toISOString()
+    },
+    {
+      id: '3',
+      name: 'Pro Pack',
+      slug: 'pro-pack',
+      type: 'pro',
+      price: 999.99,
+      deposit_price: 499.99,
+      number_of_units: 1000,
+      estimated_resale_value: 3000,
+      description: 'For professional resellers and businesses. This premium pack contains high-value electronics, premium accessories, and exclusive tech items with maximum profit potential.',
+      short_description: 'Premium pack with high-value electronics and exclusive items',
+      image_url: '/images/packs/pro-pack.jpg',
+      status: 'available',
+      available_quantity: 12,
+      reserved_quantity: 0,
+      created_at: new Date().toISOString()
+    }
+  ];
+
+  res.json({
+    success: true,
+    packs: mockPacks,
+    data: mockPacks,
+    pagination: {
+      total: mockPacks.length,
+      limit: 10,
+      offset: 0,
+      hasMore: false
+    }
+  });
+});
+
 app.get('/api/packs/:id', (req, res) => {
   const { id } = req.params;
   

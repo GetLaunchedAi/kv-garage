@@ -3,8 +3,8 @@
 .admin-orders-container,
 .admin-dashboard-container {
     max-width: 80rem;
-    margin: 2rem auto;
-    padding: 0 1rem;
+    margin-inline:  auto;
+    /* padding: 0 1rem; */
 }
 
 /* Login Section */
@@ -12,7 +12,8 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 60vh;
+    /* min-height: 60vh; */
+    padding: var(--sectionPadding);
 }
 
 .login-container {
@@ -21,9 +22,12 @@
     padding: 3rem;
     box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
     width: 100%;
-    max-width: 400px;
+    max-width: 50rem;
     border: 1px solid var(--border);
     margin-inline: auto;
+}
+body.dark-mode .login-container {
+    background-color: var(--medium);
 }
 
 .login-container h2 {
@@ -42,16 +46,22 @@
     display: block;
     margin-bottom: 0.5rem;
     font-weight: 600;
-    color: var(--text);
+    color: black;
+}
+body.dark-mode .login-form label {
+    color: white;
 }
 
 .login-form input {
     width: 100%;
     padding: 0.75rem;
-    border: 1px solid var(--border);
+    border: 1px solid rgba(0, 0, 0, 0.2);
     border-radius: 8px;
     font-size: 1rem;
     transition: border-color 0.2s ease;
+}
+body.dark-mode .login-form input {
+    border: 1px solid var(--border);
 }
 
 .login-form input:focus {

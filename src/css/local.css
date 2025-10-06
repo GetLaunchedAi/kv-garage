@@ -12,7 +12,7 @@
     margin: auto;
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: center !important;
     flex-direction: column;
     row-gap: 2.5rem;
   }
@@ -42,7 +42,7 @@
   }
   #sbs .cs-picture1 {
     width: 100%;
-    height: 36.3125em;
+    height: 100%;
     left: 0;
     top: 0;
   }
@@ -134,7 +134,7 @@
     right: clamp(1rem, 4vw, 2rem);
   }
   #sbs .button-solid {
-    margin-top: 2rem;
+    /* margin-top: 2rem; */
   }
 }
 /* Desktop - 1024px */
@@ -164,7 +164,7 @@
     border: clamp(0.375em, 1.5vw, 0.75em) solid var(--dark);
   }
   body.dark-mode #sbs .cs-topper {
-    color: var(--primaryLight);
+    color: var(--primary);
   }
   body.dark-mode #sbs .cs-title,
   body.dark-mode #sbs .cs-text,
@@ -348,7 +348,7 @@
     border: clamp(0.375em, 1.5vw, 0.75em) solid var(--dark);
   }
   body.dark-mode #sbs-r .cs-topper {
-    color: var(--primaryLight);
+    color: var(--primary);
   }
   body.dark-mode #sbs-r .cs-title,
   body.dark-mode #sbs-r .cs-text,
@@ -745,7 +745,7 @@
 /* Trust Signals & Social Proof Styles */
 
 #trust-signals {
-    /* padding: 5rem 0 !important; */
+  padding: var(--sectionPadding);
     /* background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #f1f5f9 100%) !important; */
     position: relative !important;
     overflow: hidden !important;
@@ -767,7 +767,7 @@
     z-index: 1;
     max-width: 80rem;
     margin-inline: auto;
-    padding: var(--sectionPadding);
+    
 }
 
 #trust-signals .cs-flex-group {
@@ -776,15 +776,15 @@
 }
 
 #trust-signals .cs-title {
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: var(--primary) !important;
-    margin-bottom: 1rem;
-    /* background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); */
-    /* -webkit-background-clip: text; */
-    /* -webkit-text-fill-color: transparent; */
-    /* background-clip: text; */
+  font-size: var(--headerFontSize);
+  font-weight: 900;
+  line-height: 1.2em;
+  max-width: 50rem;
+  margin: 0 auto 1rem;
+  color: var(--headerColor);
+  position: relative;
 }
+
 body.dark-mode #trust-signals .cs-title {
     color: white !important;
 }
@@ -1050,7 +1050,7 @@ body.dark-mode .metric-description {
     line-height: clamp(2.875em, 5.5vw, 3.5em) !important;
     text-decoration: none !important;
     font-weight: 700 !important;
-    margin: 0 0.5rem 1rem 0.5rem !important;
+    /* margin: 0 0.5rem 1rem 0.5rem !important; */
     color: white !important;
     padding: 0 1rem !important;
     background-color: var(--primary) !important;

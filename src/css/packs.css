@@ -100,7 +100,7 @@
 /* ============================================ */
 
 .pack-catalog {
-  padding: 4rem 0;
+  padding: var(--sectionPadding);
 }
 
 .catalog-header {
@@ -109,11 +109,15 @@
 }
 
 .catalog-header h2 {
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: var(--primary);
-  margin-bottom: 1rem;
+  font-size: var(--headerFontSize);
+  font-weight: 900;
+  line-height: 1.2em;
+  max-width: 50rem;
+  margin: 0 auto 1rem;
+  color: var(--headerColor);
+  position: relative;
 }
+
 body.dark-mode .catalog-header h2 {
   color: white;
 }
