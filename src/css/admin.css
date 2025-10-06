@@ -23,6 +23,7 @@
     width: 100%;
     max-width: 400px;
     border: 1px solid var(--border);
+    margin-inline: auto;
 }
 
 .login-container h2 {
