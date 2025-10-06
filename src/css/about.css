@@ -136,6 +136,57 @@
     margin-top: 2rem;
   }
 }
+
+/* Unified Button Styling - Match #hero .cs-button-solid exactly */
+.button-solid,
+#sbs .button-solid,
+#footer .right-section .button-solid {
+    font-size: 1rem !important;
+    /* 46px - 56px */
+    line-height: clamp(2.875em, 5.5vw, 3.5em) !important;
+    text-decoration: none !important;
+    font-weight: 700 !important;
+    margin: 0 0.5rem 1rem 0.5rem !important;
+    color: white !important;
+    padding: 0 1rem !important;
+    background-color: var(--primary) !important;
+    display: inline-block !important;
+    position: relative !important;
+    z-index: 1 !important;
+    transition: color .3s !important;
+    text-transform: none !important;
+    width: auto !important;
+    height: auto !important;
+    padding-top: 0 !important;
+}
+
+.button-solid:before,
+#sbs .button-solid:before,
+#footer .right-section .button-solid:before {
+    content: '' !important;
+    position: absolute !important;
+    display: block !important;
+    height: 100% !important;
+    width: 0% !important;
+    background: #000 !important;
+    opacity: 1 !important;
+    top: 0 !important;
+    left: 0 !important;
+    z-index: -1 !important;
+    transition: width .3s !important;
+}
+
+.button-solid:hover,
+#sbs .button-solid:hover,
+#footer .right-section .button-solid:hover {
+    color: var(--bodyTextColorWhite) !important;
+}
+
+.button-solid:hover:before,
+#sbs .button-solid:hover:before,
+#footer .right-section .button-solid:hover:before {
+    width: 100% !important;
+}
 /* Desktop - 1024px */
 @media only screen and (min-width: 64em) {
   #sbs .cs-container {

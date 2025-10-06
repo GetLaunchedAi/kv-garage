@@ -1,0 +1,887 @@
+---
+layout: "base.html"
+description: "Wholesale tech packs for resellers. Curated liquidation packs with detailed manifests, flexible payment options, and real-time inventory tracking."
+metaTitle: "Wholesale Tech Packs | KV Garage B2B Marketplace"
+tagTitle: "Packs"
+title: "Packs"
+preloadImg: "/images/packs_banner_img.png"
+preloadCSS: "/css/packs.css"
+permalink: "packs/"
+eleventyNavigation:
+  key: Packs
+  order: 100
+---
+
+<!-- ============================================ -->
+<!--                    HERO SECTION              -->
+<!-- ============================================ -->
+
+<section id="int-hero">
+  <h1 id="home-h">Wholesale Packs for Resellers</h1>
+  <picture class="">
+    <source type="image/webp" srcset="/images/packs-200w.webp 200w, /images/packs-400w.webp 400w, /images/packs-850w.webp 850w, /images/packs-1920w.webp 1920w" sizes="(max-width: 400px) 400px,
+      (max-width: 850px) 850px,
+      1920px">
+    <source type="image/jpeg" srcset="/images/packs-200w.jpeg 200w, /images/packs-400w.jpeg 400w, /images/packs-850w.jpeg 850w, /images/packs-1920w.jpeg 1920w" sizes="(max-width: 400px) 400px,
+    (max-width: 850px) 850px,
+      1920px">
+    <img
+      src="/images/packs-200w.jpeg"
+      width="1920"
+      height="463"
+      alt="KV Garage wholesale tech packs for resellers"
+      loading="lazy"
+      decoding="async">
+  </picture>
+</section>
+
+<!-- ============================================ -->
+<!--                TRUST SIGNALS                 -->
+<!-- ============================================ -->
+
+<!-- <section class="trust-signals">
+  <div class="container">
+    <div class="trust-grid">
+      <div class="trust-item">
+        <div class="trust-icon">✓</div>
+        <h3>Verified Suppliers</h3>
+        <p>All packs sourced from trusted suppliers with quality guarantees</p>
+      </div>
+      <div class="trust-item">
+        <div class="trust-icon">📞</div>
+        <h3>Phone Support</h3>
+        <p>Call (616) 228-2244 for immediate assistance</p>
+      </div>
+      <div class="trust-item">
+        <div class="trust-icon">📧</div>
+        <h3>Email Support</h3>
+        <p>kvgarage@kvgarage.com for detailed inquiries</p>
+      </div>
+      <div class="trust-item">
+        <div class="trust-icon">💬</div>
+        <h3>Live Chat</h3>
+        <p>Get instant answers to your questions</p>
+      </div>
+    </div>
+    <div class="success-metric">
+      <p><strong>Average reseller flips inventory 2.5x in 30–60 days</strong></p>
+    </div>
+  </div>
+</section> -->
+
+<!-- ============================================ -->
+<!--                PACK CATALOG                  -->
+<!-- ============================================ -->
+
+<section class="pack-catalog">
+  <div class="container">
+    <div class="catalog-header">
+      <h2>Featured Wholesale Packs</h2>
+      <p>Curated tech packs with detailed manifests • Perfect for resellers</p>
+    </div>
+
+    <!-- Pack Grid -->
+    <div id="pack-grid" class="pack-grid">
+      <!-- Packs will be loaded here dynamically -->
+    </div>
+
+    <!-- Loading State -->
+    <div id="loading-state" class="loading-state">
+      <div class="spinner"></div>
+      <p>Loading packs...</p>
+    </div>
+
+    <!-- Error State -->
+    <div id="error-state" class="error-state" style="display: none;">
+      <p>Failed to load packs. Please try again later.</p>
+      <button id="retry-button" class="retry-btn">Retry</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ -->
+<!--                CUSTOM PACK REQUEST           -->
+<!-- ============================================ -->
+
+<section class="custom-pack-section">
+  <div class="container">
+    <div class="custom-pack-card">
+      <h3>Need a Custom Pack?</h3>
+      <p>Tell us what you're looking for and we'll create a custom pack tailored to your needs</p>
+      <button id="custom-pack-btn" class="custom-pack-btn">Request Custom Pack</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ -->
+<!--                PACK DETAIL MODAL             -->
+<!-- ============================================ -->
+
+<div id="pack-modal" class="pack-modal" style="display: none;">
+  <div class="modal-overlay"></div>
+  <div class="modal-content">
+    <button class="modal-close" id="modal-close">&times;</button>
+    
+    <div class="modal-header">
+      <h2 id="modal-pack-name">Pack Name</h2>
+      <div class="pack-badges">
+        <span id="modal-pack-type" class="pack-type-badge">Type</span>
+        <span id="modal-pack-status" class="pack-status-badge">Available</span>
+      </div>
+    </div>
+
+    <div class="modal-body">
+      <div class="pack-info">
+        <div class="pack-image">
+          <img id="modal-pack-image" src="" alt="Pack image">
+        </div>
+        <div class="pack-details">
+          <div class="price-info">
+            <div class="price-row">
+              <span class="price-label">Your Cost:</span>
+              <span id="modal-pack-price" class="price-value">$0</span>
+            </div>
+            <div class="price-row">
+              <span class="price-label">Est. Resale Value:</span>
+              <span id="modal-pack-resale" class="price-value profit">$0</span>
+            </div>
+            <div class="price-row">
+              <span class="price-label">Est. Profit:</span>
+              <span id="modal-pack-profit" class="price-value profit">$0</span>
+            </div>
+          </div>
+          
+          <div class="pack-stats">
+            <div class="stat">
+              <span class="stat-label">Units:</span>
+              <span id="modal-pack-units" class="stat-value">0</span>
+            </div>
+            <div class="stat">
+              <span class="stat-label">Available:</span>
+              <span id="modal-pack-available" class="stat-value">0</span>
+            </div>
+          </div>
+
+          <p id="modal-pack-description" class="pack-description"></p>
+        </div>
+      </div>
+
+      <div class="manifest-section">
+        <h3>Manifest Contents</h3>
+        <div id="manifest-preview" class="manifest-preview">
+          <!-- Manifest items will be loaded here -->
+        </div>
+        <div class="manifest-actions">
+          <button id="view-full-manifest" class="manifest-btn">View Full Manifest</button>
+          <button id="download-csv" class="manifest-btn secondary">Download CSV</button>
+          <button id="download-pdf" class="manifest-btn secondary">Download PDF</button>
+        </div>
+      </div>
+
+      <div class="purchase-section">
+        <div class="payment-options">
+          <h4>Payment Options</h4>
+          <div class="payment-option">
+            <input type="radio" id="full-payment" name="payment-type" value="full" checked>
+            <label for="full-payment">
+              <span class="payment-amount" id="full-payment-amount">$0</span>
+              <span class="payment-desc">Pay now and receive pack immediately</span>
+            </label>
+          </div>
+          <div class="payment-option">
+            <input type="radio" id="deposit-payment" name="payment-type" value="deposit">
+            <label for="deposit-payment">
+              <span class="payment-amount" id="deposit-payment-amount">$0</span>
+              <span class="payment-desc">Pay 50% now, 50% when ready to ship</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="purchase-actions">
+          <button id="buy-now-btn" class="buy-btn primary">Buy Now</button>
+          <button id="reserve-btn" class="buy-btn secondary">Reserve with Deposit</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================ -->
+<!--                MANIFEST MODAL                -->
+<!-- ============================================ -->
+
+<div id="manifest-modal" class="manifest-modal" style="display: none;">
+  <div class="modal-overlay"></div>
+  <div class="modal-content">
+    <button class="modal-close" id="manifest-modal-close">&times;</button>
+    
+    <div class="modal-header">
+      <h2 id="manifest-modal-title">Pack Manifest</h2>
+    </div>
+
+    <div class="modal-body">
+      <div id="manifest-content" class="manifest-content">
+        <!-- Full manifest will be loaded here -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================ -->
+<!--                CUSTOM PACK MODAL             -->
+<!-- ============================================ -->
+
+<div id="custom-pack-modal" class="custom-pack-modal" style="display: none;">
+  <div class="modal-overlay"></div>
+  <div class="modal-content">
+    <button class="modal-close" id="custom-pack-modal-close">&times;</button>
+    
+    <div class="modal-header">
+      <h2>Request Custom Pack</h2>
+    </div>
+
+    <div class="modal-body">
+      <form id="custom-pack-form" class="custom-pack-form">
+        <div class="form-group">
+          <label for="customer-name">Your Name *</label>
+          <input type="text" id="customer-name" name="customer_name" required>
+        </div>
+
+        <div class="form-group">
+          <label for="customer-email">Email Address *</label>
+          <input type="email" id="customer-email" name="customer_email" required>
+        </div>
+
+        <div class="form-group">
+          <label for="customer-phone">Phone Number</label>
+          <input type="tel" id="customer-phone" name="customer_phone">
+        </div>
+
+        <div class="form-group">
+          <label for="business-name">Business Name</label>
+          <input type="text" id="business-name" name="business_name">
+        </div>
+
+        <div class="form-group">
+          <label for="estimated-budget">Estimated Budget</label>
+          <input type="number" id="estimated-budget" name="estimated_budget" min="0" step="0.01">
+        </div>
+
+        <div class="form-group">
+          <label for="preferred-categories">Preferred Categories</label>
+          <textarea id="preferred-categories" name="preferred_categories" placeholder="e.g., iPhone cases, cables, screen protectors..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="request-description">Tell us what you're looking for *</label>
+          <textarea id="request-description" name="request_description" required placeholder="Describe the types of products you want in your custom pack..."></textarea>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" id="cancel-custom-pack" class="btn secondary">Cancel</button>
+          <button type="submit" id="submit-custom-pack" class="btn primary">Submit Request</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+// Pack Catalog System
+class PackCatalogSystem {
+  constructor() {
+    this.packs = [];
+    this.currentPack = null;
+    this.apiBaseUrl = 'http://localhost:3001/api';
+    this.initializeElements();
+    this.bindEvents();
+    this.loadPacks();
+  }
+
+  initializeElements() {
+    // Main elements
+    this.packGrid = document.getElementById('pack-grid');
+    this.loadingState = document.getElementById('loading-state');
+    this.errorState = document.getElementById('error-state');
+    this.retryButton = document.getElementById('retry-button');
+
+    // Modal elements
+    this.packModal = document.getElementById('pack-modal');
+    this.manifestModal = document.getElementById('manifest-modal');
+    this.customPackModal = document.getElementById('custom-pack-modal');
+    
+    // Modal close buttons
+    this.modalClose = document.getElementById('modal-close');
+    this.manifestModalClose = document.getElementById('manifest-modal-close');
+    this.customPackModalClose = document.getElementById('custom-pack-modal-close');
+
+    // Custom pack elements
+    this.customPackBtn = document.getElementById('custom-pack-btn');
+    this.customPackForm = document.getElementById('custom-pack-form');
+  }
+
+  bindEvents() {
+    // Retry button
+    this.retryButton?.addEventListener('click', () => this.loadPacks());
+
+    // Modal close events
+    this.modalClose?.addEventListener('click', () => this.closeModal());
+    this.manifestModalClose?.addEventListener('click', () => this.closeManifestModal());
+    this.customPackModalClose?.addEventListener('click', () => this.closeCustomPackModal());
+
+    // Custom pack events
+    this.customPackBtn?.addEventListener('click', () => this.openCustomPackModal());
+    this.customPackForm?.addEventListener('submit', (e) => this.handleCustomPackSubmit(e));
+
+    // Close modals on overlay click
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('modal-overlay')) {
+        this.closeModal();
+        this.closeManifestModal();
+        this.closeCustomPackModal();
+      }
+    });
+
+    // Close modals on escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        this.closeModal();
+        this.closeManifestModal();
+        this.closeCustomPackModal();
+      }
+    });
+  }
+
+  async loadPacks() {
+    try {
+      this.showLoading();
+      
+      const response = await fetch(`${this.apiBaseUrl}/packs`);
+      if (!response.ok) throw new Error('Failed to load packs');
+      
+      const data = await response.json();
+      this.packs = data.packs || data.data || [];
+      
+      this.renderPacks();
+      this.hideLoading();
+      
+      // Start real-time inventory updates
+      this.startInventoryUpdates();
+    } catch (error) {
+      console.error('Error loading packs:', error);
+      this.showError();
+    }
+  }
+
+  startInventoryUpdates() {
+    // Update inventory every 30 seconds
+    this.inventoryInterval = setInterval(async () => {
+      await this.updateInventory();
+    }, 30000);
+  }
+
+  async updateInventory() {
+    try {
+      // Update each pack's inventory
+      for (let pack of this.packs) {
+        const response = await fetch(`${this.apiBaseUrl}/packs/${pack.id}/inventory`);
+        if (response.ok) {
+          const data = await response.json();
+          const newQuantity = data.data.available_quantity;
+          
+          // Update pack data
+          pack.available_quantity = newQuantity;
+          
+          // Update the display
+          this.updatePackDisplay(pack);
+        }
+      }
+    } catch (error) {
+      console.error('Error updating inventory:', error);
+    }
+  }
+
+  updatePackDisplay(pack) {
+    const packCard = document.querySelector(`[data-pack-id="${pack.id}"]`);
+    if (!packCard) return;
+
+    // Update available count
+    const availableCount = packCard.querySelector('.available-count');
+    if (availableCount) {
+      availableCount.textContent = pack.available_quantity;
+    }
+
+    // Update limited badge
+    const stockBadge = packCard.querySelector('.stock-badge');
+    const isLimited = pack.status === 'limited' && pack.available_quantity > 0;
+    const isOutOfStock = pack.available_quantity === 0;
+
+    if (stockBadge) {
+      if (isLimited) {
+        stockBadge.textContent = `Limited — ${pack.available_quantity} left`;
+        stockBadge.className = 'stock-badge limited';
+      } else if (isOutOfStock) {
+        stockBadge.textContent = 'Sold Out';
+        stockBadge.className = 'stock-badge out-of-stock';
+      } else {
+        stockBadge.remove();
+      }
+    } else if (isLimited) {
+      // Add badge if it doesn't exist
+      const packImage = packCard.querySelector('.pack-image');
+      if (packImage) {
+        const badge = document.createElement('div');
+        badge.className = 'stock-badge limited';
+        badge.textContent = `Limited — ${pack.available_quantity} left`;
+        packImage.appendChild(badge);
+      }
+    }
+
+    // Update pack card class
+    packCard.className = `pack-card ${isOutOfStock ? 'out-of-stock' : ''}`;
+
+    // Update action buttons
+    const actionsContainer = packCard.querySelector('.pack-actions');
+    if (actionsContainer) {
+      const buyButtons = actionsContainer.querySelectorAll('.pack-btn.buy, .pack-btn.reserve');
+      buyButtons.forEach(btn => btn.remove());
+
+      if (!isOutOfStock) {
+        const buyBtn = document.createElement('button');
+        buyBtn.className = 'pack-btn buy';
+        buyBtn.setAttribute('data-action', 'buy');
+        buyBtn.textContent = `Buy Now ($${pack.price.toFixed(2)})`;
+
+        const reserveBtn = document.createElement('button');
+        reserveBtn.className = 'pack-btn reserve';
+        reserveBtn.setAttribute('data-action', 'reserve');
+        reserveBtn.textContent = `Reserve with 50% Deposit ($${pack.deposit_price.toFixed(2)})`;
+
+        actionsContainer.appendChild(buyBtn);
+        actionsContainer.appendChild(reserveBtn);
+
+        // Re-bind events
+        this.bindPackCardEvents();
+      }
+    }
+  }
+
+  showLoading() {
+    this.loadingState.style.display = 'block';
+    this.packGrid.style.display = 'none';
+    this.errorState.style.display = 'none';
+  }
+
+  hideLoading() {
+    this.loadingState.style.display = 'none';
+    this.packGrid.style.display = 'grid';
+  }
+
+  showError() {
+    this.loadingState.style.display = 'none';
+    this.packGrid.style.display = 'none';
+    this.errorState.style.display = 'block';
+  }
+
+  renderPacks() {
+    if (this.packs.length === 0) {
+      this.packGrid.innerHTML = '<p class="no-packs">No packs available at this time.</p>';
+      return;
+    }
+
+    this.packGrid.innerHTML = this.packs.map(pack => this.createPackCard(pack)).join('');
+    
+    // Bind pack card events
+    this.bindPackCardEvents();
+  }
+
+  createPackCard(pack) {
+    const isLowStock = pack.available_quantity <= 5;
+    const isOutOfStock = pack.available_quantity === 0;
+    const isLimited = pack.status === 'limited' && pack.available_quantity > 0;
+    
+    return `
+      <div class="pack-card ${isOutOfStock ? 'out-of-stock' : ''}" data-pack-id="${pack.id}">
+        <div class="pack-image">
+          <img src="${pack.image_url || '/images/placeholder.jpg'}" alt="${pack.name}" loading="lazy">
+          ${isLimited ? `<div class="stock-badge limited">Limited — ${pack.available_quantity} left</div>` : ''}
+          ${isOutOfStock ? `<div class="stock-badge out-of-stock">Sold Out</div>` : ''}
+        </div>
+        
+        <div class="pack-content">
+          <div class="pack-header">
+            <h3 class="pack-name">${pack.name}</h3>
+            <span class="pack-type">${pack.type.toUpperCase()}</span>
+          </div>
+          
+          <div class="pack-pricing">
+            <div class="price-row">
+              <span class="price-label">Your Cost:</span>
+              <span class="price-value">$${pack.price.toFixed(2)}</span>
+            </div>
+            <div class="price-row">
+              <span class="price-label">Est. Resale:</span>
+              <span class="price-value profit">$${pack.estimated_resale_value.toFixed(2)}</span>
+            </div>
+            <div class="price-row">
+              <span class="price-label">Est. Profit:</span>
+              <span class="price-value profit">$${(pack.estimated_resale_value - pack.price).toFixed(2)}</span>
+            </div>
+          </div>
+          
+          <div class="pack-stats">
+            <div class="stat">
+              <span class="stat-label">Units in Pack:</span>
+              <span class="stat-value">${pack.number_of_units}</span>
+            </div>
+            <div class="stat">
+              <span class="stat-label">Available Now:</span>
+              <span class="stat-value available-count">${pack.available_quantity}</span>
+            </div>
+          </div>
+          
+          <p class="pack-description">${pack.short_description || pack.description}</p>
+          
+          <div class="pack-actions">
+            <button class="pack-btn primary" data-action="view">View Details</button>
+            <button class="pack-btn secondary" data-action="manifest">View Manifest</button>
+            ${!isOutOfStock ? `
+              <button class="pack-btn buy" data-action="buy">Buy Now ($${pack.price.toFixed(2)})</button>
+              <button class="pack-btn reserve" data-action="reserve">Reserve with 50% Deposit ($${pack.deposit_price.toFixed(2)})</button>
+            ` : ''}
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  bindPackCardEvents() {
+    document.querySelectorAll('.pack-card').forEach(card => {
+      const packId = card.dataset.packId;
+      const pack = this.packs.find(p => p.id == packId);
+      
+      card.querySelectorAll('.pack-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const action = btn.dataset.action;
+          this.handlePackAction(action, pack);
+        });
+      });
+    });
+  }
+
+  async handlePackAction(action, pack) {
+    switch (action) {
+      case 'view':
+        await this.openPackModal(pack);
+        break;
+      case 'manifest':
+        await this.openManifestModal(pack);
+        break;
+      case 'buy':
+        await this.initiatePurchase(pack, 'full');
+        break;
+      case 'reserve':
+        await this.initiatePurchase(pack, 'deposit');
+        break;
+    }
+  }
+
+  async openPackModal(pack) {
+    this.currentPack = pack;
+    
+    // Load full pack details with manifest
+    try {
+      const response = await fetch(`${this.apiBaseUrl}/packs/${pack.id}`);
+      const data = await response.json();
+      
+      if (!data.success) {
+        throw new Error('Failed to load pack details');
+      }
+      
+      const fullPack = data.data.pack;
+      const manifest = data.data.manifest;
+      
+      // Add manifest to pack object
+      fullPack.manifest = manifest;
+      
+      this.populatePackModal(fullPack);
+      this.packModal.style.display = 'flex';
+      setTimeout(() => this.packModal.classList.add('show'), 10);
+      document.body.style.overflow = 'hidden';
+    } catch (error) {
+      console.error('Error loading pack details:', error);
+      alert('Failed to load pack details. Please try again.');
+    }
+  }
+
+  populatePackModal(pack) {
+    // Update modal content
+    document.getElementById('modal-pack-name').textContent = pack.name;
+    document.getElementById('modal-pack-type').textContent = pack.type.toUpperCase();
+    document.getElementById('modal-pack-status').textContent = pack.available_quantity > 0 ? 'Available' : 'Sold Out';
+    document.getElementById('modal-pack-image').src = pack.image_url || '/images/placeholder.jpg';
+    document.getElementById('modal-pack-price').textContent = `$${pack.price.toFixed(2)}`;
+    document.getElementById('modal-pack-resale').textContent = `$${pack.estimated_resale_value.toFixed(2)}`;
+    document.getElementById('modal-pack-profit').textContent = `$${(pack.estimated_resale_value - pack.price).toFixed(2)}`;
+    document.getElementById('modal-pack-units').textContent = `${pack.number_of_units}`;
+    document.getElementById('modal-pack-available').textContent = pack.available_quantity;
+    document.getElementById('modal-pack-description').textContent = pack.description;
+    
+    // Update payment amounts
+    document.getElementById('full-payment-amount').textContent = `$${pack.price.toFixed(2)}`;
+    document.getElementById('deposit-payment-amount').textContent = `$${pack.deposit_price.toFixed(2)}`;
+    
+    // Render manifest preview
+    this.renderManifestPreview(pack.manifest);
+    
+    // Update purchase buttons
+    const buyBtn = document.getElementById('buy-now-btn');
+    const reserveBtn = document.getElementById('reserve-btn');
+    
+    if (pack.available_quantity === 0) {
+      buyBtn.disabled = true;
+      reserveBtn.disabled = true;
+      buyBtn.textContent = 'Sold Out';
+      reserveBtn.textContent = 'Sold Out';
+    } else {
+      buyBtn.disabled = false;
+      reserveBtn.disabled = false;
+      buyBtn.textContent = 'Buy Now';
+      reserveBtn.textContent = 'Reserve with Deposit';
+    }
+    
+    // Bind modal events
+    this.bindModalEvents();
+  }
+
+  renderManifestPreview(manifest) {
+    const preview = document.getElementById('manifest-preview');
+    
+    if (!manifest || manifest.length === 0) {
+      preview.innerHTML = '<p>No manifest available</p>';
+      return;
+    }
+    
+    // Group items by category
+    const grouped = manifest.reduce((acc, item) => {
+      const category = item.category || 'Other';
+      if (!acc[category]) acc[category] = [];
+      acc[category].push(item);
+      return acc;
+    }, {});
+    
+    preview.innerHTML = Object.entries(grouped).map(([category, items]) => `
+      <div class="manifest-category">
+        <h4>${category}</h4>
+        <div class="manifest-items">
+          ${items.slice(0, 3).map(item => `
+            <div class="manifest-item">
+              <span class="item-quantity">${item.quantity}x</span>
+              <span class="item-name">${item.product_name}</span>
+            </div>
+          `).join('')}
+          ${items.length > 3 ? `<div class="more-items">+${items.length - 3} more items</div>` : ''}
+        </div>
+      </div>
+    `).join('');
+  }
+
+  bindModalEvents() {
+    // Payment type change
+    document.querySelectorAll('input[name="payment-type"]').forEach(radio => {
+      radio.addEventListener('change', (e) => {
+        const isDeposit = e.target.value === 'deposit';
+        document.getElementById('buy-now-btn').style.display = isDeposit ? 'none' : 'block';
+        document.getElementById('reserve-btn').style.display = isDeposit ? 'block' : 'none';
+      });
+    });
+    
+    // Purchase buttons
+    document.getElementById('buy-now-btn').onclick = () => this.initiatePurchase(this.currentPack, 'full');
+    document.getElementById('reserve-btn').onclick = () => this.initiatePurchase(this.currentPack, 'deposit');
+    
+    // Manifest buttons
+    document.getElementById('view-full-manifest').onclick = () => this.openManifestModal(this.currentPack);
+    document.getElementById('download-csv').onclick = () => this.downloadManifest(this.currentPack, 'csv');
+    document.getElementById('download-pdf').onclick = () => this.downloadManifest(this.currentPack, 'pdf');
+  }
+
+  async openManifestModal(pack) {
+    try {
+      const response = await fetch(`${this.apiBaseUrl}/manifests/${pack.id}`);
+      const data = await response.json();
+      
+      if (!data.success) {
+        throw new Error('Failed to load manifest');
+      }
+      
+      const manifestItems = data.data;
+      
+      this.populateManifestModal(pack, manifestItems);
+      this.manifestModal.style.display = 'flex';
+      setTimeout(() => this.manifestModal.classList.add('show'), 10);
+      document.body.style.overflow = 'hidden';
+    } catch (error) {
+      console.error('Error loading manifest:', error);
+      alert('Failed to load manifest. Please try again.');
+    }
+  }
+
+  populateManifestModal(pack, manifestItems) {
+    document.getElementById('manifest-modal-title').textContent = `${pack.name} Manifest`;
+    
+    // Calculate totals
+    const totalItems = manifestItems.reduce((sum, item) => sum + item.quantity, 0);
+    const totalCost = pack.price;
+    const estimatedValue = pack.estimated_resale_value;
+    
+    const content = document.getElementById('manifest-content');
+    content.innerHTML = `
+      <div class="manifest-summary">
+        <div class="summary-item">
+          <span class="summary-label">Total Items:</span>
+          <span class="summary-value">${totalItems}</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">Est. Value:</span>
+          <span class="summary-value">$${estimatedValue.toFixed(2)}</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">Your Cost:</span>
+          <span class="summary-value">$${totalCost.toFixed(2)}</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">Est. Profit:</span>
+          <span class="summary-value profit">$${(estimatedValue - totalCost).toFixed(2)}</span>
+        </div>
+      </div>
+      
+      <div class="manifest-table">
+        <table>
+          <thead>
+            <tr>
+              <th>SKU</th>
+              <th>Product Name</th>
+              <th>Qty</th>
+              <th>Condition</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${manifestItems.map(item => `
+              <tr>
+                <td>${item.sku}</td>
+                <td>${item.item_name}</td>
+                <td>${item.quantity}</td>
+                <td>${item.condition}</td>
+                <td>${item.notes || 'N/A'}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+  }
+
+  async downloadManifest(pack, format) {
+    try {
+      const response = await fetch(`${this.apiBaseUrl}/manifests/${pack.id}?format=${format}`);
+      
+      if (!response.ok) throw new Error('Failed to download manifest');
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `manifest-${pack.name.replace(/\s+/g, '-').toLowerCase()}.${format}`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('Error downloading manifest:', error);
+      alert('Failed to download manifest. Please try again.');
+    }
+  }
+
+  async initiatePurchase(pack, paymentType) {
+    try {
+      // Import checkout functionality
+      const { createCheckoutSession } = await import('/assets/js/checkout.js');
+      
+      // Create checkout session
+      const sessionUrl = await createCheckoutSession(pack.id, paymentType);
+      
+      // Redirect to Stripe checkout
+      window.location.href = sessionUrl;
+      
+    } catch (error) {
+      console.error('Checkout error:', error);
+      alert(`Error: ${error.message}`);
+    }
+  }
+
+  openCustomPackModal() {
+    this.customPackModal.style.display = 'flex';
+    setTimeout(() => this.customPackModal.classList.add('show'), 10);
+    document.body.style.overflow = 'hidden';
+  }
+
+  closeModal() {
+    this.packModal.classList.remove('show');
+    setTimeout(() => {
+      this.packModal.style.display = 'none';
+      document.body.style.overflow = 'auto';
+    }, 300);
+  }
+
+  closeManifestModal() {
+    this.manifestModal.classList.remove('show');
+    setTimeout(() => {
+      this.manifestModal.style.display = 'none';
+      document.body.style.overflow = 'auto';
+    }, 300);
+  }
+
+  closeCustomPackModal() {
+    this.customPackModal.classList.remove('show');
+    setTimeout(() => {
+      this.customPackModal.style.display = 'none';
+      document.body.style.overflow = 'auto';
+    }, 300);
+  }
+
+  async handleCustomPackSubmit(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this.customPackForm);
+    const data = Object.fromEntries(formData.entries());
+    
+    try {
+      const response = await fetch(`${this.apiBaseUrl}/custom-packs/request`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+      });
+      
+      if (!response.ok) throw new Error('Failed to submit request');
+      
+      const result = await response.json();
+      alert('Custom pack request submitted successfully! We will contact you within 24 hours.');
+      this.customPackForm.reset();
+      this.closeCustomPackModal();
+    } catch (error) {
+      console.error('Error submitting custom pack request:', error);
+      alert('Failed to submit request. Please try again.');
+    }
+  }
+}
+
+// Initialize the pack catalog system when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+  new PackCatalogSystem();
+});
+</script>
