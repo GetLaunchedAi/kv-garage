@@ -430,7 +430,7 @@ export class AdminOrderManager {
             </div>
         `;
         
-        modal.style.display = 'block';
+        modal.style.display = 'flex';
         document.body.style.overflow = 'hidden';
     }
 

@@ -266,7 +266,7 @@ export class AdminDashboard {
                 this.populatePackSelect(data.packs || data.data);
             }
 
-            document.getElementById('manifest-upload-modal').style.display = 'block';
+            document.getElementById('manifest-upload-modal').style.display = 'flex';
             document.body.style.overflow = 'hidden';
 
         } catch (error) {
@@ -354,7 +354,7 @@ export class AdminDashboard {
             </div>
         `;
 
-        document.getElementById('custom-requests-modal').style.display = 'block';
+        document.getElementById('custom-requests-modal').style.display = 'flex';
         document.body.style.overflow = 'hidden';
 
         try {
