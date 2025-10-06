@@ -3,7 +3,10 @@
  * Handles order viewing, status updates, and management
  */
 
-const API_BASE_URL = 'http://localhost:3001/api';
+// Dynamic API base URL - works for both development and production
+const API_BASE_URL = window.location.hostname === 'localhost' 
+    ? 'http://localhost:3001/api' 
+    : '/api';
 
 export class AdminOrderManager {
     constructor() {
@@ -17,10 +20,44 @@ export class AdminOrderManager {
 
     init() {
         this.bindEvents();
+        this.checkAuthentication();
+    }
+
+    checkAuthentication() {
+        const token = this.getAuthToken();
+        if (!token) {
+            this.showLogin();
+            return;
+        }
+        this.showOrders();
         this.loadOrders();
     }
 
+    showLogin() {
+        document.getElementById('login-section').style.display = 'block';
+        document.getElementById('orders-section').style.display = 'none';
+    }
+
+    showOrders() {
+        document.getElementById('login-section').style.display = 'none';
+        document.getElementById('orders-section').style.display = 'block';
+    }
+
+    getAuthToken() {
+        return localStorage.getItem('admin_token');
+    }
+
     bindEvents() {
+        // Login form
+        document.getElementById('admin-login-form')?.addEventListener('submit', (e) => {
+            this.handleLogin(e);
+        });
+
+        // Logout button
+        document.getElementById('logout-btn')?.addEventListener('click', () => {
+            this.handleLogout();
+        });
+
         // Refresh button
         document.getElementById('refresh-orders')?.addEventListener('click', () => {
             this.loadOrders();
@@ -61,7 +98,11 @@ export class AdminOrderManager {
                 params.append('status', this.statusFilter);
             }
 
-            const response = await fetch(`${API_BASE_URL}/orders?${params}`);
+            const response = await fetch(`${API_BASE_URL}/admin/orders?${params}`, {
+                headers: {
+                    'Authorization': `Bearer ${this.getAuthToken()}`
+                }
+            });
             
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -76,7 +117,14 @@ export class AdminOrderManager {
             
         } catch (error) {
             console.error('Error loading orders:', error);
-            this.showError('Failed to load orders. Please try again.');
+            if (error.message.includes('401') || error.message.includes('403')) {
+                this.showError('Authentication failed. Please log in again.');
+                // Clear token and show login
+                localStorage.removeItem('admin_token');
+                this.showLogin();
+            } else {
+                this.showError('Failed to load orders. Please try again.');
+            }
         }
     }
 
@@ -270,7 +318,11 @@ export class AdminOrderManager {
 
     async showOrderDetails(orderId) {
         try {
-            const response = await fetch(`${API_BASE_URL}/orders/${orderId}`);
+            const response = await fetch(`${API_BASE_URL}/orders/${orderId}`, {
+                headers: {
+                    'Authorization': `Bearer ${this.getAuthToken()}`
+                }
+            });
             
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -398,6 +450,7 @@ export class AdminOrderManager {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${this.getAuthToken()}`
                 },
                 body: JSON.stringify({
                     status: newStatus,
@@ -424,6 +477,95 @@ export class AdminOrderManager {
     goToPage(page) {
         this.currentPage = page;
         this.loadOrders();
+    }
+
+    async handleLogin(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(e.target);
+        const email = formData.get('email');
+        const password = formData.get('password');
+
+        const loginBtn = e.target.querySelector('.login-btn');
+        loginBtn.disabled = true;
+        loginBtn.textContent = 'Logging in...';
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/admin/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email, password })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                localStorage.setItem('admin_token', data.data.token);
+                this.showOrders();
+                await this.loadOrders();
+                this.showNotification('Login successful!', 'success');
+            } else {
+                throw new Error(data.error || 'Login failed');
+            }
+
+        } catch (error) {
+            console.error('Login error:', error);
+            this.showNotification(`Login failed: ${error.message}`, 'error');
+        } finally {
+            loginBtn.disabled = false;
+            loginBtn.textContent = 'Login';
+        }
+    }
+
+    handleLogout() {
+        localStorage.removeItem('admin_token');
+        this.showLogin();
+        this.showNotification('Logged out successfully', 'info');
+    }
+
+    showNotification(message, type = 'info') {
+        // Simple notification system
+        const notification = document.createElement('div');
+        notification.className = `notification notification-${type}`;
+        notification.textContent = message;
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            border-radius: 4px;
+            color: white;
+            font-weight: 500;
+            z-index: 10000;
+            max-width: 300px;
+            word-wrap: break-word;
+        `;
+        
+        // Set background color based on type
+        switch (type) {
+            case 'success':
+                notification.style.backgroundColor = '#10b981';
+                break;
+            case 'error':
+                notification.style.backgroundColor = '#ef4444';
+                break;
+            case 'warning':
+                notification.style.backgroundColor = '#f59e0b';
+                break;
+            default:
+                notification.style.backgroundColor = '#3b82f6';
+        }
+        
+        document.body.appendChild(notification);
+        
+        // Remove notification after 3 seconds
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 3000);
     }
 }
 

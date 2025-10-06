@@ -301,6 +301,9 @@ body.dark-mode .price-value {
   background: #f9fafb;
   border-radius: 8px;
 }
+body.dark-mode .stat {
+  background: var(--medium);
+}
 
 .stat-label {
   font-size: 0.75rem;
@@ -316,7 +319,7 @@ body.dark-mode .price-value {
   color: black;
 }
 body.dark-mode .stat-value {
-  color: black;
+  color: white;
 }
 
 .pack-description {
@@ -723,7 +726,7 @@ body.dark-mode .manifest-preview {
 
 .manifest-item {
   /* background: var(--pack-bg); */
-  border: 1px solid var(--pack-border);
+  border: 1px solid var(--btn-secondary);
   border-radius: 6px;
   padding: 0.5rem 0.75rem;
   font-size: 0.875rem;
@@ -793,8 +796,11 @@ body.dark-mode .manifest-item {
 .payment-options h4 {
   font-size: 1.125rem;
   font-weight: 600;
-  color: var(--text-primary);
+  color: black;
   margin-bottom: 1rem;
+}
+body.dark-mode .payment-options h4 {
+  color: white;
 }
 
 .payment-option {
@@ -817,20 +823,26 @@ body.dark-mode .manifest-item {
 
 .payment-option input[type="radio"]:checked + label {
   border-color: var(--btn-primary);
-  background: #eff6ff;
+  /* background: #eff6ff; */
 }
 
 .payment-amount {
   font-size: 1.125rem;
   font-weight: 600;
-  color: var(--text-primary);
+  color: black;
   margin-right: 1rem;
   min-width: 80px;
 }
+body.dark-mode .payment-amount {
+  color: white;
+}
 
 .payment-desc {
-  color: var(--text-secondary);
+  color: black;
   font-size: 0.875rem;
+}
+body.dark-mode .payment-desc {
+  color: white;
 }
 
 .purchase-actions {
@@ -886,6 +898,9 @@ body.dark-mode .manifest-item {
   background: #f9fafb;
   border-radius: 8px;
 }
+body.dark-mode .manifest-summary {
+  background: var(--medium);
+}
 
 .summary-item {
   text-align: center;
@@ -894,16 +909,22 @@ body.dark-mode .manifest-item {
 .summary-label {
   display: block;
   font-size: 0.875rem;
-  color: var(--text-secondary);
+  color: rgba(0, 0, 0, 0.8);
   margin-bottom: 0.5rem;
+}
+body.dark-mode .summary-label {
+  color: rgba(255, 255, 255, 0.8);
 }
 
 .summary-value {
   font-size: 1.25rem;
   font-weight: 600;
-  color: var(--text-primary);
+  color: black;
 }
 
+body.dark-mode .summary-value {
+  color: white;
+}
 .summary-value.profit {
   color: var(--profit-color);
 }
@@ -927,15 +948,22 @@ body.dark-mode .manifest-item {
 .manifest-table th {
   background: #f9fafb;
   font-weight: 600;
-  color: var(--text-primary);
+  color: black;
   font-size: 0.875rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
+body.dark-mode .manifest-table th {
+  background: var(--medium);
+  color: white;
+}
 
 .manifest-table td {
-  color: var(--text-secondary);
+  color: black;
   font-size: 0.875rem;
+}
+body.dark-mode .manifest-table td {
+  color: white;
 }
 
 /* ============================================ */
@@ -1132,11 +1160,11 @@ body.dark-mode .manifest-item {
   }
   
   .manifest-summary {
-    background: #111827;
+    /* background: #111827; */
   }
   
   .manifest-table th {
-    background: #111827;
+    /* background: #111827; */
   }
 }
 

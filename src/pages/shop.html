@@ -4,7 +4,7 @@ description: "Shop KV Garage's hand-picked liquidation pallets, mobile accessori
 metaTitle: "Tech Deals & Liquidation Pallets | KV Garage Shop"
 tagTitle: "Shop"
 title: "Shop"
-preloadImg: "/images/shop_banner_img.png"
+preloadImg: "/images/landing.avif"
 preloadCSS: "/css/shop.css"
 permalink: "shopp/"
 eleventyNavigation:
@@ -17,22 +17,9 @@ eleventyNavigation:
 <!-- ============================================ -->
 
 <section id="int-hero">
-    <h1 id="home-h">Tech Deals & Liquidation Pallets</h1>
-  <picture class="">
-    <source type="image/webp" srcset="/images/landing-200w.webp 200w, /images/landing-400w.webp 400w, /images/landing-850w.webp 850w, /images/landing-1920w.webp 1920w" sizes="(max-width: 400px) 400px,
-      (max-width: 850px) 850px,
-      1920px">
-    <source type="image/jpeg" srcset="/images/landing-200w.jpeg 200w, /images/landing-400w.jpeg 400w, /images/landing-850w.jpeg 850w, /images/landing-1920w.jpeg 1920w" sizes="(max-width: 400px) 400px,
-    (max-width: 850px) 850px,
-      1920px">
-    <img
-      src="/images/landing-200w.jpeg"
-      width="1920"
-      height="463"
-      alt="KV Garage tech products and liquidation pallets"
-      loading="lazy"
-      decoding="async">
-  </picture>
+  <h1 id="home-h">Tech Deals & Liquidation Pallets</h1>
+  {% image './src/images/landing.avif', 'vinyl floors', '', 'lazy',
+  '(max-width: 850px) 850px, 1920px'%}
 </section>
 <!-- ============================================ -->
 <!--                Advanced Filter System        -->

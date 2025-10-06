@@ -7,9 +7,9 @@ title: "Admin Dashboard"
 preloadImg: "/images/shop_banner_img.png"
 preloadCSS: "/css/admin.css"
 permalink: "admin/dashboard/"
-eleventyNavigation:
-  key: Admin Dashboard
-  order: 999
+# eleventyNavigation:
+#   key: Admin Dashboard
+#   order: 999
 ---
 
 <section id="int-hero">
@@ -188,6 +188,6 @@ eleventyNavigation:
     import { AdminDashboard } from '/assets/js/admin-dashboard.js';
 
     document.addEventListener('DOMContentLoaded', () => {
-        new AdminDashboard();
+        window.adminDashboard = new AdminDashboard();
     });
 </script>

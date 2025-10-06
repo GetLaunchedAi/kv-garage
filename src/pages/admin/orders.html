@@ -7,9 +7,9 @@ title: "Order Management"
 preloadImg: "/images/shop_banner_img.png"
 preloadCSS: "/css/admin.css"
 permalink: "admin/orders/"
-eleventyNavigation:
-  key: Admin Orders
-  order: 999
+# eleventyNavigation:
+#   key: Admin Orders
+#   order: 999
 ---
 
 <section id="int-hero">
@@ -32,20 +32,41 @@ eleventyNavigation:
 </section>
 
 <div class="admin-orders-container">
-    <div class="admin-header">
-        <h2>Order Management</h2>
-        <div class="admin-actions">
-            <button id="refresh-orders" class="btn btn-secondary">Refresh</button>
-            <select id="status-filter" class="filter-select">
-                <option value="">All Statuses</option>
-                <option value="pending">Pending</option>
-                <option value="reserved">Reserved</option>
-                <option value="completed">Completed</option>
-                <option value="shipped">Shipped</option>
-                <option value="cancelled">Cancelled</option>
-            </select>
+    <!-- Login Section (shown when not authenticated) -->
+    <div id="login-section" class="login-section">
+        <div class="login-container">
+            <h2>Admin Login</h2>
+            <form id="admin-login-form" class="login-form">
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <button type="submit" class="login-btn">Login</button>
+            </form>
         </div>
     </div>
+
+    <!-- Orders Section (shown when authenticated) -->
+    <div id="orders-section" class="orders-section" style="display: none;">
+        <div class="admin-header">
+            <h2>Order Management</h2>
+            <div class="admin-actions">
+                <button id="refresh-orders" class="btn btn-secondary">Refresh</button>
+                <button id="logout-btn" class="btn btn-danger">Logout</button>
+                <select id="status-filter" class="filter-select">
+                    <option value="">All Statuses</option>
+                    <option value="pending">Pending</option>
+                    <option value="reserved">Reserved</option>
+                    <option value="completed">Completed</option>
+                    <option value="shipped">Shipped</option>
+                    <option value="cancelled">Cancelled</option>
+                </select>
+            </div>
+        </div>
 
     <div class="orders-stats">
         <div class="stat-card">
@@ -91,8 +112,9 @@ eleventyNavigation:
         </table>
     </div>
 
-    <div id="pagination" class="pagination">
-        <!-- Pagination will be generated here -->
+        <div id="pagination" class="pagination">
+            <!-- Pagination will be generated here -->
+        </div>
     </div>
 </div>
 

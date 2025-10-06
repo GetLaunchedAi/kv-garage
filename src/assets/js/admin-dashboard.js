@@ -3,7 +3,10 @@
  * Handles admin authentication, dashboard management, and admin tools
  */
 
-const API_BASE_URL = 'http://localhost:3001/api';
+// Dynamic API base URL - works for both development and production
+const API_BASE_URL = window.location.hostname === 'localhost' 
+    ? 'http://localhost:3001/api' 
+    : '/api';
 
 export class AdminDashboard {
     constructor() {
@@ -108,7 +111,7 @@ export class AdminDashboard {
             const data = await response.json();
 
             if (response.ok) {
-                this.authToken = data.token;
+                this.authToken = data.token || data.data?.token;
                 localStorage.setItem('admin_token', this.authToken);
                 this.isAuthenticated = true;
                 this.showDashboard();
@@ -201,32 +204,50 @@ export class AdminDashboard {
     renderRecentActivity(analytics) {
         const activityList = document.getElementById('activity-list');
         
-        if (!analytics || !analytics.recentOrders) {
+        // If no analytics data or recent orders, show a simple message
+        if (!analytics) {
             activityList.innerHTML = '<p class="no-data">No recent activity</p>';
             return;
         }
 
-        const activities = analytics.recentOrders.slice(0, 10).map(order => {
-            const date = new Date(order.created_at).toLocaleDateString();
-            const time = new Date(order.created_at).toLocaleTimeString();
-            
-            return `
+        // Create activity items from available data
+        const activities = [];
+        
+        // Add top selling packs as activity items
+        if (analytics.topSellingPacks && analytics.topSellingPacks.length > 0) {
+            analytics.topSellingPacks.slice(0, 3).forEach(pack => {
+                activities.push(`
+                    <div class="activity-item">
+                        <div class="activity-icon">📦</div>
+                        <div class="activity-content">
+                            <h4>Top Seller: ${pack.name}</h4>
+                            <p>Sales: ${pack.sales} • Revenue: $${pack.revenue.toFixed(2)}</p>
+                        </div>
+                        <div class="activity-time">
+                            <span>Recent</span>
+                        </div>
+                    </div>
+                `);
+            });
+        }
+
+        // Add revenue summary
+        if (analytics.totalRevenue) {
+            activities.push(`
                 <div class="activity-item">
-                    <div class="activity-icon">📋</div>
+                    <div class="activity-icon">💰</div>
                     <div class="activity-content">
-                        <h4>New Order: ${order.pack_name || 'Unknown Pack'}</h4>
-                        <p>Customer: ${order.customer_name || order.customer_email}</p>
-                        <p>Amount: $${order.amount_paid.toFixed(2)} • Status: ${order.status}</p>
+                        <h4>Period Summary</h4>
+                        <p>Total Revenue: $${analytics.totalRevenue.toFixed(2)} • Orders: ${analytics.totalOrders}</p>
                     </div>
                     <div class="activity-time">
-                        <span>${date}</span>
-                        <span>${time}</span>
+                        <span>Last 7 days</span>
                     </div>
                 </div>
-            `;
-        }).join('');
+            `);
+        }
 
-        activityList.innerHTML = activities || '<p class="no-data">No recent activity</p>';
+        activityList.innerHTML = activities.length > 0 ? activities.join('') : '<p class="no-data">No recent activity</p>';
     }
 
     async openManifestUpload() {
@@ -242,7 +263,7 @@ export class AdminDashboard {
 
             if (response.ok) {
                 const data = await response.json();
-                this.populatePackSelect(data.packs);
+                this.populatePackSelect(data.packs || data.data);
             }
 
             document.getElementById('manifest-upload-modal').style.display = 'block';
@@ -377,17 +398,19 @@ export class AdminDashboard {
                     </div>
                     <div class="request-content">
                         <p><strong>Email:</strong> ${request.customer_email}</p>
-                        <p><strong>Request:</strong> ${request.requested_mix}</p>
+                        <p><strong>Business:</strong> ${request.business_name || 'N/A'}</p>
+                        <p><strong>Request:</strong> ${request.request_description || request.requested_mix || 'N/A'}</p>
+                        <p><strong>Budget:</strong> $${request.estimated_budget || 'N/A'}</p>
                         ${request.admin_notes ? `<p><strong>Admin Notes:</strong> ${request.admin_notes}</p>` : ''}
                     </div>
                     <div class="request-actions">
-                        <button class="btn btn-sm btn-primary" onclick="this.updateRequestStatus('${request.id}', 'reviewed')">
+                        <button class="btn btn-sm btn-primary" onclick="updateRequestStatus('${request.id}', 'reviewed')">
                             Mark Reviewed
                         </button>
-                        <button class="btn btn-sm btn-success" onclick="this.updateRequestStatus('${request.id}', 'approved')">
+                        <button class="btn btn-sm btn-success" onclick="updateRequestStatus('${request.id}', 'approved')">
                             Approve
                         </button>
-                        <button class="btn btn-sm btn-danger" onclick="this.updateRequestStatus('${request.id}', 'rejected')">
+                        <button class="btn btn-sm btn-danger" onclick="updateRequestStatus('${request.id}', 'rejected')">
                             Reject
                         </button>
                     </div>

@@ -1,10 +1,11 @@
 ---
 layout: "base.html"
-description: "Wholesale tech packs for resellers. Curated liquidation packs with detailed manifests, flexible payment options, and real-time inventory tracking."
+description: "Wholesale tech packs for resellers. Curated liquidation packs with detailed manifests, flexible payment
+options, and real-time inventory tracking."
 metaTitle: "Wholesale Tech Packs | KV Garage B2B Marketplace"
 tagTitle: "Packs"
 title: "Packs"
-preloadImg: "/images/packs_banner_img.png"
+preloadImg: "/images/landing.avif"
 preloadCSS: "/css/packs.css"
 permalink: "packs/"
 eleventyNavigation:
@@ -18,21 +19,8 @@ eleventyNavigation:
 
 <section id="int-hero">
   <h1 id="home-h">Wholesale Packs for Resellers</h1>
-  <picture class="">
-    <source type="image/webp" srcset="/images/packs-200w.webp 200w, /images/packs-400w.webp 400w, /images/packs-850w.webp 850w, /images/packs-1920w.webp 1920w" sizes="(max-width: 400px) 400px,
-      (max-width: 850px) 850px,
-      1920px">
-    <source type="image/jpeg" srcset="/images/packs-200w.jpeg 200w, /images/packs-400w.jpeg 400w, /images/packs-850w.jpeg 850w, /images/packs-1920w.jpeg 1920w" sizes="(max-width: 400px) 400px,
-    (max-width: 850px) 850px,
-      1920px">
-    <img
-      src="/images/packs-200w.jpeg"
-      width="1920"
-      height="463"
-      alt="KV Garage wholesale tech packs for resellers"
-      loading="lazy"
-      decoding="async">
-  </picture>
+  {% image './src/images/landing.avif', 'vinyl floors', '', 'lazy',
+  '(max-width: 850px) 850px, 1920px'%}
 </section>
 
 <!-- ============================================ -->
@@ -121,7 +109,7 @@ eleventyNavigation:
   <div class="modal-overlay"></div>
   <div class="modal-content">
     <button class="modal-close" id="modal-close">&times;</button>
-    
+
     <div class="modal-header">
       <h2 id="modal-pack-name">Pack Name</h2>
       <div class="pack-badges">
@@ -133,7 +121,7 @@ eleventyNavigation:
     <div class="modal-body">
       <div class="pack-info">
         <div class="pack-image">
-          <img id="modal-pack-image" src="" alt="Pack image">
+          <img id="modal-pack-image" src="/src/images/landing.avif" alt="Pack image">
         </div>
         <div class="pack-details">
           <div class="price-info">
@@ -150,7 +138,7 @@ eleventyNavigation:
               <span id="modal-pack-profit" class="price-value profit">$0</span>
             </div>
           </div>
-          
+
           <div class="pack-stats">
             <div class="stat">
               <span class="stat-label">Units:</span>
@@ -214,7 +202,7 @@ eleventyNavigation:
   <div class="modal-overlay"></div>
   <div class="modal-content">
     <button class="modal-close" id="manifest-modal-close">&times;</button>
-    
+
     <div class="modal-header">
       <h2 id="manifest-modal-title">Pack Manifest</h2>
     </div>
@@ -235,7 +223,7 @@ eleventyNavigation:
   <div class="modal-overlay"></div>
   <div class="modal-content">
     <button class="modal-close" id="custom-pack-modal-close">&times;</button>
-    
+
     <div class="modal-header">
       <h2>Request Custom Pack</h2>
     </div>
@@ -269,12 +257,14 @@ eleventyNavigation:
 
         <div class="form-group">
           <label for="preferred-categories">Preferred Categories</label>
-          <textarea id="preferred-categories" name="preferred_categories" placeholder="e.g., iPhone cases, cables, screen protectors..."></textarea>
+          <textarea id="preferred-categories" name="preferred_categories"
+            placeholder="e.g., iPhone cases, cables, screen protectors..."></textarea>
         </div>
 
         <div class="form-group">
           <label for="request-description">Tell us what you're looking for *</label>
-          <textarea id="request-description" name="request_description" required placeholder="Describe the types of products you want in your custom pack..."></textarea>
+          <textarea id="request-description" name="request_description" required
+            placeholder="Describe the types of products you want in your custom pack..."></textarea>
         </div>
 
         <div class="form-actions">
@@ -287,220 +277,220 @@ eleventyNavigation:
 </div>
 
 <script>
-// Pack Catalog System
-class PackCatalogSystem {
-  constructor() {
-    this.packs = [];
-    this.currentPack = null;
-    this.apiBaseUrl = 'http://localhost:3001/api';
-    this.initializeElements();
-    this.bindEvents();
-    this.loadPacks();
-  }
-
-  initializeElements() {
-    // Main elements
-    this.packGrid = document.getElementById('pack-grid');
-    this.loadingState = document.getElementById('loading-state');
-    this.errorState = document.getElementById('error-state');
-    this.retryButton = document.getElementById('retry-button');
-
-    // Modal elements
-    this.packModal = document.getElementById('pack-modal');
-    this.manifestModal = document.getElementById('manifest-modal');
-    this.customPackModal = document.getElementById('custom-pack-modal');
-    
-    // Modal close buttons
-    this.modalClose = document.getElementById('modal-close');
-    this.manifestModalClose = document.getElementById('manifest-modal-close');
-    this.customPackModalClose = document.getElementById('custom-pack-modal-close');
-
-    // Custom pack elements
-    this.customPackBtn = document.getElementById('custom-pack-btn');
-    this.customPackForm = document.getElementById('custom-pack-form');
-  }
-
-  bindEvents() {
-    // Retry button
-    this.retryButton?.addEventListener('click', () => this.loadPacks());
-
-    // Modal close events
-    this.modalClose?.addEventListener('click', () => this.closeModal());
-    this.manifestModalClose?.addEventListener('click', () => this.closeManifestModal());
-    this.customPackModalClose?.addEventListener('click', () => this.closeCustomPackModal());
-
-    // Custom pack events
-    this.customPackBtn?.addEventListener('click', () => this.openCustomPackModal());
-    this.customPackForm?.addEventListener('submit', (e) => this.handleCustomPackSubmit(e));
-
-    // Close modals on overlay click
-    document.addEventListener('click', (e) => {
-      if (e.target.classList.contains('modal-overlay')) {
-        this.closeModal();
-        this.closeManifestModal();
-        this.closeCustomPackModal();
-      }
-    });
-
-    // Close modals on escape key
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        this.closeModal();
-        this.closeManifestModal();
-        this.closeCustomPackModal();
-      }
-    });
-  }
-
-  async loadPacks() {
-    try {
-      this.showLoading();
-      
-      const response = await fetch(`${this.apiBaseUrl}/packs`);
-      if (!response.ok) throw new Error('Failed to load packs');
-      
-      const data = await response.json();
-      this.packs = data.packs || data.data || [];
-      
-      this.renderPacks();
-      this.hideLoading();
-      
-      // Start real-time inventory updates
-      this.startInventoryUpdates();
-    } catch (error) {
-      console.error('Error loading packs:', error);
-      this.showError();
+  // Pack Catalog System
+  class PackCatalogSystem {
+    constructor() {
+      this.packs = [];
+      this.currentPack = null;
+      this.apiBaseUrl = 'http://localhost:3001/api';
+      this.initializeElements();
+      this.bindEvents();
+      this.loadPacks();
     }
-  }
 
-  startInventoryUpdates() {
-    // Update inventory every 30 seconds
-    this.inventoryInterval = setInterval(async () => {
-      await this.updateInventory();
-    }, 30000);
-  }
+    initializeElements() {
+      // Main elements
+      this.packGrid = document.getElementById('pack-grid');
+      this.loadingState = document.getElementById('loading-state');
+      this.errorState = document.getElementById('error-state');
+      this.retryButton = document.getElementById('retry-button');
 
-  async updateInventory() {
-    try {
-      // Update each pack's inventory
-      for (let pack of this.packs) {
-        const response = await fetch(`${this.apiBaseUrl}/packs/${pack.id}/inventory`);
-        if (response.ok) {
-          const data = await response.json();
-          const newQuantity = data.data.available_quantity;
-          
-          // Update pack data
-          pack.available_quantity = newQuantity;
-          
-          // Update the display
-          this.updatePackDisplay(pack);
+      // Modal elements
+      this.packModal = document.getElementById('pack-modal');
+      this.manifestModal = document.getElementById('manifest-modal');
+      this.customPackModal = document.getElementById('custom-pack-modal');
+
+      // Modal close buttons
+      this.modalClose = document.getElementById('modal-close');
+      this.manifestModalClose = document.getElementById('manifest-modal-close');
+      this.customPackModalClose = document.getElementById('custom-pack-modal-close');
+
+      // Custom pack elements
+      this.customPackBtn = document.getElementById('custom-pack-btn');
+      this.customPackForm = document.getElementById('custom-pack-form');
+    }
+
+    bindEvents() {
+      // Retry button
+      this.retryButton?.addEventListener('click', () => this.loadPacks());
+
+      // Modal close events
+      this.modalClose?.addEventListener('click', () => this.closeModal());
+      this.manifestModalClose?.addEventListener('click', () => this.closeManifestModal());
+      this.customPackModalClose?.addEventListener('click', () => this.closeCustomPackModal());
+
+      // Custom pack events
+      this.customPackBtn?.addEventListener('click', () => this.openCustomPackModal());
+      this.customPackForm?.addEventListener('submit', (e) => this.handleCustomPackSubmit(e));
+
+      // Close modals on overlay click
+      document.addEventListener('click', (e) => {
+        if (e.target.classList.contains('modal-overlay')) {
+          this.closeModal();
+          this.closeManifestModal();
+          this.closeCustomPackModal();
+        }
+      });
+
+      // Close modals on escape key
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          this.closeModal();
+          this.closeManifestModal();
+          this.closeCustomPackModal();
+        }
+      });
+    }
+
+    async loadPacks() {
+      try {
+        this.showLoading();
+
+        const response = await fetch(`${this.apiBaseUrl}/packs`);
+        if (!response.ok) throw new Error('Failed to load packs');
+
+        const data = await response.json();
+        this.packs = data.packs || data.data || [];
+
+        this.renderPacks();
+        this.hideLoading();
+
+        // Start real-time inventory updates
+        this.startInventoryUpdates();
+      } catch (error) {
+        console.error('Error loading packs:', error);
+        this.showError();
+      }
+    }
+
+    startInventoryUpdates() {
+      // Update inventory every 30 seconds
+      this.inventoryInterval = setInterval(async () => {
+        await this.updateInventory();
+      }, 30000);
+    }
+
+    async updateInventory() {
+      try {
+        // Update each pack's inventory
+        for (let pack of this.packs) {
+          const response = await fetch(`${this.apiBaseUrl}/packs/${pack.id}/inventory`);
+          if (response.ok) {
+            const data = await response.json();
+            const newQuantity = data.data.available_quantity;
+
+            // Update pack data
+            pack.available_quantity = newQuantity;
+
+            // Update the display
+            this.updatePackDisplay(pack);
+          }
+        }
+      } catch (error) {
+        console.error('Error updating inventory:', error);
+      }
+    }
+
+    updatePackDisplay(pack) {
+      const packCard = document.querySelector(`[data-pack-id="${pack.id}"]`);
+      if (!packCard) return;
+
+      // Update available count
+      const availableCount = packCard.querySelector('.available-count');
+      if (availableCount) {
+        availableCount.textContent = pack.available_quantity;
+      }
+
+      // Update limited badge
+      const stockBadge = packCard.querySelector('.stock-badge');
+      const isLimited = pack.status === 'limited' && pack.available_quantity > 0;
+      const isOutOfStock = pack.available_quantity === 0;
+
+      if (stockBadge) {
+        if (isLimited) {
+          stockBadge.textContent = `Limited — ${pack.available_quantity} left`;
+          stockBadge.className = 'stock-badge limited';
+        } else if (isOutOfStock) {
+          stockBadge.textContent = 'Sold Out';
+          stockBadge.className = 'stock-badge out-of-stock';
+        } else {
+          stockBadge.remove();
+        }
+      } else if (isLimited) {
+        // Add badge if it doesn't exist
+        const packImage = packCard.querySelector('.pack-image');
+        if (packImage) {
+          const badge = document.createElement('div');
+          badge.className = 'stock-badge limited';
+          badge.textContent = `Limited — ${pack.available_quantity} left`;
+          packImage.appendChild(badge);
         }
       }
-    } catch (error) {
-      console.error('Error updating inventory:', error);
-    }
-  }
 
-  updatePackDisplay(pack) {
-    const packCard = document.querySelector(`[data-pack-id="${pack.id}"]`);
-    if (!packCard) return;
+      // Update pack card class
+      packCard.className = `pack-card ${isOutOfStock ? 'out-of-stock' : ''}`;
 
-    // Update available count
-    const availableCount = packCard.querySelector('.available-count');
-    if (availableCount) {
-      availableCount.textContent = pack.available_quantity;
-    }
+      // Update action buttons
+      const actionsContainer = packCard.querySelector('.pack-actions');
+      if (actionsContainer) {
+        const buyButtons = actionsContainer.querySelectorAll('.pack-btn.buy, .pack-btn.reserve');
+        buyButtons.forEach(btn => btn.remove());
 
-    // Update limited badge
-    const stockBadge = packCard.querySelector('.stock-badge');
-    const isLimited = pack.status === 'limited' && pack.available_quantity > 0;
-    const isOutOfStock = pack.available_quantity === 0;
+        if (!isOutOfStock) {
+          const buyBtn = document.createElement('button');
+          buyBtn.className = 'pack-btn buy';
+          buyBtn.setAttribute('data-action', 'buy');
+          buyBtn.textContent = `Buy Now ($${pack.price.toFixed(2)})`;
 
-    if (stockBadge) {
-      if (isLimited) {
-        stockBadge.textContent = `Limited — ${pack.available_quantity} left`;
-        stockBadge.className = 'stock-badge limited';
-      } else if (isOutOfStock) {
-        stockBadge.textContent = 'Sold Out';
-        stockBadge.className = 'stock-badge out-of-stock';
-      } else {
-        stockBadge.remove();
-      }
-    } else if (isLimited) {
-      // Add badge if it doesn't exist
-      const packImage = packCard.querySelector('.pack-image');
-      if (packImage) {
-        const badge = document.createElement('div');
-        badge.className = 'stock-badge limited';
-        badge.textContent = `Limited — ${pack.available_quantity} left`;
-        packImage.appendChild(badge);
+          const reserveBtn = document.createElement('button');
+          reserveBtn.className = 'pack-btn reserve';
+          reserveBtn.setAttribute('data-action', 'reserve');
+          reserveBtn.textContent = `Reserve with 50% Deposit ($${pack.deposit_price.toFixed(2)})`;
+
+          actionsContainer.appendChild(buyBtn);
+          actionsContainer.appendChild(reserveBtn);
+
+          // Re-bind events
+          this.bindPackCardEvents();
+        }
       }
     }
 
-    // Update pack card class
-    packCard.className = `pack-card ${isOutOfStock ? 'out-of-stock' : ''}`;
+    showLoading() {
+      this.loadingState.style.display = 'block';
+      this.packGrid.style.display = 'none';
+      this.errorState.style.display = 'none';
+    }
 
-    // Update action buttons
-    const actionsContainer = packCard.querySelector('.pack-actions');
-    if (actionsContainer) {
-      const buyButtons = actionsContainer.querySelectorAll('.pack-btn.buy, .pack-btn.reserve');
-      buyButtons.forEach(btn => btn.remove());
+    hideLoading() {
+      this.loadingState.style.display = 'none';
+      this.packGrid.style.display = 'grid';
+    }
 
-      if (!isOutOfStock) {
-        const buyBtn = document.createElement('button');
-        buyBtn.className = 'pack-btn buy';
-        buyBtn.setAttribute('data-action', 'buy');
-        buyBtn.textContent = `Buy Now ($${pack.price.toFixed(2)})`;
+    showError() {
+      this.loadingState.style.display = 'none';
+      this.packGrid.style.display = 'none';
+      this.errorState.style.display = 'block';
+    }
 
-        const reserveBtn = document.createElement('button');
-        reserveBtn.className = 'pack-btn reserve';
-        reserveBtn.setAttribute('data-action', 'reserve');
-        reserveBtn.textContent = `Reserve with 50% Deposit ($${pack.deposit_price.toFixed(2)})`;
-
-        actionsContainer.appendChild(buyBtn);
-        actionsContainer.appendChild(reserveBtn);
-
-        // Re-bind events
-        this.bindPackCardEvents();
+    renderPacks() {
+      if (this.packs.length === 0) {
+        this.packGrid.innerHTML = '<p class="no-packs">No packs available at this time.</p>';
+        return;
       }
-    }
-  }
 
-  showLoading() {
-    this.loadingState.style.display = 'block';
-    this.packGrid.style.display = 'none';
-    this.errorState.style.display = 'none';
-  }
+      this.packGrid.innerHTML = this.packs.map(pack => this.createPackCard(pack)).join('');
 
-  hideLoading() {
-    this.loadingState.style.display = 'none';
-    this.packGrid.style.display = 'grid';
-  }
-
-  showError() {
-    this.loadingState.style.display = 'none';
-    this.packGrid.style.display = 'none';
-    this.errorState.style.display = 'block';
-  }
-
-  renderPacks() {
-    if (this.packs.length === 0) {
-      this.packGrid.innerHTML = '<p class="no-packs">No packs available at this time.</p>';
-      return;
+      // Bind pack card events
+      this.bindPackCardEvents();
     }
 
-    this.packGrid.innerHTML = this.packs.map(pack => this.createPackCard(pack)).join('');
-    
-    // Bind pack card events
-    this.bindPackCardEvents();
-  }
+    createPackCard(pack) {
+      const isLowStock = pack.available_quantity <= 5;
+      const isOutOfStock = pack.available_quantity === 0;
+      const isLimited = pack.status === 'limited' && pack.available_quantity > 0;
 
-  createPackCard(pack) {
-    const isLowStock = pack.available_quantity <= 5;
-    const isOutOfStock = pack.available_quantity === 0;
-    const isLimited = pack.status === 'limited' && pack.available_quantity > 0;
-    
-    return `
+      return `
       <div class="pack-card ${isOutOfStock ? 'out-of-stock' : ''}" data-pack-id="${pack.id}">
         <div class="pack-image">
           <img src="${pack.image_url || '/images/placeholder.jpg'}" alt="${pack.name}" loading="lazy">
@@ -553,125 +543,125 @@ class PackCatalogSystem {
         </div>
       </div>
     `;
-  }
+    }
 
-  bindPackCardEvents() {
-    document.querySelectorAll('.pack-card').forEach(card => {
-      const packId = card.dataset.packId;
-      const pack = this.packs.find(p => p.id == packId);
-      
-      card.querySelectorAll('.pack-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          const action = btn.dataset.action;
-          this.handlePackAction(action, pack);
+    bindPackCardEvents() {
+      document.querySelectorAll('.pack-card').forEach(card => {
+        const packId = card.dataset.packId;
+        const pack = this.packs.find(p => p.id == packId);
+
+        card.querySelectorAll('.pack-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const action = btn.dataset.action;
+            this.handlePackAction(action, pack);
+          });
         });
       });
-    });
-  }
-
-  async handlePackAction(action, pack) {
-    switch (action) {
-      case 'view':
-        await this.openPackModal(pack);
-        break;
-      case 'manifest':
-        await this.openManifestModal(pack);
-        break;
-      case 'buy':
-        await this.initiatePurchase(pack, 'full');
-        break;
-      case 'reserve':
-        await this.initiatePurchase(pack, 'deposit');
-        break;
     }
-  }
 
-  async openPackModal(pack) {
-    this.currentPack = pack;
-    
-    // Load full pack details with manifest
-    try {
-      const response = await fetch(`${this.apiBaseUrl}/packs/${pack.id}`);
-      const data = await response.json();
-      
-      if (!data.success) {
-        throw new Error('Failed to load pack details');
+    async handlePackAction(action, pack) {
+      switch (action) {
+        case 'view':
+          await this.openPackModal(pack);
+          break;
+        case 'manifest':
+          await this.openManifestModal(pack);
+          break;
+        case 'buy':
+          await this.initiatePurchase(pack, 'full');
+          break;
+        case 'reserve':
+          await this.initiatePurchase(pack, 'deposit');
+          break;
       }
-      
-      const fullPack = data.data.pack;
-      const manifest = data.data.manifest;
-      
-      // Add manifest to pack object
-      fullPack.manifest = manifest;
-      
-      this.populatePackModal(fullPack);
-      this.packModal.style.display = 'flex';
-      setTimeout(() => this.packModal.classList.add('show'), 10);
-      document.body.style.overflow = 'hidden';
-    } catch (error) {
-      console.error('Error loading pack details:', error);
-      alert('Failed to load pack details. Please try again.');
     }
-  }
 
-  populatePackModal(pack) {
-    // Update modal content
-    document.getElementById('modal-pack-name').textContent = pack.name;
-    document.getElementById('modal-pack-type').textContent = pack.type.toUpperCase();
-    document.getElementById('modal-pack-status').textContent = pack.available_quantity > 0 ? 'Available' : 'Sold Out';
-    document.getElementById('modal-pack-image').src = pack.image_url || '/images/placeholder.jpg';
-    document.getElementById('modal-pack-price').textContent = `$${pack.price.toFixed(2)}`;
-    document.getElementById('modal-pack-resale').textContent = `$${pack.estimated_resale_value.toFixed(2)}`;
-    document.getElementById('modal-pack-profit').textContent = `$${(pack.estimated_resale_value - pack.price).toFixed(2)}`;
-    document.getElementById('modal-pack-units').textContent = `${pack.number_of_units}`;
-    document.getElementById('modal-pack-available').textContent = pack.available_quantity;
-    document.getElementById('modal-pack-description').textContent = pack.description;
-    
-    // Update payment amounts
-    document.getElementById('full-payment-amount').textContent = `$${pack.price.toFixed(2)}`;
-    document.getElementById('deposit-payment-amount').textContent = `$${pack.deposit_price.toFixed(2)}`;
-    
-    // Render manifest preview
-    this.renderManifestPreview(pack.manifest);
-    
-    // Update purchase buttons
-    const buyBtn = document.getElementById('buy-now-btn');
-    const reserveBtn = document.getElementById('reserve-btn');
-    
-    if (pack.available_quantity === 0) {
-      buyBtn.disabled = true;
-      reserveBtn.disabled = true;
-      buyBtn.textContent = 'Sold Out';
-      reserveBtn.textContent = 'Sold Out';
-    } else {
-      buyBtn.disabled = false;
-      reserveBtn.disabled = false;
-      buyBtn.textContent = 'Buy Now';
-      reserveBtn.textContent = 'Reserve with Deposit';
-    }
-    
-    // Bind modal events
-    this.bindModalEvents();
-  }
+    async openPackModal(pack) {
+      this.currentPack = pack;
 
-  renderManifestPreview(manifest) {
-    const preview = document.getElementById('manifest-preview');
-    
-    if (!manifest || manifest.length === 0) {
-      preview.innerHTML = '<p>No manifest available</p>';
-      return;
+      // Load full pack details with manifest
+      try {
+        const response = await fetch(`${this.apiBaseUrl}/packs/${pack.id}`);
+        const data = await response.json();
+
+        if (!data.success) {
+          throw new Error('Failed to load pack details');
+        }
+
+        const fullPack = data.data.pack;
+        const manifest = data.data.manifest;
+
+        // Add manifest to pack object
+        fullPack.manifest = manifest;
+
+        this.populatePackModal(fullPack);
+        this.packModal.style.display = 'flex';
+        setTimeout(() => this.packModal.classList.add('show'), 10);
+        document.body.style.overflow = 'hidden';
+      } catch (error) {
+        console.error('Error loading pack details:', error);
+        alert('Failed to load pack details. Please try again.');
+      }
     }
-    
-    // Group items by category
-    const grouped = manifest.reduce((acc, item) => {
-      const category = item.category || 'Other';
-      if (!acc[category]) acc[category] = [];
-      acc[category].push(item);
-      return acc;
-    }, {});
-    
-    preview.innerHTML = Object.entries(grouped).map(([category, items]) => `
+
+    populatePackModal(pack) {
+      // Update modal content
+      document.getElementById('modal-pack-name').textContent = pack.name;
+      document.getElementById('modal-pack-type').textContent = pack.type.toUpperCase();
+      document.getElementById('modal-pack-status').textContent = pack.available_quantity > 0 ? 'Available' : 'Sold Out';
+      document.getElementById('modal-pack-image').src = pack.image_url || '/images/placeholder.jpg';
+      document.getElementById('modal-pack-price').textContent = `$${pack.price.toFixed(2)}`;
+      document.getElementById('modal-pack-resale').textContent = `$${pack.estimated_resale_value.toFixed(2)}`;
+      document.getElementById('modal-pack-profit').textContent = `$${(pack.estimated_resale_value - pack.price).toFixed(2)}`;
+      document.getElementById('modal-pack-units').textContent = `${pack.number_of_units}`;
+      document.getElementById('modal-pack-available').textContent = pack.available_quantity;
+      document.getElementById('modal-pack-description').textContent = pack.description;
+
+      // Update payment amounts
+      document.getElementById('full-payment-amount').textContent = `$${pack.price.toFixed(2)}`;
+      document.getElementById('deposit-payment-amount').textContent = `$${pack.deposit_price.toFixed(2)}`;
+
+      // Render manifest preview
+      this.renderManifestPreview(pack.manifest);
+
+      // Update purchase buttons
+      const buyBtn = document.getElementById('buy-now-btn');
+      const reserveBtn = document.getElementById('reserve-btn');
+
+      if (pack.available_quantity === 0) {
+        buyBtn.disabled = true;
+        reserveBtn.disabled = true;
+        buyBtn.textContent = 'Sold Out';
+        reserveBtn.textContent = 'Sold Out';
+      } else {
+        buyBtn.disabled = false;
+        reserveBtn.disabled = false;
+        buyBtn.textContent = 'Buy Now';
+        reserveBtn.textContent = 'Reserve with Deposit';
+      }
+
+      // Bind modal events
+      this.bindModalEvents();
+    }
+
+    renderManifestPreview(manifest) {
+      const preview = document.getElementById('manifest-preview');
+
+      if (!manifest || manifest.length === 0) {
+        preview.innerHTML = '<p>No manifest available</p>';
+        return;
+      }
+
+      // Group items by category
+      const grouped = manifest.reduce((acc, item) => {
+        const category = item.category || 'Other';
+        if (!acc[category]) acc[category] = [];
+        acc[category].push(item);
+        return acc;
+      }, {});
+
+      preview.innerHTML = Object.entries(grouped).map(([category, items]) => `
       <div class="manifest-category">
         <h4>${category}</h4>
         <div class="manifest-items">
@@ -685,59 +675,59 @@ class PackCatalogSystem {
         </div>
       </div>
     `).join('');
-  }
-
-  bindModalEvents() {
-    // Payment type change
-    document.querySelectorAll('input[name="payment-type"]').forEach(radio => {
-      radio.addEventListener('change', (e) => {
-        const isDeposit = e.target.value === 'deposit';
-        document.getElementById('buy-now-btn').style.display = isDeposit ? 'none' : 'block';
-        document.getElementById('reserve-btn').style.display = isDeposit ? 'block' : 'none';
-      });
-    });
-    
-    // Purchase buttons
-    document.getElementById('buy-now-btn').onclick = () => this.initiatePurchase(this.currentPack, 'full');
-    document.getElementById('reserve-btn').onclick = () => this.initiatePurchase(this.currentPack, 'deposit');
-    
-    // Manifest buttons
-    document.getElementById('view-full-manifest').onclick = () => this.openManifestModal(this.currentPack);
-    document.getElementById('download-csv').onclick = () => this.downloadManifest(this.currentPack, 'csv');
-    document.getElementById('download-pdf').onclick = () => this.downloadManifest(this.currentPack, 'pdf');
-  }
-
-  async openManifestModal(pack) {
-    try {
-      const response = await fetch(`${this.apiBaseUrl}/manifests/${pack.id}`);
-      const data = await response.json();
-      
-      if (!data.success) {
-        throw new Error('Failed to load manifest');
-      }
-      
-      const manifestItems = data.data;
-      
-      this.populateManifestModal(pack, manifestItems);
-      this.manifestModal.style.display = 'flex';
-      setTimeout(() => this.manifestModal.classList.add('show'), 10);
-      document.body.style.overflow = 'hidden';
-    } catch (error) {
-      console.error('Error loading manifest:', error);
-      alert('Failed to load manifest. Please try again.');
     }
-  }
 
-  populateManifestModal(pack, manifestItems) {
-    document.getElementById('manifest-modal-title').textContent = `${pack.name} Manifest`;
-    
-    // Calculate totals
-    const totalItems = manifestItems.reduce((sum, item) => sum + item.quantity, 0);
-    const totalCost = pack.price;
-    const estimatedValue = pack.estimated_resale_value;
-    
-    const content = document.getElementById('manifest-content');
-    content.innerHTML = `
+    bindModalEvents() {
+      // Payment type change
+      document.querySelectorAll('input[name="payment-type"]').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+          const isDeposit = e.target.value === 'deposit';
+          document.getElementById('buy-now-btn').style.display = isDeposit ? 'none' : 'block';
+          document.getElementById('reserve-btn').style.display = isDeposit ? 'block' : 'none';
+        });
+      });
+
+      // Purchase buttons
+      document.getElementById('buy-now-btn').onclick = () => this.initiatePurchase(this.currentPack, 'full');
+      document.getElementById('reserve-btn').onclick = () => this.initiatePurchase(this.currentPack, 'deposit');
+
+      // Manifest buttons
+      document.getElementById('view-full-manifest').onclick = () => this.openManifestModal(this.currentPack);
+      document.getElementById('download-csv').onclick = () => this.downloadManifest(this.currentPack, 'csv');
+      document.getElementById('download-pdf').onclick = () => this.downloadManifest(this.currentPack, 'pdf');
+    }
+
+    async openManifestModal(pack) {
+      try {
+        const response = await fetch(`${this.apiBaseUrl}/manifests/${pack.id}`);
+        const data = await response.json();
+
+        if (!data.success) {
+          throw new Error('Failed to load manifest');
+        }
+
+        const manifestItems = data.data;
+
+        this.populateManifestModal(pack, manifestItems);
+        this.manifestModal.style.display = 'flex';
+        setTimeout(() => this.manifestModal.classList.add('show'), 10);
+        document.body.style.overflow = 'hidden';
+      } catch (error) {
+        console.error('Error loading manifest:', error);
+        alert('Failed to load manifest. Please try again.');
+      }
+    }
+
+    populateManifestModal(pack, manifestItems) {
+      document.getElementById('manifest-modal-title').textContent = `${pack.name} Manifest`;
+
+      // Calculate totals
+      const totalItems = manifestItems.reduce((sum, item) => sum + item.quantity, 0);
+      const totalCost = pack.price;
+      const estimatedValue = pack.estimated_resale_value;
+
+      const content = document.getElementById('manifest-content');
+      content.innerHTML = `
       <div class="manifest-summary">
         <div class="summary-item">
           <span class="summary-label">Total Items:</span>
@@ -782,106 +772,106 @@ class PackCatalogSystem {
         </table>
       </div>
     `;
-  }
+    }
 
-  async downloadManifest(pack, format) {
-    try {
-      const response = await fetch(`${this.apiBaseUrl}/manifests/${pack.id}?format=${format}`);
-      
-      if (!response.ok) throw new Error('Failed to download manifest');
-      
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `manifest-${pack.name.replace(/\s+/g, '-').toLowerCase()}.${format}`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-    } catch (error) {
-      console.error('Error downloading manifest:', error);
-      alert('Failed to download manifest. Please try again.');
+    async downloadManifest(pack, format) {
+      try {
+        const response = await fetch(`${this.apiBaseUrl}/manifests/${pack.id}?format=${format}`);
+
+        if (!response.ok) throw new Error('Failed to download manifest');
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `manifest-${pack.name.replace(/\s+/g, '-').toLowerCase()}.${format}`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      } catch (error) {
+        console.error('Error downloading manifest:', error);
+        alert('Failed to download manifest. Please try again.');
+      }
+    }
+
+    async initiatePurchase(pack, paymentType) {
+      try {
+        // Import checkout functionality
+        const { createCheckoutSession } = await import('/assets/js/checkout.js');
+
+        // Create checkout session
+        const sessionUrl = await createCheckoutSession(pack.id, paymentType);
+
+        // Redirect to Stripe checkout
+        window.location.href = sessionUrl;
+
+      } catch (error) {
+        console.error('Checkout error:', error);
+        alert(`Error: ${error.message}`);
+      }
+    }
+
+    openCustomPackModal() {
+      this.customPackModal.style.display = 'flex';
+      setTimeout(() => this.customPackModal.classList.add('show'), 10);
+      document.body.style.overflow = 'hidden';
+    }
+
+    closeModal() {
+      this.packModal.classList.remove('show');
+      setTimeout(() => {
+        this.packModal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+      }, 300);
+    }
+
+    closeManifestModal() {
+      this.manifestModal.classList.remove('show');
+      setTimeout(() => {
+        this.manifestModal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+      }, 300);
+    }
+
+    closeCustomPackModal() {
+      this.customPackModal.classList.remove('show');
+      setTimeout(() => {
+        this.customPackModal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+      }, 300);
+    }
+
+    async handleCustomPackSubmit(e) {
+      e.preventDefault();
+
+      const formData = new FormData(this.customPackForm);
+      const data = Object.fromEntries(formData.entries());
+
+      try {
+        const response = await fetch(`${this.apiBaseUrl}/custom-packs/request`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data)
+        });
+
+        if (!response.ok) throw new Error('Failed to submit request');
+
+        const result = await response.json();
+        alert('Custom pack request submitted successfully! We will contact you within 24 hours.');
+        this.customPackForm.reset();
+        this.closeCustomPackModal();
+      } catch (error) {
+        console.error('Error submitting custom pack request:', error);
+        alert('Failed to submit request. Please try again.');
+      }
     }
   }
 
-  async initiatePurchase(pack, paymentType) {
-    try {
-      // Import checkout functionality
-      const { createCheckoutSession } = await import('/assets/js/checkout.js');
-      
-      // Create checkout session
-      const sessionUrl = await createCheckoutSession(pack.id, paymentType);
-      
-      // Redirect to Stripe checkout
-      window.location.href = sessionUrl;
-      
-    } catch (error) {
-      console.error('Checkout error:', error);
-      alert(`Error: ${error.message}`);
-    }
-  }
-
-  openCustomPackModal() {
-    this.customPackModal.style.display = 'flex';
-    setTimeout(() => this.customPackModal.classList.add('show'), 10);
-    document.body.style.overflow = 'hidden';
-  }
-
-  closeModal() {
-    this.packModal.classList.remove('show');
-    setTimeout(() => {
-      this.packModal.style.display = 'none';
-      document.body.style.overflow = 'auto';
-    }, 300);
-  }
-
-  closeManifestModal() {
-    this.manifestModal.classList.remove('show');
-    setTimeout(() => {
-      this.manifestModal.style.display = 'none';
-      document.body.style.overflow = 'auto';
-    }, 300);
-  }
-
-  closeCustomPackModal() {
-    this.customPackModal.classList.remove('show');
-    setTimeout(() => {
-      this.customPackModal.style.display = 'none';
-      document.body.style.overflow = 'auto';
-    }, 300);
-  }
-
-  async handleCustomPackSubmit(e) {
-    e.preventDefault();
-    
-    const formData = new FormData(this.customPackForm);
-    const data = Object.fromEntries(formData.entries());
-    
-    try {
-      const response = await fetch(`${this.apiBaseUrl}/custom-packs/request`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data)
-      });
-      
-      if (!response.ok) throw new Error('Failed to submit request');
-      
-      const result = await response.json();
-      alert('Custom pack request submitted successfully! We will contact you within 24 hours.');
-      this.customPackForm.reset();
-      this.closeCustomPackModal();
-    } catch (error) {
-      console.error('Error submitting custom pack request:', error);
-      alert('Failed to submit request. Please try again.');
-    }
-  }
-}
-
-// Initialize the pack catalog system when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-  new PackCatalogSystem();
-});
+  // Initialize the pack catalog system when DOM is loaded
+  document.addEventListener('DOMContentLoaded', () => {
+    new PackCatalogSystem();
+  });
 </script>

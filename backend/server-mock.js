@@ -417,6 +417,109 @@ app.get('/api/admin/dashboard', (req, res) => {
   });
 });
 
+// Mock admin orders endpoint
+app.get('/api/admin/orders', (req, res) => {
+  // Mock orders data
+  const mockOrders = [
+    {
+      id: 'order-1',
+      customer_name: 'John Doe',
+      customer_email: 'john@example.com',
+      pack_name: 'Starter Pack',
+      pack_type: 'starter',
+      payment_mode: 'full',
+      amount_paid: 299.99,
+      total_amount: 299.99,
+      status: 'pending',
+      created_at: new Date().toISOString(),
+      stripe_checkout_session_id: 'cs_test_123'
+    },
+    {
+      id: 'order-2',
+      customer_name: 'Jane Smith',
+      customer_email: 'jane@example.com',
+      pack_name: 'Reseller Pack',
+      pack_type: 'reseller',
+      payment_mode: 'deposit',
+      amount_paid: 150.00,
+      total_amount: 599.99,
+      status: 'reserved',
+      created_at: new Date(Date.now() - 86400000).toISOString(),
+      stripe_checkout_session_id: 'cs_test_456'
+    },
+    {
+      id: 'order-3',
+      customer_name: 'Bob Johnson',
+      customer_email: 'bob@example.com',
+      pack_name: 'Pro Pack',
+      pack_type: 'pro',
+      payment_mode: 'full',
+      amount_paid: 999.99,
+      total_amount: 999.99,
+      status: 'completed',
+      created_at: new Date(Date.now() - 172800000).toISOString(),
+      stripe_checkout_session_id: 'cs_test_789'
+    }
+  ];
+
+  res.json({
+    success: true,
+    data: mockOrders,
+    pagination: {
+      limit: 50,
+      offset: 0,
+      total: mockOrders.length
+    }
+  });
+});
+
+// Mock individual order endpoint
+app.get('/api/orders/:id', (req, res) => {
+  const orderId = req.params.id;
+  
+  // Mock order details
+  const mockOrder = {
+    id: orderId,
+    customer_name: 'John Doe',
+    customer_email: 'john@example.com',
+    pack_name: 'Starter Pack',
+    pack_type: 'starter',
+    payment_mode: 'full',
+    amount_paid: 299.99,
+    total_amount: 299.99,
+    status: 'pending',
+    created_at: new Date().toISOString(),
+    stripe_checkout_session_id: 'cs_test_123',
+    pack_description: 'Perfect for small resellers starting out',
+    pack_image: '/images/packs/starter-pack.jpg',
+    pack_price: 299.99,
+    pack_deposit_price: 150.00,
+    estimated_resale_value: 450.00
+  };
+
+  res.json({
+    success: true,
+    data: mockOrder
+  });
+});
+
+// Mock order status update endpoint
+app.put('/api/orders/:id/status', (req, res) => {
+  const orderId = req.params.id;
+  const { status, notes } = req.body;
+  
+  res.json({
+    success: true,
+    data: {
+      id: orderId,
+      status: status,
+      notes: notes,
+      updated_at: new Date().toISOString()
+    },
+    message: 'Order status updated successfully'
+  });
+});
+
 // Mock custom pack requests endpoint
 app.get('/api/custom-packs/requests', (req, res) => {
   // Mock custom pack requests
@@ -461,6 +564,36 @@ app.post('/api/custom-packs/request', (req, res) => {
       created_at: new Date().toISOString()
     },
     message: 'Custom pack request submitted successfully. We will contact you within 24 hours.'
+  });
+});
+
+// Mock manifest upload endpoint
+app.post('/api/admin/manifests/upload', (req, res) => {
+  // Mock successful manifest upload
+  res.json({
+    success: true,
+    message: 'Manifest uploaded successfully',
+    data: {
+      pack_id: req.body.pack_id || 1,
+      items_count: 25,
+      uploaded_at: new Date().toISOString()
+    }
+  });
+});
+
+// Mock custom pack request status update
+app.put('/api/custom-packs/requests/:id/status', (req, res) => {
+  const requestId = req.params.id;
+  const { status } = req.body;
+  
+  res.json({
+    success: true,
+    data: {
+      id: requestId,
+      status: status,
+      updated_at: new Date().toISOString()
+    },
+    message: `Request ${status} successfully`
   });
 });
 

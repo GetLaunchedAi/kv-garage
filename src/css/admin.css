@@ -197,6 +197,10 @@
     cursor: pointer;
     display: block;
 }
+body.dark-mode .action-card {
+    background: var(--medium);
+    border: 1px solid var(--border);
+}
 
 .action-card:hover {
     transform: translateY(-4px);
@@ -528,6 +532,11 @@
     letter-spacing: 0.5px;
 }
 
+body.dark-mode #packs-table th {
+    background: var(--medium);
+    color: white;
+}
+
 #packs-table tbody tr:hover {
     background: var(--hover-bg);
 }
@@ -535,6 +544,10 @@
 #packs-table td {
     color: var(--text);
     font-size: 0.9rem;
+}
+
+body.dark-mode #packs-table td {
+    color: white;
 }
 
 /* Status and Type Badges */
@@ -829,6 +842,9 @@
     color: var(--text);
 }
 
+body.dark-mode .stat-card span {
+    color: var(--primary);
+}
 /* Orders Table */
 .orders-table-container {
     background: var(--card-bg);
@@ -857,10 +873,17 @@
     z-index: 10;
 }
 
+body.dark-mode .orders-table th {
+    background: var(--medium);
+    color: white;
+}
 .orders-table td {
     padding: 1rem;
     border-bottom: 1px solid var(--border);
     color: var(--text);
+}
+body.dark-mode .orders-table td {
+    color: white;
 }
 
 .orders-table tbody tr:hover {
