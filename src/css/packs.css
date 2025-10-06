@@ -276,7 +276,10 @@ body.dark-mode .price-label {
 
 .price-value {
   font-weight: 600;
-  color: var(--text-primary);
+  color: black;
+}
+body.dark-mode .price-value {
+  color: white;
 }
 
 .price-value.profit {
@@ -608,8 +611,11 @@ body.dark-mode .modal-content {
 .modal-header h2 {
   font-size: 1.5rem;
   font-weight: 600;
-  color: var(--text-primary);
+  color: black;
   margin: 0 0 1rem 0;
+}
+body.dark-mode .modal-header h2 {
+  color: white;
 }
 
 .pack-badges {
@@ -649,7 +655,7 @@ body.dark-mode .modal-content {
 
 .pack-image img {
   width: 100%;
-  height: 200px;
+  height: 400px;
   object-fit: cover;
   border-radius: 8px;
 }
@@ -679,8 +685,11 @@ body.dark-mode .modal-content {
 .manifest-section h3 {
   font-size: 1.25rem;
   font-weight: 600;
-  color: var(--text-primary);
+  color: black;
   margin-bottom: 1rem;
+}
+body.dark-mode .manifest-section h3 {
+  color: white;
 }
 
 .manifest-preview {
@@ -688,6 +697,9 @@ body.dark-mode .modal-content {
   border-radius: 8px;
   padding: 1rem;
   margin-bottom: 1rem;
+}
+body.dark-mode .manifest-preview {
+  background: var(--medium);
 }
 
 .manifest-category {
@@ -710,13 +722,17 @@ body.dark-mode .modal-content {
 }
 
 .manifest-item {
-  background: var(--pack-bg);
+  /* background: var(--pack-bg); */
   border: 1px solid var(--pack-border);
   border-radius: 6px;
   padding: 0.5rem 0.75rem;
   font-size: 0.875rem;
 }
 
+body.dark-mode .manifest-item {
+  background: var(--medium);
+  border: 1px solid var(--btn-secondary);
+}
 .item-quantity {
   font-weight: 600;
   color: var(--btn-primary);
@@ -1112,7 +1128,7 @@ body.dark-mode .modal-content {
   }
   
   .manifest-preview {
-    background: #111827;
+    /* background: #111827; */
   }
   
   .manifest-summary {
