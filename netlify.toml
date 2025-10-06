@@ -16,6 +16,11 @@
   status = 200
 
 [[redirects]]
+  from = "/api/packs/health"
+  to = "/.netlify/functions/packs"
+  status = 200
+
+[[redirects]]
   from = "/api/packs/:id"
   to = "/.netlify/functions/pack-detail/:id"
   status = 200

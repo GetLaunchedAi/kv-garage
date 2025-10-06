@@ -1,12 +1,16 @@
 exports.handler = async (event, context) => {
-  // Handle CORS
-  const headers = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Content-Type',
-    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  };
+  try {
+    console.log('Packs function called:', event.httpMethod, event.path);
+    
+    // Handle CORS
+    const headers = {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Headers': 'Content-Type',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    };
 
   if (event.httpMethod === 'OPTIONS') {
+    console.log('Handling OPTIONS request');
     return {
       statusCode: 200,
       headers,
@@ -15,10 +19,24 @@ exports.handler = async (event, context) => {
   }
 
   if (event.httpMethod !== 'GET') {
+    console.log('Method not allowed:', event.httpMethod);
     return {
       statusCode: 405,
       headers,
       body: JSON.stringify({ error: 'Method not allowed' }),
+    };
+  }
+
+  // Health check endpoint
+  if (event.path === '/api/packs/health') {
+    return {
+      statusCode: 200,
+      headers,
+      body: JSON.stringify({ 
+        status: 'ok', 
+        message: 'Packs function is working',
+        timestamp: new Date().toISOString()
+      }),
     };
   }
 
@@ -100,19 +118,39 @@ exports.handler = async (event, context) => {
     filteredPacks = filteredPacks.filter(pack => pack.number_of_units <= parseInt(max_units));
   }
 
+  const response = {
+    packs: filteredPacks,
+    total: filteredPacks.length,
+    filters: {
+      status,
+      min_price,
+      max_price,
+      min_units,
+      max_units
+    }
+  };
+  
+  console.log('Returning packs response:', JSON.stringify(response, null, 2));
+  
   return {
     statusCode: 200,
     headers,
-    body: JSON.stringify({
-      packs: filteredPacks,
-      total: filteredPacks.length,
-      filters: {
-        status,
-        min_price,
-        max_price,
-        min_units,
-        max_units
-      }
-    }),
+    body: JSON.stringify(response),
   };
+  
+  } catch (error) {
+    console.error('Error in packs function:', error);
+    return {
+      statusCode: 500,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Content-Type',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      },
+      body: JSON.stringify({ 
+        error: 'Internal server error',
+        message: error.message 
+      }),
+    };
+  }
 };

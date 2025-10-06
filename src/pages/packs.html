@@ -357,18 +357,43 @@ eleventyNavigation:
 
     async loadPacks() {
       try {
-        console.log('Loading packs from:', `${this.apiBaseUrl}/packs`);
+        const url = `${this.apiBaseUrl}/packs`;
+        console.log('Loading packs from:', url);
+        console.log('Current hostname:', window.location.hostname);
+        console.log('API Base URL:', this.apiBaseUrl);
         this.showLoading();
 
+        // First try the health check to see if the function is working
+        try {
+          const healthResponse = await fetch(`${this.apiBaseUrl}/packs/health`);
+          console.log('Health check response:', healthResponse.status, healthResponse.statusText);
+          if (healthResponse.ok) {
+            const healthData = await healthResponse.json();
+            console.log('Health check data:', healthData);
+          }
+        } catch (healthError) {
+          console.warn('Health check failed:', healthError);
+        }
+
         const response = await fetch(`${this.apiBaseUrl}/packs`);
+        console.log('Packs response status:', response.status, response.statusText);
+        
         if (!response.ok) {
           console.error('Packs response not ok:', response.status, response.statusText);
-          throw new Error('Failed to load packs');
+          const errorText = await response.text();
+          console.error('Error response body:', errorText);
+          throw new Error(`Failed to load packs: ${response.status} ${response.statusText}`);
         }
 
         const data = await response.json();
         console.log('Packs data received:', data);
+        
+        if (!data) {
+          throw new Error('No data received from packs API');
+        }
+        
         this.packs = data.packs || data.data || [];
+        console.log('Processed packs:', this.packs);
 
         if (this.packs.length === 0) {
           console.warn('No packs received');
