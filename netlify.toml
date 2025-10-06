@@ -21,6 +21,11 @@
   status = 200
 
 [[redirects]]
+  from = "/api/packs/:id/manifest"
+  to = "/.netlify/functions/pack-manifest/:id"
+  status = 200
+
+[[redirects]]
   from = "/api/catalogs/hero"
   to = "/.netlify/functions/hero-catalog"
   status = 200

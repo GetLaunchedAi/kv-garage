@@ -22,9 +22,14 @@ exports.handler = async (event, context) => {
     };
   }
 
-  // Extract pack ID from path
-  const pathParts = event.path.split('/');
-  const packId = pathParts[pathParts.length - 1];
+  // Extract pack ID from path or query parameters
+  let packId;
+  if (event.pathParameters && event.pathParameters.id) {
+    packId = event.pathParameters.id;
+  } else {
+    const pathParts = event.path.split('/');
+    packId = pathParts[pathParts.length - 1];
+  }
 
   // Mock pack data
   const mockPacks = {
@@ -90,6 +95,9 @@ exports.handler = async (event, context) => {
   return {
     statusCode: 200,
     headers,
-    body: JSON.stringify(pack),
+    body: JSON.stringify({
+      success: true,
+      data: pack
+    }),
   };
 };

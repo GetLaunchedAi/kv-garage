@@ -109,6 +109,176 @@ app.get('/api/packs', (req, res) => {
   });
 });
 
+// Pack manifest endpoint
+app.get('/api/packs/:id/manifest', (req, res) => {
+  const { id } = req.params;
+  
+  // Mock manifest data for each pack
+  const mockManifests = {
+    '1': {
+      pack_id: 1,
+      pack_name: 'Starter Pack',
+      pack_type: 'starter',
+      total_items: 250,
+      total_estimated_value: 750.00,
+      created_date: new Date().toISOString(),
+      items: [
+        {
+          sku: 'IPHONE-12-128GB',
+          name: 'iPhone 12 128GB',
+          quantity: 5,
+          condition: 'Good',
+          estimated_value: 450.00,
+          category: 'Smartphones',
+          brand: 'Apple'
+        },
+        {
+          sku: 'SAMSUNG-GALAXY-S21',
+          name: 'Samsung Galaxy S21',
+          quantity: 3,
+          condition: 'Excellent',
+          estimated_value: 380.00,
+          category: 'Smartphones',
+          brand: 'Samsung'
+        },
+        {
+          sku: 'AIRPODS-PRO-2',
+          name: 'AirPods Pro 2nd Gen',
+          quantity: 8,
+          condition: 'Good',
+          estimated_value: 180.00,
+          category: 'Audio',
+          brand: 'Apple'
+        },
+        {
+          sku: 'LIGHTNING-CABLE-1M',
+          name: 'Lightning Cable 1m',
+          quantity: 25,
+          condition: 'New',
+          estimated_value: 15.00,
+          category: 'Cables',
+          brand: 'Generic'
+        },
+        {
+          sku: 'USB-C-CABLE-2M',
+          name: 'USB-C Cable 2m',
+          quantity: 20,
+          condition: 'New',
+          estimated_value: 12.00,
+          category: 'Cables',
+          brand: 'Generic'
+        }
+      ]
+    },
+    '2': {
+      pack_id: 2,
+      pack_name: 'Reseller Pack',
+      pack_type: 'reseller',
+      total_items: 500,
+      total_estimated_value: 1500.00,
+      created_date: new Date().toISOString(),
+      items: [
+        {
+          sku: 'IPHONE-13-256GB',
+          name: 'iPhone 13 256GB',
+          quantity: 8,
+          condition: 'Excellent',
+          estimated_value: 650.00,
+          category: 'Smartphones',
+          brand: 'Apple'
+        },
+        {
+          sku: 'SAMSUNG-GALAXY-S22',
+          name: 'Samsung Galaxy S22',
+          quantity: 6,
+          condition: 'Good',
+          estimated_value: 520.00,
+          category: 'Smartphones',
+          brand: 'Samsung'
+        },
+        {
+          sku: 'IPAD-AIR-5TH',
+          name: 'iPad Air 5th Gen',
+          quantity: 4,
+          condition: 'Good',
+          estimated_value: 480.00,
+          category: 'Tablets',
+          brand: 'Apple'
+        },
+        {
+          sku: 'MACBOOK-AIR-M2',
+          name: 'MacBook Air M2',
+          quantity: 2,
+          condition: 'Excellent',
+          estimated_value: 1200.00,
+          category: 'Laptops',
+          brand: 'Apple'
+        }
+      ]
+    },
+    '3': {
+      pack_id: 3,
+      pack_name: 'Pro Pack',
+      pack_type: 'pro',
+      total_items: 1000,
+      total_estimated_value: 3000.00,
+      created_date: new Date().toISOString(),
+      items: [
+        {
+          sku: 'IPHONE-14-PRO-256GB',
+          name: 'iPhone 14 Pro 256GB',
+          quantity: 12,
+          condition: 'Excellent',
+          estimated_value: 850.00,
+          category: 'Smartphones',
+          brand: 'Apple'
+        },
+        {
+          sku: 'SAMSUNG-GALAXY-S23-ULTRA',
+          name: 'Samsung Galaxy S23 Ultra',
+          quantity: 8,
+          condition: 'Excellent',
+          estimated_value: 950.00,
+          category: 'Smartphones',
+          brand: 'Samsung'
+        },
+        {
+          sku: 'IPAD-PRO-12.9-M2',
+          name: 'iPad Pro 12.9" M2',
+          quantity: 6,
+          condition: 'Excellent',
+          estimated_value: 1100.00,
+          category: 'Tablets',
+          brand: 'Apple'
+        },
+        {
+          sku: 'MACBOOK-PRO-14-M2',
+          name: 'MacBook Pro 14" M2',
+          quantity: 4,
+          condition: 'Excellent',
+          estimated_value: 1800.00,
+          category: 'Laptops',
+          brand: 'Apple'
+        }
+      ]
+    }
+  };
+
+  const manifest = mockManifests[id];
+  
+  if (!manifest) {
+    return res.status(404).json({
+      success: false,
+      error: 'Manifest not found for this pack'
+    });
+  }
+
+  res.json({
+    success: true,
+    data: manifest
+  });
+});
+
 app.get('/api/packs/:id', (req, res) => {
   const { id } = req.params;
   

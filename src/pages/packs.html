@@ -205,6 +205,9 @@ eleventyNavigation:
 
     <div class="modal-header">
       <h2 id="manifest-modal-title">Pack Manifest</h2>
+      <button id="download-manifest-modal-btn" class="btn btn-primary btn-sm">
+        📋 Download CSV
+      </button>
     </div>
 
     <div class="modal-body">
@@ -282,7 +285,9 @@ eleventyNavigation:
     constructor() {
       this.packs = [];
       this.currentPack = null;
-      this.apiBaseUrl = 'http://localhost:3001/api';
+      this.apiBaseUrl = window.location.hostname === 'localhost' 
+        ? 'http://localhost:3001/api' 
+        : '/api';
       this.initializeElements();
       this.bindEvents();
       this.loadPacks();
@@ -304,6 +309,10 @@ eleventyNavigation:
       this.modalClose = document.getElementById('modal-close');
       this.manifestModalClose = document.getElementById('manifest-modal-close');
       this.customPackModalClose = document.getElementById('custom-pack-modal-close');
+      
+      // Manifest modal elements
+      this.manifestModalTitle = document.getElementById('manifest-modal-title');
+      this.manifestContent = document.getElementById('manifest-content');
 
       // Custom pack elements
       this.customPackBtn = document.getElementById('custom-pack-btn');
@@ -318,6 +327,10 @@ eleventyNavigation:
       this.modalClose?.addEventListener('click', () => this.closeModal());
       this.manifestModalClose?.addEventListener('click', () => this.closeManifestModal());
       this.customPackModalClose?.addEventListener('click', () => this.closeCustomPackModal());
+      
+      // Manifest download button
+      const downloadManifestBtn = document.getElementById('download-manifest-modal-btn');
+      downloadManifestBtn?.addEventListener('click', () => this.downloadManifest());
 
       // Custom pack events
       this.customPackBtn?.addEventListener('click', () => this.openCustomPackModal());
@@ -344,13 +357,22 @@ eleventyNavigation:
 
     async loadPacks() {
       try {
+        console.log('Loading packs from:', `${this.apiBaseUrl}/packs`);
         this.showLoading();
 
         const response = await fetch(`${this.apiBaseUrl}/packs`);
-        if (!response.ok) throw new Error('Failed to load packs');
+        if (!response.ok) {
+          console.error('Packs response not ok:', response.status, response.statusText);
+          throw new Error('Failed to load packs');
+        }
 
         const data = await response.json();
+        console.log('Packs data received:', data);
         this.packs = data.packs || data.data || [];
+
+        if (this.packs.length === 0) {
+          console.warn('No packs received');
+        }
 
         this.renderPacks();
         this.hideLoading();
@@ -561,12 +583,14 @@ eleventyNavigation:
     }
 
     async handlePackAction(action, pack) {
+      console.log('handlePackAction called with action:', action, 'pack:', pack);
       switch (action) {
         case 'view':
           await this.openPackModal(pack);
           break;
         case 'manifest':
-          await this.openManifestModal(pack);
+          console.log('Manifest action triggered for pack:', pack.id);
+          this.viewManifest(pack.id);
           break;
         case 'buy':
           await this.initiatePurchase(pack, 'full');
@@ -692,31 +716,11 @@ eleventyNavigation:
       document.getElementById('reserve-btn').onclick = () => this.initiatePurchase(this.currentPack, 'deposit');
 
       // Manifest buttons
-      document.getElementById('view-full-manifest').onclick = () => this.openManifestModal(this.currentPack);
-      document.getElementById('download-csv').onclick = () => this.downloadManifest(this.currentPack, 'csv');
-      document.getElementById('download-pdf').onclick = () => this.downloadManifest(this.currentPack, 'pdf');
+      document.getElementById('view-full-manifest').onclick = () => this.viewManifest(this.currentPack.id);
+      document.getElementById('download-csv').onclick = () => this.downloadManifest();
+      document.getElementById('download-pdf').onclick = () => this.downloadManifest();
     }
 
-    async openManifestModal(pack) {
-      try {
-        const response = await fetch(`${this.apiBaseUrl}/manifests/${pack.id}`);
-        const data = await response.json();
-
-        if (!data.success) {
-          throw new Error('Failed to load manifest');
-        }
-
-        const manifestItems = data.data;
-
-        this.populateManifestModal(pack, manifestItems);
-        this.manifestModal.style.display = 'flex';
-        setTimeout(() => this.manifestModal.classList.add('show'), 10);
-        document.body.style.overflow = 'hidden';
-      } catch (error) {
-        console.error('Error loading manifest:', error);
-        alert('Failed to load manifest. Please try again.');
-      }
-    }
 
     populateManifestModal(pack, manifestItems) {
       document.getElementById('manifest-modal-title').textContent = `${pack.name} Manifest`;
@@ -867,6 +871,133 @@ eleventyNavigation:
         console.error('Error submitting custom pack request:', error);
         alert('Failed to submit request. Please try again.');
       }
+    }
+
+    async viewManifest(packId) {
+      try {
+        console.log('viewManifest called with packId:', packId);
+        console.log('Loading manifest for pack:', packId);
+        const response = await fetch(`${this.apiBaseUrl}/packs/${packId}/manifest`);
+        if (!response.ok) {
+          console.error('Manifest response not ok:', response.status, response.statusText);
+          throw new Error('Failed to load manifest');
+        }
+        
+        const data = await response.json();
+        console.log('Manifest data received:', data);
+        const manifest = data.data;
+        
+        if (!manifest) {
+          throw new Error('No manifest data received');
+        }
+        
+        console.log('Rendering manifest and opening modal');
+        this.renderManifest(manifest);
+        this.openManifestModal();
+      } catch (error) {
+        console.error('Error loading manifest:', error);
+        alert(`Failed to load manifest: ${error.message}`);
+      }
+    }
+
+    renderManifest(manifest) {
+      this.manifestModalTitle.textContent = `${manifest.pack_name} - Manifest`;
+      
+      const manifestHTML = `
+        <div class="manifest-header">
+          <h3>${manifest.pack_name}</h3>
+          <div class="manifest-summary">
+            <p><strong>Total Items:</strong> ${manifest.total_items}</p>
+            <p><strong>Estimated Value:</strong> $${manifest.total_estimated_value.toFixed(2)}</p>
+            <p><strong>Created:</strong> ${new Date(manifest.created_date).toLocaleDateString()}</p>
+          </div>
+        </div>
+        
+        <div class="manifest-items">
+          <h4>Items in Pack</h4>
+          <table class="manifest-table">
+            <thead>
+              <tr>
+                <th>SKU</th>
+                <th>Name</th>
+                <th>Brand</th>
+                <th>Category</th>
+                <th>Quantity</th>
+                <th>Condition</th>
+                <th>Est. Value</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${manifest.items.map(item => `
+                <tr>
+                  <td>${item.sku}</td>
+                  <td>${item.name}</td>
+                  <td>${item.brand}</td>
+                  <td>${item.category}</td>
+                  <td>${item.quantity}</td>
+                  <td><span class="condition-badge condition-${item.condition.toLowerCase()}">${item.condition}</span></td>
+                  <td>$${item.estimated_value.toFixed(2)}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+      
+      this.manifestContent.innerHTML = manifestHTML;
+    }
+
+    openManifestModal() {
+      console.log('Opening manifest modal, element:', this.manifestModal);
+      if (!this.manifestModal) {
+        console.error('Manifest modal element not found!');
+        return;
+      }
+      this.manifestModal.style.display = 'flex';
+      this.manifestModal.classList.add('show');
+      document.body.style.overflow = 'hidden';
+      console.log('Manifest modal opened');
+    }
+
+    closeManifestModal() {
+      this.manifestModal.style.display = 'none';
+      this.manifestModal.classList.remove('show');
+      document.body.style.overflow = 'auto';
+    }
+
+    downloadManifest() {
+      // Generate CSV download
+      this.generateCSVDownload();
+    }
+
+    generateCSVDownload() {
+      const manifest = this.manifestContent;
+      const packName = this.manifestModalTitle.textContent.split(' - ')[0];
+      
+      // Extract data from the table
+      const rows = manifest.querySelectorAll('.manifest-table tbody tr');
+      let csvContent = 'SKU,Name,Brand,Category,Quantity,Condition,Estimated Value\n';
+      
+      rows.forEach(row => {
+        const cells = row.querySelectorAll('td');
+        const rowData = Array.from(cells).map(cell => {
+          const text = cell.textContent.trim();
+          // Escape commas and quotes in CSV
+          return `"${text.replace(/"/g, '""')}"`;
+        });
+        csvContent += rowData.join(',') + '\n';
+      });
+      
+      // Create and download the file
+      const blob = new Blob([csvContent], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${packName.replace(/\s+/g, '_')}_manifest.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
     }
   }
 

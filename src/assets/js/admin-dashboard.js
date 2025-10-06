@@ -11,7 +11,7 @@ const API_BASE_URL = window.location.hostname === 'localhost'
 export class AdminDashboard {
     constructor() {
         this.isAuthenticated = false;
-        this.authToken = localStorage.getItem('admin_token');
+        this.authToken = null;
         this.init();
     }
 
@@ -61,28 +61,17 @@ export class AdminDashboard {
     }
 
     async checkAuthentication() {
-        if (this.authToken) {
-            try {
-                // Verify token is still valid
-                const response = await fetch(`${API_BASE_URL}/admin/dashboard`, {
-                    headers: {
-                        'Authorization': `Bearer ${this.authToken}`
-                    }
-                });
-
-                if (response.ok) {
-                    this.isAuthenticated = true;
-                    this.showDashboard();
-                    await this.loadDashboardData();
-                } else {
-                    this.clearAuth();
-                    this.showLogin();
-                }
-            } catch (error) {
-                console.error('Auth check failed:', error);
-                this.clearAuth();
-                this.showLogin();
-            }
+        // Wait for auth service to be available and ready
+        if (typeof window.authService === 'undefined' || !window.authService.isReady()) {
+            setTimeout(() => this.checkAuthentication(), 100);
+            return;
+        }
+        
+        if (window.authService.isLoggedIn()) {
+            this.isAuthenticated = true;
+            this.authToken = window.authService.getToken();
+            this.showDashboard();
+            await this.loadDashboardData();
         } else {
             this.showLogin();
         }
@@ -100,25 +89,20 @@ export class AdminDashboard {
         loginBtn.textContent = 'Logging in...';
 
         try {
-            const response = await fetch(`${API_BASE_URL}/admin/login`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ email, password })
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                this.authToken = data.token || data.data?.token;
-                localStorage.setItem('admin_token', this.authToken);
+            if (typeof window.authService === 'undefined' || !window.authService.isReady()) {
+                throw new Error('Authentication service not available');
+            }
+            
+            const result = await window.authService.login(email, password);
+            
+            if (result.success) {
                 this.isAuthenticated = true;
+                this.authToken = window.authService.getToken();
                 this.showDashboard();
                 await this.loadDashboardData();
                 this.showNotification('Login successful!', 'success');
             } else {
-                throw new Error(data.error || 'Login failed');
+                throw new Error(result.error || 'Login failed');
             }
 
         } catch (error) {
@@ -131,7 +115,9 @@ export class AdminDashboard {
     }
 
     handleLogout() {
-        this.clearAuth();
+        window.authService.logout();
+        this.isAuthenticated = false;
+        this.authToken = null;
         this.showLogin();
         this.showNotification('Logged out successfully', 'info');
     }

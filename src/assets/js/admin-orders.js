@@ -24,13 +24,19 @@ export class AdminOrderManager {
     }
 
     checkAuthentication() {
-        const token = this.getAuthToken();
-        if (!token) {
-            this.showLogin();
+        // Wait for auth service to be available and ready
+        if (typeof window.authService === 'undefined' || !window.authService.isReady()) {
+            setTimeout(() => this.checkAuthentication(), 100);
             return;
         }
-        this.showOrders();
-        this.loadOrders();
+        
+        if (window.authService.isLoggedIn()) {
+            this.isAuthenticated = true;
+            this.showOrders();
+            this.loadOrders();
+        } else {
+            this.showLogin();
+        }
     }
 
     showLogin() {
@@ -44,7 +50,7 @@ export class AdminOrderManager {
     }
 
     getAuthToken() {
-        return localStorage.getItem('admin_token');
+        return window.authService ? window.authService.getToken() : localStorage.getItem('admin_token');
     }
 
     bindEvents() {
@@ -491,23 +497,19 @@ export class AdminOrderManager {
         loginBtn.textContent = 'Logging in...';
 
         try {
-            const response = await fetch(`${API_BASE_URL}/admin/login`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ email, password })
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                localStorage.setItem('admin_token', data.data.token);
+            if (typeof window.authService === 'undefined' || !window.authService.isReady()) {
+                throw new Error('Authentication service not available');
+            }
+            
+            const result = await window.authService.login(email, password);
+            
+            if (result.success) {
+                this.isAuthenticated = true;
                 this.showOrders();
                 await this.loadOrders();
                 this.showNotification('Login successful!', 'success');
             } else {
-                throw new Error(data.error || 'Login failed');
+                throw new Error(result.error || 'Login failed');
             }
 
         } catch (error) {
@@ -520,7 +522,8 @@ export class AdminOrderManager {
     }
 
     handleLogout() {
-        localStorage.removeItem('admin_token');
+        window.authService.logout();
+        this.isAuthenticated = false;
         this.showLogin();
         this.showNotification('Logged out successfully', 'info');
     }
