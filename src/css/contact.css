@@ -2,8 +2,8 @@
 
 .contact-container {
     max-width: 80rem;
-    margin: 2rem auto;
-    padding: 0 1rem;
+    margin-inline:  auto;
+    padding: var(--sectionPadding);
 }
 
 .contact-header {
