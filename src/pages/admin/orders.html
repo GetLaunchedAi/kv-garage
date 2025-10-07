@@ -14,23 +14,10 @@ permalink: "admin/orders/"
 
 <section id="int-hero">
     <h1 id="home-h">Order Management</h1>
-    <picture class="">
-        <source type="image/webp" srcset="/images/landing-200w.webp 200w, /images/landing-400w.webp 400w, /images/landing-850w.webp 850w, /images/landing-1920w.webp 1920w" sizes="(max-width: 400px) 400px,
-          (max-width: 850px) 850px,
-          1920px">
-        <source type="image/jpeg" srcset="/images/landing-200w.jpeg 200w, /images/landing-400w.jpeg 400w, /images/landing-850w.jpeg 850w, /images/landing-1920w.jpeg 1920w" sizes="(max-width: 400px) 400px,
-        (max-width: 850px) 850px,
-          1920px">
-        <img
-          src="/images/landing-200w.jpeg"
-          width="1920"
-          height="463"
-          alt="Order management"
-          loading="lazy"
-          decoding="async">
-    </picture>
-</section>
-
+    {% image './src/images/about_banner_img.png', 'vinyl floors', '', 'lazy',
+    '(max-width: 850px) 850px, 1920px'%}
+  </section>
+  
 <div class="admin-orders-container">
     <!-- Login Section (shown when not authenticated) -->
     <div id="login-section" class="login-section">
