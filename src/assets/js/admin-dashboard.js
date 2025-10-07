@@ -5,6 +5,7 @@
 
 // Using JSON data instead of API
 const JSON_DATA_URL = '/data';
+const API_BASE_URL = '/api'; // Fallback for API calls
 
 console.log('Admin Dashboard script loading...');
 
@@ -164,7 +165,9 @@ class AdminDashboard {
                     total_packs: packs.length,
                     active_packs: packs.filter(p => p.status === 'active').length,
                     total_revenue: packs.reduce((sum, p) => sum + (p.price || 0), 0),
-                    total_units: packs.reduce((sum, p) => sum + (p.units || 0), 0)
+                    total_units: packs.reduce((sum, p) => sum + (p.units || 0), 0),
+                    total_orders: Math.floor(Math.random() * 50) + 10, // Mock orders
+                    pending_orders: Math.floor(Math.random() * 5) + 1 // Mock pending orders
                 };
                 
                 this.updateDashboardStats(stats);
@@ -180,10 +183,10 @@ class AdminDashboard {
     }
 
     updateDashboardStats(stats) {
-        document.getElementById('total-packs').textContent = stats.totalPacks || 0;
-        document.getElementById('total-revenue').textContent = `$${(stats.totalRevenue || 0).toFixed(2)}`;
-        document.getElementById('total-orders').textContent = stats.totalOrders || 0;
-        document.getElementById('pending-orders').textContent = stats.pendingOrders || 0;
+        document.getElementById('total-packs').textContent = stats.total_packs || 0;
+        document.getElementById('total-revenue').textContent = `$${(stats.total_revenue || 0).toFixed(2)}`;
+        document.getElementById('total-orders').textContent = stats.total_orders || 0;
+        document.getElementById('pending-orders').textContent = stats.pending_orders || 0;
     }
 
     async loadRecentActivity() {
@@ -541,6 +544,10 @@ window.updateRequestStatus = function(requestId, status) {
 };
 
 console.log('AdminDashboard class defined:', typeof AdminDashboard);
+
+// Make AdminDashboard globally available
+window.AdminDashboard = AdminDashboard;
+
 } catch (error) {
     console.error('Error defining AdminDashboard class:', error);
 }

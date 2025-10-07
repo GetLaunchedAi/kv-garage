@@ -49,8 +49,5 @@ serviceMenu.addEventListener('click', function () {
             about.style.display = 'block'
             contact.style.display = 'block'
         }
-
-
-
     }
 }); // End of DOMContentLoaded
