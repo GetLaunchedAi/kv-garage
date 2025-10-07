@@ -10,12 +10,14 @@ console.log('Admin Dashboard script loading...');
 
 class AdminDashboard {
     constructor() {
+        console.log('AdminDashboard constructor called');
         this.isAuthenticated = false;
         this.authToken = null;
         this.init();
     }
 
     init() {
+        console.log('AdminDashboard init called');
         this.bindEvents();
         // Delay authentication check to ensure sharedAdminAuth is available
         setTimeout(() => {
@@ -507,6 +509,8 @@ class AdminDashboard {
         }, 5000);
     }
 }
+
+console.log('AdminDashboard class definition completed');
 
 // Global functions for onclick handlers
 window.openManifestUpload = function() {
