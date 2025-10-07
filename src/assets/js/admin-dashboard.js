@@ -6,6 +6,8 @@
 // Using JSON data instead of API
 const JSON_DATA_URL = '/data';
 
+console.log('Admin Dashboard script loading...');
+
 class AdminDashboard {
     constructor() {
         this.isAuthenticated = false;
@@ -524,3 +526,5 @@ window.updateRequestStatus = function(requestId, status) {
         window.adminDashboard.updateRequestStatus(requestId, status);
     }
 };
+
+console.log('AdminDashboard class defined:', typeof AdminDashboard);
