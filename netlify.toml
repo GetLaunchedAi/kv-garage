@@ -21,6 +21,21 @@
   status = 200
 
 [[redirects]]
+  from = "/api/packs/test"
+  to = "/.netlify/functions/packs"
+  status = 200
+
+[[redirects]]
+  from = "/api/packs-simple"
+  to = "/.netlify/functions/packs-simple"
+  status = 200
+
+[[redirects]]
+  from = "/api/packs-backup"
+  to = "/.netlify/functions/packs-backup"
+  status = 200
+
+[[redirects]]
   from = "/api/packs/:id"
   to = "/.netlify/functions/pack-detail/:id"
   status = 200

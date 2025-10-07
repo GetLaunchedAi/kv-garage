@@ -1,7 +1,6 @@
 exports.handler = async (event, context) => {
   try {
     console.log('Packs function called:', event.httpMethod, event.path);
-    console.log('Function timeout:', context.getRemainingTimeInMillis());
     
     // Handle CORS
     const headers = {
@@ -41,25 +40,12 @@ exports.handler = async (event, context) => {
     };
   }
 
-  // Simple test endpoint
-  if (event.path === '/api/packs/test') {
-    return {
-      statusCode: 200,
-      headers,
-      body: JSON.stringify({ 
-        message: 'Test endpoint working',
-        path: event.path,
-        method: event.httpMethod
-      }),
-    };
-  }
-
-  // Mock pack data - minimal for testing
+  // Mock pack data
   const mockPacks = [
     {
       id: 1,
       name: 'Starter Pack',
-      description: 'Perfect for new resellers.',
+      description: 'Perfect for new resellers looking to get started in the tech liquidation business.',
       price: 299.99,
       deposit_price: 149.99,
       number_of_units: 250,
@@ -74,7 +60,7 @@ exports.handler = async (event, context) => {
     {
       id: 2,
       name: 'Reseller Pack',
-      description: 'Ideal for established resellers.',
+      description: 'Ideal for established resellers looking to scale their business.',
       price: 599.99,
       deposit_price: 299.99,
       number_of_units: 500,
@@ -83,6 +69,21 @@ exports.handler = async (event, context) => {
       status: 'active',
       available_quantity: 8,
       reserved_quantity: 2,
+      created_at: '2024-01-15T10:00:00Z',
+      updated_at: '2024-01-15T10:00:00Z'
+    },
+    {
+      id: 3,
+      name: 'Pro Pack',
+      description: 'For professional resellers and businesses.',
+      price: 999.99,
+      deposit_price: 499.99,
+      number_of_units: 1000,
+      estimated_resale_value: 3000.00,
+      image_url: '/images/packs/pro-pack.jpg',
+      status: 'active',
+      available_quantity: 3,
+      reserved_quantity: 1,
       created_at: '2024-01-15T10:00:00Z',
       updated_at: '2024-01-15T10:00:00Z'
     }
