@@ -3,6 +3,10 @@
  * Provides consistent authentication across all admin pages
  */
 
+// Environment detection
+const isProduction = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+const isNetlify = window.location.hostname.includes('netlify.app');
+
 class SharedAdminAuth {
     constructor() {
         this.isAuthenticated = false;
@@ -11,15 +15,26 @@ class SharedAdminAuth {
     }
 
     init() {
+        console.log('SharedAdminAuth initializing...', {
+            isProduction,
+            isNetlify,
+            hostname: window.location.hostname
+        });
         this.checkStoredAuth();
     }
 
     checkStoredAuth() {
-        const token = localStorage.getItem('admin_token');
-        if (token) {
-            this.authToken = token;
-            this.isAuthenticated = true;
-            console.log('Admin authentication restored from storage');
+        try {
+            const token = localStorage.getItem('admin_token');
+            if (token) {
+                this.authToken = token;
+                this.isAuthenticated = true;
+                console.log('Admin authentication restored from storage');
+            }
+        } catch (error) {
+            console.warn('Could not access localStorage:', error);
+            this.isAuthenticated = false;
+            this.authToken = null;
         }
     }
 

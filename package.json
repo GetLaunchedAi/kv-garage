@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "eleventy",
-    "dev": "concurrently \"eleventy --serve --port=8080\" \"cd backend && node server-mock.js\"",
+    "dev": "eleventy --serve --port=8080",
     "start": "eleventy --serve --port=8080",
     "netlify:dev": "netlify dev",
     "netlify:build": "npm run build",
@@ -25,7 +25,6 @@
     "@11ty/eleventy": "^2.0.1",
     "@11ty/eleventy-navigation": "^0.3.5",
     "@11ty/eleventy-img": "^3.1.0",
-    "concurrently": "^8.2.2",
     "luxon": "^3.4.4"
   },
   "dependencies": {
