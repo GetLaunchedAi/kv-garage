@@ -17,57 +17,69 @@ class AdminDashboard {
 
     init() {
         this.bindEvents();
-        this.checkAuthentication();
+        // Delay authentication check to ensure sharedAdminAuth is available
+        setTimeout(() => {
+            this.checkAuthentication();
+        }, 100);
     }
 
     bindEvents() {
-        // Login form
-        const loginForm = document.getElementById('admin-login-form');
-        if (loginForm) {
-            loginForm.addEventListener('submit', (e) => this.handleLogin(e));
-        }
-
-        // Logout button
-        const logoutBtn = document.getElementById('logout-btn');
-        if (logoutBtn) {
-            logoutBtn.addEventListener('click', () => this.handleLogout());
-        }
-
-        // Refresh dashboard
-        const refreshBtn = document.getElementById('refresh-dashboard');
-        if (refreshBtn) {
-            refreshBtn.addEventListener('click', () => this.loadDashboardData());
-        }
-
-        // Manifest upload form
-        const manifestForm = document.getElementById('manifest-upload-form');
-        if (manifestForm) {
-            manifestForm.addEventListener('submit', (e) => this.handleManifestUpload(e));
-        }
-
-        // Close modals on overlay click
-        document.addEventListener('click', (e) => {
-            if (e.target.classList.contains('modal-overlay')) {
-                this.closeAllModals();
+        try {
+            // Login form
+            const loginForm = document.getElementById('admin-login-form');
+            if (loginForm) {
+                loginForm.addEventListener('submit', (e) => this.handleLogin(e));
             }
-        });
 
-        // Close modals on escape key
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                this.closeAllModals();
+            // Logout button
+            const logoutBtn = document.getElementById('logout-btn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', () => this.handleLogout());
             }
-        });
+
+            // Refresh dashboard
+            const refreshBtn = document.getElementById('refresh-dashboard');
+            if (refreshBtn) {
+                refreshBtn.addEventListener('click', () => this.loadDashboardData());
+            }
+
+            // Manifest upload form
+            const manifestForm = document.getElementById('manifest-upload-form');
+            if (manifestForm) {
+                manifestForm.addEventListener('submit', (e) => this.handleManifestUpload(e));
+            }
+
+            // Close modals on overlay click
+            document.addEventListener('click', (e) => {
+                if (e.target.classList.contains('modal-overlay')) {
+                    this.closeAllModals();
+                }
+            });
+
+            // Close modals on escape key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    this.closeAllModals();
+                }
+            });
+        } catch (error) {
+            console.error('Error binding events:', error);
+        }
     }
 
     async checkAuthentication() {
-        // Use shared authentication system
-        if (window.sharedAdminAuth && window.sharedAdminAuth.isLoggedIn()) {
-            this.isAuthenticated = true;
-            this.authToken = window.sharedAdminAuth.getToken();
-            this.showDashboard();
-            await this.loadDashboardData();
-        } else {
+        try {
+            // Use shared authentication system
+            if (window.sharedAdminAuth && window.sharedAdminAuth.isLoggedIn()) {
+                this.isAuthenticated = true;
+                this.authToken = window.sharedAdminAuth.getToken();
+                this.showDashboard();
+                await this.loadDashboardData();
+            } else {
+                this.showLogin();
+            }
+        } catch (error) {
+            console.error('Authentication check error:', error);
             this.showLogin();
         }
     }
