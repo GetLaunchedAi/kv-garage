@@ -5,12 +5,7 @@
 [build.environment]
   NODE_VERSION = "18"
 
-# SPA fallback for client-side routing (exclude static files)
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
-  force = false
+# No SPA fallback needed - this is a static site with proper routing
 
 # Headers for security
 [[headers]]
