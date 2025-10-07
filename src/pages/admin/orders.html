@@ -124,6 +124,24 @@ permalink: "admin/orders/"
 <script src="/assets/js/admin-orders.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        new AdminOrderManager();
+        console.log('Admin orders page loading...');
+        
+        // Wait for shared authentication system to be ready
+        function waitForSharedAuth() {
+            if (window.sharedAdminAuth) {
+                console.log('SharedAdminAuth is ready, initializing AdminOrderManager...');
+                try {
+                    window.adminOrderManager = new AdminOrderManager();
+                    console.log('AdminOrderManager initialized successfully');
+                } catch (error) {
+                    console.error('AdminOrderManager initialization error:', error);
+                }
+            } else {
+                console.log('Waiting for SharedAdminAuth to be ready...');
+                setTimeout(waitForSharedAuth, 100);
+            }
+        }
+        
+        waitForSharedAuth();
     });
 </script>

@@ -22,12 +22,25 @@ class AdminOrderManager {
     }
 
     checkAuthentication() {
-        // Use shared authentication system
-        if (window.sharedAdminAuth && window.sharedAdminAuth.isLoggedIn()) {
-            this.isAuthenticated = true;
-            this.showOrders();
-            this.loadOrders();
-        } else {
+        try {
+            // Use shared authentication system with persistent login
+            if (window.sharedAdminAuth) {
+                // Try to auto-login from stored token
+                const autoLoginSuccess = window.sharedAdminAuth.shouldAutoLogin();
+                
+                if (autoLoginSuccess && window.sharedAdminAuth.isLoggedIn()) {
+                    this.isAuthenticated = true;
+                    this.showOrders();
+                    this.loadOrders();
+                    console.log('Admin orders: Auto-login successful');
+                    return;
+                }
+            }
+            
+            // No valid stored token, show login form
+            this.showLogin();
+        } catch (error) {
+            console.error('Authentication check error:', error);
             this.showLogin();
         }
     }
@@ -587,9 +600,9 @@ window.closeOrderModal = function() {
         window.adminOrderManager.closeOrderModal();
     }
 };
-
 window.goToPage = function(page) {
     if (window.adminOrderManager) {
         window.adminOrderManager.goToPage(page);
     }
 };
+

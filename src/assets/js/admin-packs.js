@@ -108,13 +108,26 @@ class AdminPacks {
     }
 
     async checkAuthentication() {
-        // Use shared authentication system
-        if (window.sharedAdminAuth && window.sharedAdminAuth.isLoggedIn()) {
-            this.isAuthenticated = true;
-            this.authToken = window.sharedAdminAuth.getToken();
-            this.showPacksSection();
-            await this.loadPacks();
-        } else {
+        try {
+            // Use shared authentication system with persistent login
+            if (window.sharedAdminAuth) {
+                // Try to auto-login from stored token
+                const autoLoginSuccess = window.sharedAdminAuth.shouldAutoLogin();
+                
+                if (autoLoginSuccess && window.sharedAdminAuth.isLoggedIn()) {
+                    this.isAuthenticated = true;
+                    this.authToken = window.sharedAdminAuth.getToken();
+                    this.showPacksSection();
+                    await this.loadPacks();
+                    console.log('Admin packs: Auto-login successful');
+                    return;
+                }
+            }
+            
+            // No valid stored token, show login form
+            this.showLogin();
+        } catch (error) {
+            console.error('Authentication check error:', error);
             this.showLogin();
         }
     }
@@ -157,20 +170,25 @@ class AdminPacks {
     }
 
     handleLogout() {
-        // Use shared authentication system
+        // 1. Use shared authentication system to clear the storage
         if (window.sharedAdminAuth) {
-            window.sharedAdminAuth.logout();
+            window.sharedAdminAuth.logout(); // This is the ONLY place clearing localStorage
         }
-        this.clearAuth();
+        
+        // 2. Clear AdminPacks' internal state
+        this.authToken = null;
+        this.isAuthenticated = false;
+    
+        // 3. Update the UI
         this.showLogin();
         this.showNotification('Logged out successfully', 'info');
     }
 
-    clearAuth() {
-        this.authToken = null;
-        this.isAuthenticated = false;
-        localStorage.removeItem('admin_token');
-    }
+    // clearAuth() {
+    //     this.authToken = null;
+    //     this.isAuthenticated = false;
+    //     localStorage.removeItem('admin_token');
+    // }
 
     showLogin() {
         document.getElementById('login-section').style.display = 'block';
@@ -560,14 +578,26 @@ window.openManifestUpload = function() {
         window.adminPacks.openManifestUpload();
     }
 };
-
 // Make sure the instance is available globally
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Admin script loading...');
-    try {
-        window.adminPacks = new AdminPacks();
-        console.log('Admin initialized successfully');
-    } catch (error) {
-        console.error('Admin initialization error:', error);
+    
+    // Wait for shared authentication system to be ready
+    function waitForSharedAuth() {
+        if (window.sharedAdminAuth) {
+            console.log('SharedAdminAuth is ready, initializing AdminPacks...');
+            try {
+                window.adminPacks = new AdminPacks();
+                console.log('Admin initialized successfully');
+            } catch (error) {
+                console.error('Admin initialization error:', error);
+            }
+        } else {
+            console.log('Waiting for SharedAdminAuth to be ready...');
+            setTimeout(waitForSharedAuth, 100);
+        }
     }
+    
+    waitForSharedAuth();
 });
+

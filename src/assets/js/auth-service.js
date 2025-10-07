@@ -51,13 +51,16 @@ class AuthService {
         this.updateUI();
         return true;
       } else {
-        // Token has expired
+        // Token has expired - clear it
         this.clearSession();
         return false;
       }
     }
 
-    this.clearSession();
+    // No tokens found - don't clear anything, just return false
+    this.token = null;
+    this.currentUser = null;
+    this.isAuthenticated = false;
     return false;
   }
 

@@ -185,11 +185,22 @@ permalink: "admin/dashboard/"
         console.log('DOM loaded, creating AdminDashboard...');
         console.log('AdminDashboard available:', typeof AdminDashboard);
         
-        if (typeof AdminDashboard !== 'undefined') {
-            window.adminDashboard = new AdminDashboard();
-            console.log('AdminDashboard instance created:', window.adminDashboard);
-        } else {
-            console.error('AdminDashboard class not found!');
+        // Wait for both AdminDashboard class and shared authentication system to be ready
+        function waitForReady() {
+            if (typeof AdminDashboard !== 'undefined' && window.sharedAdminAuth) {
+                console.log('Both AdminDashboard and SharedAdminAuth are ready, initializing...');
+                try {
+                    window.adminDashboard = new AdminDashboard();
+                    console.log('AdminDashboard instance created:', window.adminDashboard);
+                } catch (error) {
+                    console.error('AdminDashboard initialization error:', error);
+                }
+            } else {
+                console.log('Waiting for AdminDashboard and SharedAdminAuth to be ready...');
+                setTimeout(waitForReady, 100);
+            }
         }
+        
+        waitForReady();
     });
 </script>

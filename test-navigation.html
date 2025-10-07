@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Admin Navigation</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        button { padding: 10px 15px; margin: 5px; cursor: pointer; }
+        .log { background-color: #f8f9fa; padding: 10px; border-radius: 3px; font-family: monospace; white-space: pre-wrap; max-height: 300px; overflow-y: auto; }
+        .admin-links { display: flex; gap: 10px; flex-wrap: wrap; }
+        .admin-links a { padding: 10px 15px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; }
+        .admin-links a:hover { background-color: #0056b3; }
+    </style>
+</head>
+<body>
+    <h1>KV Garage - Admin Navigation Test</h1>
+    
+    <div class="test-section info">
+        <h3>Navigation Test Instructions</h3>
+        <p>This page tests token persistence across admin page navigation:</p>
+        <ol>
+            <li>Click "Login" to authenticate</li>
+            <li>Check that token is stored in localStorage</li>
+            <li>Navigate to different admin pages using the links below</li>
+            <li>Verify that you stay logged in on each page</li>
+            <li>Check the console logs for any token clearing issues</li>
+        </ol>
+    </div>
+
+    <div class="test-section">
+        <h3>Authentication Controls</h3>
+        <button onclick="testLogin()">Login</button>
+        <button onclick="testLogout()">Logout</button>
+        <button onclick="checkToken()">Check Token</button>
+        <button onclick="clearLog()">Clear Log</button>
+    </div>
+
+    <div class="test-section">
+        <h3>Admin Page Navigation</h3>
+        <div class="admin-links">
+            <a href="/admin/dashboard/" target="_blank">Dashboard</a>
+            <a href="/admin/packs/" target="_blank">Packs Management</a>
+            <a href="/admin/orders/" target="_blank">Orders Management</a>
+        </div>
+        <p><small>Open these links in new tabs to test navigation</small></p>
+    </div>
+
+    <div class="test-section">
+        <h3>Test Results & Logs</h3>
+        <div id="log" class="log">Click a button to see results...</div>
+    </div>
+
+    <script src="/assets/js/shared-admin-auth.js"></script>
+    <script>
+        let logElement = document.getElementById('log');
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logMessage = `[${timestamp}] ${message}\n`;
+            logElement.textContent += logMessage;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+        
+        function clearLog() {
+            logElement.textContent = '';
+        }
+        
+        function testLogin() {
+            log('Testing login...');
+            
+            if (window.sharedAdminAuth) {
+                const result = window.sharedAdminAuth.login('admin@kvgarage.com', 'admin123');
+                
+                if (result.success) {
+                    log('✅ Login successful!', 'success');
+                    checkToken();
+                } else {
+                    log(`❌ Login failed: ${result.error}`, 'error');
+                }
+            } else {
+                log('❌ sharedAdminAuth not available', 'error');
+            }
+        }
+        
+        function testLogout() {
+            log('Testing logout...');
+            
+            if (window.sharedAdminAuth) {
+                window.sharedAdminAuth.logout();
+                log('✅ Logout successful!', 'success');
+                checkToken();
+            } else {
+                log('❌ sharedAdminAuth not available', 'error');
+            }
+        }
+        
+        function checkToken() {
+            log('Checking token status...');
+            
+            const adminToken = localStorage.getItem('admin_token');
+            const adminTokenExpiry = localStorage.getItem('admin_token_expiry');
+            
+            if (adminToken) {
+                log(`✅ Token found: ${adminToken.substring(0, 20)}...`);
+                
+                if (adminTokenExpiry) {
+                    const expiry = new Date(parseInt(adminTokenExpiry));
+                    const now = new Date();
+                    const isValid = now < expiry;
+                    
+                    log(`Token expiry: ${expiry.toLocaleString()}`);
+                    log(`Token valid: ${isValid ? '✅ Yes' : '❌ No (expired)'}`);
+                }
+                
+                log(`Is logged in: ${window.sharedAdminAuth ? window.sharedAdminAuth.isLoggedIn() : 'N/A'}`);
+            } else {
+                log('❌ No token found in localStorage');
+            }
+        }
+        
+        // Initialize
+        log('Navigation Test Page Loaded');
+        log('sharedAdminAuth available: ' + (window.sharedAdminAuth ? '✅ Yes' : '❌ No'));
+        
+        // Check initial state
+        setTimeout(() => {
+            log('\n--- Initial State Check ---');
+            checkToken();
+        }, 1000);
+        
+        // Monitor localStorage changes
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'admin_token' || e.key === 'admin_token_expiry') {
+                log(`localStorage changed: ${e.key} = ${e.newValue ? 'set' : 'cleared'}`);
+            }
+        });
+        
+        // Monitor page visibility changes (when returning from other tabs)
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                log('Page became visible - checking token...');
+                setTimeout(checkToken, 100);
+            }
+        });
+    </script>
+</body>
+</html>

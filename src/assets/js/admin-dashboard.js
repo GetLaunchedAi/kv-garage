@@ -71,15 +71,23 @@ class AdminDashboard {
 
     async checkAuthentication() {
         try {
-            // Use shared authentication system
-            if (window.sharedAdminAuth && window.sharedAdminAuth.isLoggedIn()) {
-                this.isAuthenticated = true;
-                this.authToken = window.sharedAdminAuth.getToken();
-                this.showDashboard();
-                await this.loadDashboardData();
-            } else {
-                this.showLogin();
+            // Use shared authentication system with persistent login
+            if (window.sharedAdminAuth) {
+                // Try to auto-login from stored token
+                const autoLoginSuccess = window.sharedAdminAuth.shouldAutoLogin();
+                
+                if (autoLoginSuccess && window.sharedAdminAuth.isLoggedIn()) {
+                    this.isAuthenticated = true;
+                    this.authToken = window.sharedAdminAuth.getToken();
+                    this.showDashboard();
+                    await this.loadDashboardData();
+                    console.log('Admin dashboard: Auto-login successful');
+                    return;
+                }
             }
+            
+            // No valid stored token, show login form
+            this.showLogin();
         } catch (error) {
             console.error('Authentication check error:', error);
             this.showLogin();
