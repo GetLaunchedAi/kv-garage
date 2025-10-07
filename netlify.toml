@@ -5,7 +5,11 @@
 [build.environment]
   NODE_VERSION = "18"
 
-# No SPA fallback needed - this is a static site with proper routing
+# SPA fallback for client-side routing
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
 
 # Headers for security
 [[headers]]
@@ -30,9 +34,8 @@
 
 # Cache JSON data files (shorter cache for development)
 [[headers]]
-  for = "/data/*.json"
+  for = "/data/*"
   [headers.values]
-    Content-Type = "application/json"
     Cache-Control = "public, max-age=300"
     Access-Control-Allow-Origin = "*"
     Access-Control-Allow-Methods = "GET, OPTIONS"

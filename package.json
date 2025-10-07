@@ -27,7 +27,9 @@
     "@11ty/eleventy-img": "^3.1.0",
     "luxon": "^3.4.4"
   },
-  "dependencies": {},
+  "dependencies": {
+    "pdfkit": "^0.14.0"
+  },
   "engines": {
     "node": ">=18.0.0"
   }
