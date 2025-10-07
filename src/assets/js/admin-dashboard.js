@@ -8,16 +8,15 @@ const JSON_DATA_URL = '/data';
 
 console.log('Admin Dashboard script loading...');
 
+try {
 class AdminDashboard {
     constructor() {
-        console.log('AdminDashboard constructor called');
         this.isAuthenticated = false;
         this.authToken = null;
         this.init();
     }
 
     init() {
-        console.log('AdminDashboard init called');
         this.bindEvents();
         // Delay authentication check to ensure sharedAdminAuth is available
         setTimeout(() => {
@@ -510,8 +509,6 @@ class AdminDashboard {
     }
 }
 
-console.log('AdminDashboard class definition completed');
-
 // Global functions for onclick handlers
 window.openManifestUpload = function() {
     if (window.adminDashboard) {
@@ -544,3 +541,6 @@ window.updateRequestStatus = function(requestId, status) {
 };
 
 console.log('AdminDashboard class defined:', typeof AdminDashboard);
+} catch (error) {
+    console.error('Error defining AdminDashboard class:', error);
+}

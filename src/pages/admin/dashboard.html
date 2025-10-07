@@ -171,7 +171,15 @@ permalink: "admin/dashboard/"
 </div>
 
 <script src="/assets/js/shared-admin-auth.js"></script>
-<script src="/assets/js/admin-dashboard.js"></script>
+<script>
+    console.log('shared-admin-auth.js loaded');
+    console.log('sharedAdminAuth available:', typeof window.sharedAdminAuth);
+</script>
+<script src="/assets/js/admin-dashboard.js" onerror="console.error('Failed to load admin-dashboard.js')"></script>
+<script>
+    console.log('admin-dashboard.js loaded');
+    console.log('AdminDashboard available after script load:', typeof AdminDashboard);
+</script>
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         console.log('DOM loaded, creating AdminDashboard...');
