@@ -3,12 +3,10 @@
  * Handles admin authentication, dashboard management, and admin tools
  */
 
-// Dynamic API base URL - works for both development and production
-const API_BASE_URL = window.location.hostname === 'localhost' 
-    ? 'http://localhost:3001/api' 
-    : '/api';
+// Using JSON data instead of API
+const JSON_DATA_URL = '/data';
 
-export class AdminDashboard {
+class AdminDashboard {
     constructor() {
         this.isAuthenticated = false;
         this.authToken = null;
@@ -61,15 +59,10 @@ export class AdminDashboard {
     }
 
     async checkAuthentication() {
-        // Wait for auth service to be available and ready
-        if (typeof window.authService === 'undefined' || !window.authService.isReady()) {
-            setTimeout(() => this.checkAuthentication(), 100);
-            return;
-        }
-        
-        if (window.authService.isLoggedIn()) {
+        // Use shared authentication system
+        if (window.sharedAdminAuth && window.sharedAdminAuth.isLoggedIn()) {
             this.isAuthenticated = true;
-            this.authToken = window.authService.getToken();
+            this.authToken = window.sharedAdminAuth.getToken();
             this.showDashboard();
             await this.loadDashboardData();
         } else {
@@ -89,20 +82,20 @@ export class AdminDashboard {
         loginBtn.textContent = 'Logging in...';
 
         try {
-            if (typeof window.authService === 'undefined' || !window.authService.isReady()) {
-                throw new Error('Authentication service not available');
-            }
-            
-            const result = await window.authService.login(email, password);
-            
+            // Use shared authentication system
+            if (window.sharedAdminAuth) {
+                const result = window.sharedAdminAuth.login(email, password);
             if (result.success) {
                 this.isAuthenticated = true;
-                this.authToken = window.authService.getToken();
+                    this.authToken = result.token;
                 this.showDashboard();
                 await this.loadDashboardData();
                 this.showNotification('Login successful!', 'success');
+                } else {
+                    throw new Error(result.error);
+                }
             } else {
-                throw new Error(result.error || 'Login failed');
+                throw new Error('Authentication system not available');
             }
 
         } catch (error) {
@@ -115,7 +108,10 @@ export class AdminDashboard {
     }
 
     handleLogout() {
-        window.authService.logout();
+        // Use shared authentication system
+        if (window.sharedAdminAuth) {
+            window.sharedAdminAuth.logout();
+        }
         this.isAuthenticated = false;
         this.authToken = null;
         this.showLogin();
@@ -142,16 +138,21 @@ export class AdminDashboard {
         if (!this.isAuthenticated) return;
 
         try {
-            // Load dashboard stats
-            const statsResponse = await fetch(`${API_BASE_URL}/admin/dashboard`, {
-                headers: {
-                    'Authorization': `Bearer ${this.authToken}`
-                }
-            });
-
-            if (statsResponse.ok) {
-                const stats = await statsResponse.json();
-                this.updateDashboardStats(stats.data);
+            // Load pack data from JSON
+            const response = await fetch(`${JSON_DATA_URL}/packs.json`);
+            if (response.ok) {
+                const data = await response.json();
+                const packs = data.packs || [];
+                
+                // Create mock dashboard stats
+                const stats = {
+                    total_packs: packs.length,
+                    active_packs: packs.filter(p => p.status === 'active').length,
+                    total_revenue: packs.reduce((sum, p) => sum + (p.price || 0), 0),
+                    total_units: packs.reduce((sum, p) => sum + (p.units || 0), 0)
+                };
+                
+                this.updateDashboardStats(stats);
             }
 
             // Load recent activity

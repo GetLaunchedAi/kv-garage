@@ -25,7 +25,7 @@ exports.handler = async (event, context) => {
           estimated_resale_value: 750,
           description: "Perfect for new resellers looking to get started in the tech liquidation business. This pack contains a curated mix of mobile accessories, cables, and small electronics.",
           short_description: "Curated mix of mobile accessories and small electronics",
-          image_url: "/images/packs/starter-pack.jpg",
+          image_url: "/images/landing.avif",
           status: "limited",
           available_quantity: 3,
           reserved_quantity: 2,

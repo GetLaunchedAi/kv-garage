@@ -357,42 +357,24 @@ eleventyNavigation:
 
     async loadPacks() {
       try {
-        const url = `${this.apiBaseUrl}/packs`;
-        console.log('Loading packs from:', url);
-        console.log('Current hostname:', window.location.hostname);
-        console.log('API Base URL:', this.apiBaseUrl);
+        console.log('Loading packs from JSON data');
         this.showLoading();
 
-        // First try the health check to see if the function is working
-        try {
-          const healthResponse = await fetch(`${this.apiBaseUrl}/packs/health`);
-          console.log('Health check response:', healthResponse.status, healthResponse.statusText);
-          if (healthResponse.ok) {
-            const healthData = await healthResponse.json();
-            console.log('Health check data:', healthData);
-          }
-        } catch (healthError) {
-          console.warn('Health check failed:', healthError);
-        }
-
-        const response = await fetch(`${this.apiBaseUrl}/packs`);
-        console.log('Packs response status:', response.status, response.statusText);
+        // Load packs from JSON file
+        const response = await fetch('/data/packs.json');
         
         if (!response.ok) {
-          console.error('Packs response not ok:', response.status, response.statusText);
-          const errorText = await response.text();
-          console.error('Error response body:', errorText);
           throw new Error(`Failed to load packs: ${response.status} ${response.statusText}`);
         }
 
         const data = await response.json();
         console.log('Packs data received:', data);
         
-        if (!data) {
-          throw new Error('No data received from packs API');
+        if (!data || !data.packs) {
+          throw new Error('No packs data found in JSON file');
         }
         
-        this.packs = data.packs || data.data || [];
+        this.packs = data.packs;
         console.log('Processed packs:', this.packs);
 
         if (this.packs.length === 0) {
@@ -402,8 +384,8 @@ eleventyNavigation:
         this.renderPacks();
         this.hideLoading();
 
-        // Start real-time inventory updates
-        this.startInventoryUpdates();
+        // Note: Real-time inventory updates disabled when using JSON data
+        // this.startInventoryUpdates();
       } catch (error) {
         console.error('Error loading packs:', error);
         this.showError();
@@ -540,7 +522,7 @@ eleventyNavigation:
       return `
       <div class="pack-card ${isOutOfStock ? 'out-of-stock' : ''}" data-pack-id="${pack.id}">
         <div class="pack-image">
-          <img src="${pack.image_url || '/images/placeholder.jpg'}" alt="${pack.name}" loading="lazy">
+          <img src="${pack.image_url || '/images/landing.jpg'}" alt="${pack.name}" loading="lazy">
           ${isLimited ? `<div class="stock-badge limited">Limited — ${pack.available_quantity} left</div>` : ''}
           ${isOutOfStock ? `<div class="stock-badge out-of-stock">Sold Out</div>` : ''}
         </div>
@@ -629,22 +611,16 @@ eleventyNavigation:
     async openPackModal(pack) {
       this.currentPack = pack;
 
-      // Load full pack details with manifest
+      // Load manifest data from JSON
       try {
-        const response = await fetch(`${this.apiBaseUrl}/packs/${pack.id}`);
+        const response = await fetch('/data/manifests.json');
         const data = await response.json();
-
-        if (!data.success) {
-          throw new Error('Failed to load pack details');
-        }
-
-        const fullPack = data.data.pack;
-        const manifest = data.data.manifest;
+        const manifestItems = data.manifests[pack.id];
 
         // Add manifest to pack object
-        fullPack.manifest = manifest;
+        pack.manifest = manifestItems || [];
 
-        this.populatePackModal(fullPack);
+        this.populatePackModal(pack);
         this.packModal.style.display = 'flex';
         setTimeout(() => this.packModal.classList.add('show'), 10);
         document.body.style.overflow = 'hidden';
@@ -902,7 +878,9 @@ eleventyNavigation:
       try {
         console.log('viewManifest called with packId:', packId);
         console.log('Loading manifest for pack:', packId);
-        const response = await fetch(`${this.apiBaseUrl}/packs/${packId}/manifest`);
+        
+        // Load manifest from JSON file
+        const response = await fetch('/data/manifests.json');
         if (!response.ok) {
           console.error('Manifest response not ok:', response.status, response.statusText);
           throw new Error('Failed to load manifest');
@@ -910,11 +888,21 @@ eleventyNavigation:
         
         const data = await response.json();
         console.log('Manifest data received:', data);
-        const manifest = data.data;
+        const manifestItems = data.manifests[packId];
         
-        if (!manifest) {
-          throw new Error('No manifest data received');
+        if (!manifestItems) {
+          throw new Error('No manifest data found for this pack');
         }
+        
+        // Create manifest object in the expected format
+        const pack = this.packs.find(p => p.id == packId);
+        const manifest = {
+          pack_name: pack?.name || 'Pack',
+          total_items: manifestItems.length,
+          total_estimated_value: manifestItems.reduce((sum, item) => sum + (item.estimated_value * item.quantity), 0),
+          created_date: new Date().toISOString(),
+          items: manifestItems
+        };
         
         console.log('Rendering manifest and opening modal');
         this.renderManifest(manifest);

@@ -1,0 +1,190 @@
+{
+  "manifests": {
+    "1": [
+      {
+        "sku": "CBL-001",
+        "item_name": "Lightning Cable 6ft",
+        "product_name": "Lightning Cable 6ft",
+        "quantity": 50,
+        "condition": "new",
+        "condition_grade": "new",
+        "notes": "Original packaging",
+        "estimated_value": 15.00,
+        "category": "Cables",
+        "brand": "Generic"
+      },
+      {
+        "sku": "CBL-002",
+        "item_name": "USB-C Cable 3ft",
+        "product_name": "USB-C Cable 3ft",
+        "quantity": 40,
+        "condition": "new",
+        "condition_grade": "new",
+        "notes": "Original packaging",
+        "estimated_value": 12.00,
+        "category": "Cables",
+        "brand": "Generic"
+      },
+      {
+        "sku": "ACC-001",
+        "item_name": "Phone Case iPhone 12",
+        "product_name": "Phone Case iPhone 12",
+        "quantity": 30,
+        "condition": "new",
+        "condition_grade": "new",
+        "notes": "Various colors",
+        "estimated_value": 25.00,
+        "category": "Accessories",
+        "brand": "Generic"
+      },
+      {
+        "sku": "ACC-002",
+        "item_name": "Wireless Charger",
+        "product_name": "Wireless Charger",
+        "quantity": 25,
+        "condition": "new",
+        "condition_grade": "new",
+        "notes": "Qi compatible",
+        "estimated_value": 35.00,
+        "category": "Accessories",
+        "brand": "Generic"
+      },
+      {
+        "sku": "ACC-003",
+        "item_name": "Bluetooth Earbuds",
+        "product_name": "Bluetooth Earbuds",
+        "quantity": 20,
+        "condition": "refurbished",
+        "condition_grade": "good",
+        "notes": "Tested and working",
+        "estimated_value": 45.00,
+        "category": "Audio",
+        "brand": "Generic"
+      },
+      {
+        "sku": "ACC-004",
+        "item_name": "Phone Stand",
+        "product_name": "Phone Stand",
+        "quantity": 15,
+        "condition": "new",
+        "condition_grade": "new",
+        "notes": "Adjustable angle",
+        "estimated_value": 20.00,
+        "category": "Accessories",
+        "brand": "Generic"
+      },
+      {
+        "sku": "ACC-005",
+        "item_name": "Car Mount",
+        "product_name": "Car Mount",
+        "quantity": 20,
+        "condition": "new",
+        "condition_grade": "new",
+        "notes": "Magnetic mount",
+        "estimated_value": 30.00,
+        "category": "Accessories",
+        "brand": "Generic"
+      }
+    ],
+    "2": [
+      {
+        "sku": "TAB-001",
+        "item_name": "iPad Air 4th Gen",
+        "product_name": "iPad Air 4th Gen",
+        "quantity": 5,
+        "condition": "refurbished",
+        "condition_grade": "excellent",
+        "notes": "Excellent condition",
+        "estimated_value": 450.00,
+        "category": "Tablets",
+        "brand": "Apple"
+      },
+      {
+        "sku": "LAP-001",
+        "item_name": "MacBook Air M1",
+        "product_name": "MacBook Air M1",
+        "quantity": 3,
+        "condition": "refurbished",
+        "condition_grade": "excellent",
+        "notes": "8GB RAM, 256GB SSD",
+        "estimated_value": 800.00,
+        "category": "Laptops",
+        "brand": "Apple"
+      },
+      {
+        "sku": "PHN-001",
+        "item_name": "iPhone 12 Pro",
+        "product_name": "iPhone 12 Pro",
+        "quantity": 8,
+        "condition": "refurbished",
+        "condition_grade": "good",
+        "notes": "128GB, various colors",
+        "estimated_value": 600.00,
+        "category": "Smartphones",
+        "brand": "Apple"
+      },
+      {
+        "sku": "ACC-006",
+        "item_name": "Magic Mouse",
+        "product_name": "Magic Mouse",
+        "quantity": 12,
+        "condition": "new",
+        "condition_grade": "new",
+        "notes": "Original packaging",
+        "estimated_value": 80.00,
+        "category": "Accessories",
+        "brand": "Apple"
+      }
+    ],
+    "3": [
+      {
+        "sku": "LAP-002",
+        "item_name": "MacBook Pro 16\" M1 Max",
+        "product_name": "MacBook Pro 16\" M1 Max",
+        "quantity": 2,
+        "condition": "refurbished",
+        "condition_grade": "excellent",
+        "notes": "32GB RAM, 1TB SSD",
+        "estimated_value": 2000.00,
+        "category": "Laptops",
+        "brand": "Apple"
+      },
+      {
+        "sku": "TAB-002",
+        "item_name": "iPad Pro 12.9\" M1",
+        "product_name": "iPad Pro 12.9\" M1",
+        "quantity": 3,
+        "condition": "refurbished",
+        "condition_grade": "excellent",
+        "notes": "256GB, WiFi + Cellular",
+        "estimated_value": 900.00,
+        "category": "Tablets",
+        "brand": "Apple"
+      },
+      {
+        "sku": "PHN-002",
+        "item_name": "iPhone 13 Pro Max",
+        "product_name": "iPhone 13 Pro Max",
+        "quantity": 5,
+        "condition": "refurbished",
+        "condition_grade": "excellent",
+        "notes": "256GB, various colors",
+        "estimated_value": 800.00,
+        "category": "Smartphones",
+        "brand": "Apple"
+      },
+      {
+        "sku": "WAT-001",
+        "item_name": "Apple Watch Series 7",
+        "product_name": "Apple Watch Series 7",
+        "quantity": 8,
+        "condition": "refurbished",
+        "condition_grade": "excellent",
+        "notes": "GPS + Cellular",
+        "estimated_value": 300.00,
+        "category": "Wearables",
+        "brand": "Apple"
+      }
+    ]
+  }
+}

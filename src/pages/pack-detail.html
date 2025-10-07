@@ -92,9 +92,7 @@ eleventyComputed:
 class PackDetailSystem {
   constructor() {
     this.packId = this.getPackIdFromUrl();
-    this.apiBaseUrl = window.location.hostname === 'localhost' 
-      ? 'http://localhost:3001/api' 
-      : '/api';
+    this.packs = []; // Store packs data for manifest loading
     this.initializeElements();
     this.loadPackDetails();
   }
@@ -163,11 +161,17 @@ class PackDetailSystem {
     try {
       this.showLoading();
       
-      const response = await fetch(`${this.apiBaseUrl}/packs/${this.packId}`);
-      if (!response.ok) throw new Error('Failed to load pack details');
+      // Load packs from JSON file
+      const response = await fetch('/data/packs.json');
+      if (!response.ok) throw new Error('Failed to load pack data');
       
       const data = await response.json();
-      const pack = data.data;
+      this.packs = data.packs; // Store packs data for manifest loading
+      const pack = data.packs.find(p => p.id == this.packId);
+      
+      if (!pack) {
+        throw new Error('Pack not found');
+      }
       
       this.renderPackDetails(pack);
       this.loadRelatedPacks(pack.type);
@@ -187,11 +191,25 @@ class PackDetailSystem {
 
   async viewManifest() {
     try {
-      const response = await fetch(`${this.apiBaseUrl}/packs/${this.packId}/manifest`);
-      if (!response.ok) throw new Error('Failed to load manifest');
+      // Load manifest from JSON file
+      const response = await fetch('/data/manifests.json');
+      if (!response.ok) throw new Error('Failed to load manifest data');
       
       const data = await response.json();
-      const manifest = data.data;
+      const manifestItems = data.manifests[this.packId];
+      
+      if (!manifestItems) {
+        throw new Error('Manifest not found for this pack');
+      }
+      
+      // Create manifest object in the expected format
+      const manifest = {
+        pack_name: this.packs.find(p => p.id == this.packId)?.name || 'Pack',
+        total_items: manifestItems.length,
+        total_estimated_value: manifestItems.reduce((sum, item) => sum + (item.estimated_value * item.quantity), 0),
+        created_date: new Date().toISOString(),
+        items: manifestItems
+      };
       
       this.renderManifest(manifest);
       this.openManifestModal();
@@ -476,9 +494,25 @@ class PackDetailSystem {
 
   async loadManifestContent(packId) {
     try {
-      const response = await fetch(`${this.apiBaseUrl}/manifests/${packId}`);
+      // Load manifest from JSON file
+      const response = await fetch('/data/manifests.json');
       const data = await response.json();
-      const manifestData = data.data;
+      const manifestItems = data.manifests[packId];
+      
+      if (!manifestItems) {
+        console.error('Manifest not found for pack:', packId);
+        return;
+      }
+      
+      // Create manifest data in the expected format
+      const manifestData = {
+        manifest: manifestItems,
+        totals: {
+          total_items: manifestItems.length,
+          total_estimated_value: manifestItems.reduce((sum, item) => sum + (item.estimated_value * item.quantity), 0)
+        },
+        pack: this.packs.find(p => p.id == packId) || { price: 0 }
+      };
       
       this.renderManifestContent(manifestData);
     } catch (error) {
@@ -550,9 +584,10 @@ class PackDetailSystem {
 
   async loadRelatedPacks(currentType) {
     try {
-      const response = await fetch(`${this.apiBaseUrl}/packs?type=${currentType}&limit=3`);
+      // Load packs from JSON file
+      const response = await fetch('/data/packs.json');
       const data = await response.json();
-      const relatedPacks = data.data.filter(pack => pack.id !== this.packId);
+      const relatedPacks = data.packs.filter(pack => pack.id !== this.packId && pack.type === currentType).slice(0, 3);
       
       if (relatedPacks.length > 0) {
         this.renderRelatedPacks(relatedPacks);
@@ -567,7 +602,7 @@ class PackDetailSystem {
     this.relatedPacksGrid.innerHTML = packs.map(pack => `
       <div class="pack-card">
         <div class="pack-image">
-          <img src="${pack.image || '/images/placeholder.jpg'}" alt="${pack.name}" loading="lazy">
+          <img src="${pack.image || '/images/landing.jpg'}" alt="${pack.name}" loading="lazy">
         </div>
         <div class="pack-content">
           <div class="pack-header">

@@ -3,12 +3,13 @@
  * Handles pack creation, editing, and management
  */
 
-const API_BASE_URL = 'http://localhost:3001/api';
+// Using JSON data instead of API
+const JSON_DATA_URL = '/data';
 
 class AdminPacks {
     constructor() {
         this.isAuthenticated = false;
-        this.authToken = localStorage.getItem('admin_token');
+        this.authToken = null;
         this.packs = [];
         this.init();
     }
@@ -19,10 +20,15 @@ class AdminPacks {
     }
 
     bindEvents() {
+        console.log('Binding events...');
         // Login form
         const loginForm = document.getElementById('admin-login-form');
+        console.log('Login form element:', loginForm);
         if (loginForm) {
             loginForm.addEventListener('submit', (e) => this.handleLogin(e));
+            console.log('Login form event listener added');
+        } else {
+            console.error('Login form not found!');
         }
 
         // Logout button
@@ -102,27 +108,12 @@ class AdminPacks {
     }
 
     async checkAuthentication() {
-        if (this.authToken) {
-            try {
-                const response = await fetch(`${API_BASE_URL}/admin/dashboard`, {
-                    headers: {
-                        'Authorization': `Bearer ${this.authToken}`
-                    }
-                });
-
-                if (response.ok) {
-                    this.isAuthenticated = true;
-                    this.showPacksSection();
-                    await this.loadPacks();
-                } else {
-                    this.clearAuth();
-                    this.showLogin();
-                }
-            } catch (error) {
-                console.error('Auth check failed:', error);
-                this.clearAuth();
-                this.showLogin();
-            }
+        // Use shared authentication system
+        if (window.sharedAdminAuth && window.sharedAdminAuth.isLoggedIn()) {
+            this.isAuthenticated = true;
+            this.authToken = window.sharedAdminAuth.getToken();
+            this.showPacksSection();
+            await this.loadPacks();
         } else {
             this.showLogin();
         }
@@ -140,25 +131,20 @@ class AdminPacks {
         loginBtn.textContent = 'Logging in...';
 
         try {
-            const response = await fetch(`${API_BASE_URL}/admin/login`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ email, password })
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                this.authToken = data.token;
-                localStorage.setItem('admin_token', this.authToken);
-                this.isAuthenticated = true;
-                this.showPacksSection();
-                await this.loadPacks();
-                this.showNotification('Login successful!', 'success');
+            // Use shared authentication system
+            if (window.sharedAdminAuth) {
+                const result = window.sharedAdminAuth.login(email, password);
+                if (result.success) {
+                    this.isAuthenticated = true;
+                    this.authToken = result.token;
+                    this.showPacksSection();
+                    await this.loadPacks();
+                    this.showNotification('Login successful!', 'success');
+                } else {
+                    throw new Error(result.error);
+                }
             } else {
-                throw new Error(data.error || 'Login failed');
+                throw new Error('Authentication system not available');
             }
 
         } catch (error) {
@@ -171,6 +157,10 @@ class AdminPacks {
     }
 
     handleLogout() {
+        // Use shared authentication system
+        if (window.sharedAdminAuth) {
+            window.sharedAdminAuth.logout();
+        }
         this.clearAuth();
         this.showLogin();
         this.showNotification('Logged out successfully', 'info');
@@ -196,11 +186,7 @@ class AdminPacks {
         if (!this.isAuthenticated) return;
 
         try {
-            const response = await fetch(`${API_BASE_URL}/packs`, {
-                headers: {
-                    'Authorization': `Bearer ${this.authToken}`
-                }
-            });
+            const response = await fetch(`${JSON_DATA_URL}/packs.json`);
 
             if (response.ok) {
                 const data = await response.json();
@@ -338,27 +324,11 @@ class AdminPacks {
         submitBtn.textContent = 'Saving...';
 
         try {
-            const url = packId ? `${API_BASE_URL}/admin/packs/${packId}` : `${API_BASE_URL}/admin/packs`;
-            const method = packId ? 'PUT' : 'POST';
-
-            const response = await fetch(url, {
-                method,
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${this.authToken}`
-                },
-                body: JSON.stringify(packData)
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                this.showNotification(packId ? 'Pack updated successfully!' : 'Pack created successfully!', 'success');
-                this.closePackModal();
-                this.loadPacks();
-            } else {
-                throw new Error(data.error || 'Failed to save pack');
-            }
+            // Demo mode - just show success message
+            // In a real app, you'd save to a database
+            this.showNotification(packId ? 'Pack updated successfully! (Demo mode)' : 'Pack created successfully! (Demo mode)', 'success');
+            this.closePackModal();
+            this.loadPacks();
 
         } catch (error) {
             console.error('Pack save error:', error);
@@ -375,19 +345,10 @@ class AdminPacks {
         }
 
         try {
-            const response = await fetch(`${API_BASE_URL}/admin/packs/${packId}`, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${this.authToken}`
-                }
-            });
-
-            if (response.ok) {
-                this.showNotification('Pack deleted successfully!', 'success');
-                this.loadPacks();
-            } else {
-                throw new Error('Failed to delete pack');
-            }
+            // Demo mode - just show success message
+            // In a real app, you'd delete from a database
+            this.showNotification('Pack deleted successfully! (Demo mode)', 'success');
+            this.loadPacks();
 
         } catch (error) {
             console.error('Delete pack error:', error);
@@ -602,5 +563,11 @@ window.openManifestUpload = function() {
 
 // Make sure the instance is available globally
 document.addEventListener('DOMContentLoaded', () => {
-    window.adminPacks = new AdminPacks();
+    console.log('Admin script loading...');
+    try {
+        window.adminPacks = new AdminPacks();
+        console.log('Admin initialized successfully');
+    } catch (error) {
+        console.error('Admin initialization error:', error);
+    }
 });

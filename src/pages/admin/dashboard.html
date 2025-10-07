@@ -170,10 +170,9 @@ permalink: "admin/dashboard/"
     </div>
 </div>
 
-<script src="/assets/js/admin-dashboard.js" type="module"></script>
-<script type="module">
-    import { AdminDashboard } from '/assets/js/admin-dashboard.js';
-
+<script src="/assets/js/shared-admin-auth.js"></script>
+<script src="/assets/js/admin-dashboard.js"></script>
+<script>
     document.addEventListener('DOMContentLoaded', () => {
         window.adminDashboard = new AdminDashboard();
     });
