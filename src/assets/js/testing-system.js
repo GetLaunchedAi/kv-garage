@@ -712,4 +712,4 @@ if (window.location.search.includes('test=true')) {
 }
 
 // Export for use in other modules
-export { TestingSystem };
+// Export removed - using as regular script

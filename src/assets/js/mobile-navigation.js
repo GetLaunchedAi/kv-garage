@@ -240,4 +240,4 @@ window.addEventListener('resize', () => {
 });
 
 // Export for use in other modules
-export { MobileNavigation };
+// Export removed - using as regular script

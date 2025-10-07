@@ -1,13 +1,20 @@
 //
 //    Toggle Mobile Navigation
 //
-const navbarMenu = document.querySelector("#navigation #navbar-menu");
-const hamburgerMenu = document.querySelector("#navigation .hamburger-menu");
-const serviceMenu = document.querySelector("#navigation .dropdown");
-const about = document.querySelector('#About\\ Us')
-const contact = document.querySelector('#Contact')
+document.addEventListener('DOMContentLoaded', function() {
+    const navbarMenu = document.querySelector("#navigation #navbar-menu");
+    const hamburgerMenu = document.querySelector("#navigation .hamburger-menu");
+    const serviceMenu = document.querySelector("#navigation .dropdown");
+    const about = document.querySelector('#About\\ Us')
+    const contact = document.querySelector('#Contact')
 
-const screenWidth = window.screen.width;
+    // Check if elements exist before adding event listeners
+    if (!navbarMenu || !hamburgerMenu || !serviceMenu || !about || !contact) {
+        console.log('Navigation elements not found, skipping nav.js initialization');
+        return; // Exit early if elements don't exist
+    }
+
+    const screenWidth = window.screen.width;
 
 
 
@@ -46,4 +53,4 @@ serviceMenu.addEventListener('click', function () {
 
 
     }
-});
+}); // End of DOMContentLoaded

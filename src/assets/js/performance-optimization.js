@@ -383,4 +383,4 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Export for use in other modules
-export { PerformanceOptimizer };
+// Export removed - using as regular script

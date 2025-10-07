@@ -285,4 +285,4 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Export for potential use in other modules
-export { ContactManager };
+// Export removed - using as regular script
