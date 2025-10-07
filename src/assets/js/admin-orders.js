@@ -3,12 +3,10 @@
  * Handles order viewing, status updates, and management
  */
 
-// Dynamic API base URL - works for both development and production
-const API_BASE_URL = window.location.hostname === 'localhost' 
-    ? 'http://localhost:3001/api' 
-    : '/api';
+// Using JSON data instead of API
+const JSON_DATA_URL = '/data';
 
-export class AdminOrderManager {
+class AdminOrderManager {
     constructor() {
         this.orders = [];
         this.currentPage = 1;
@@ -24,13 +22,8 @@ export class AdminOrderManager {
     }
 
     checkAuthentication() {
-        // Wait for auth service to be available and ready
-        if (typeof window.authService === 'undefined' || !window.authService.isReady()) {
-            setTimeout(() => this.checkAuthentication(), 100);
-            return;
-        }
-        
-        if (window.authService.isLoggedIn()) {
+        // Use shared authentication system
+        if (window.sharedAdminAuth && window.sharedAdminAuth.isLoggedIn()) {
             this.isAuthenticated = true;
             this.showOrders();
             this.loadOrders();
@@ -497,19 +490,19 @@ export class AdminOrderManager {
         loginBtn.textContent = 'Logging in...';
 
         try {
-            if (typeof window.authService === 'undefined' || !window.authService.isReady()) {
-                throw new Error('Authentication service not available');
-            }
-            
-            const result = await window.authService.login(email, password);
-            
-            if (result.success) {
-                this.isAuthenticated = true;
-                this.showOrders();
-                await this.loadOrders();
-                this.showNotification('Login successful!', 'success');
+            // Use shared authentication system
+            if (window.sharedAdminAuth) {
+                const result = window.sharedAdminAuth.login(email, password);
+                if (result.success) {
+                    this.isAuthenticated = true;
+                    this.showOrders();
+                    await this.loadOrders();
+                    this.showNotification('Login successful!', 'success');
+                } else {
+                    throw new Error(result.error);
+                }
             } else {
-                throw new Error(result.error || 'Login failed');
+                throw new Error('Authentication system not available');
             }
 
         } catch (error) {
@@ -522,7 +515,10 @@ export class AdminOrderManager {
     }
 
     handleLogout() {
-        window.authService.logout();
+        // Use shared authentication system
+        if (window.sharedAdminAuth) {
+            window.sharedAdminAuth.logout();
+        }
         this.isAuthenticated = false;
         this.showLogin();
         this.showNotification('Logged out successfully', 'info');
