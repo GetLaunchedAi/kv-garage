@@ -5,107 +5,6 @@
 [build.environment]
   NODE_VERSION = "18"
 
-# Netlify Functions configuration
-[functions]
-  directory = "netlify/functions"
-
-# Redirect rules for API endpoints
-[[redirects]]
-  from = "/api/packs"
-  to = "/.netlify/functions/packs"
-  status = 200
-
-[[redirects]]
-  from = "/api/packs/health"
-  to = "/.netlify/functions/packs"
-  status = 200
-
-[[redirects]]
-  from = "/api/packs/test"
-  to = "/.netlify/functions/packs"
-  status = 200
-
-[[redirects]]
-  from = "/api/packs-simple"
-  to = "/.netlify/functions/packs-simple"
-  status = 200
-
-[[redirects]]
-  from = "/api/packs-backup"
-  to = "/.netlify/functions/packs-backup"
-  status = 200
-
-[[redirects]]
-  from = "/api/packs/:id"
-  to = "/.netlify/functions/pack-detail/:id"
-  status = 200
-
-[[redirects]]
-  from = "/api/packs/:id/manifest"
-  to = "/.netlify/functions/pack-manifest/:id"
-  status = 200
-
-[[redirects]]
-  from = "/api/catalogs/hero"
-  to = "/.netlify/functions/hero-catalog"
-  status = 200
-
-# Admin API endpoints
-[[redirects]]
-  from = "/api/admin/login"
-  to = "/.netlify/functions/admin-login"
-  status = 200
-
-[[redirects]]
-  from = "/api/admin/dashboard"
-  to = "/.netlify/functions/admin-dashboard"
-  status = 200
-
-[[redirects]]
-  from = "/api/admin/orders"
-  to = "/.netlify/functions/admin-orders"
-  status = 200
-
-[[redirects]]
-  from = "/api/orders/:id"
-  to = "/.netlify/functions/order-detail"
-  status = 200
-
-[[redirects]]
-  from = "/api/orders/:id/status"
-  to = "/.netlify/functions/order-detail"
-  status = 200
-
-[[redirects]]
-  from = "/api/admin/analytics"
-  to = "/.netlify/functions/admin-analytics"
-  status = 200
-
-[[redirects]]
-  from = "/api/admin/manifests/upload"
-  to = "/.netlify/functions/admin-manifest-upload"
-  status = 200
-
-[[redirects]]
-  from = "/api/admin/packs"
-  to = "/.netlify/functions/admin-packs"
-  status = 200
-
-[[redirects]]
-  from = "/api/admin/packs/:id"
-  to = "/.netlify/functions/admin-packs"
-  status = 200
-
-[[redirects]]
-  from = "/api/custom-packs/requests"
-  to = "/.netlify/functions/custom-pack-requests"
-  status = 200
-
-[[redirects]]
-  from = "/api/custom-packs/requests/:id/status"
-  to = "/.netlify/functions/custom-pack-requests"
-  status = 200
-
 # SPA fallback for client-side routing
 [[redirects]]
   from = "/*"
@@ -132,3 +31,9 @@
   for = "/images/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000"
+
+# Cache JSON data files
+[[headers]]
+  for = "/data/*"
+  [headers.values]
+    Cache-Control = "public, max-age=3600"
