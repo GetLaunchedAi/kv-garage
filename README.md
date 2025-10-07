@@ -90,6 +90,15 @@ The site is configured for Netlify deployment:
 3. Set publish directory: `public`
 4. Deploy!
 
+### Troubleshooting Production Issues
+
+If you encounter issues in production (especially "Unexpected token 'export'" errors):
+
+- See **[QUICK-FIX.md](./QUICK-FIX.md)** for immediate solutions
+- See **[DEPLOYMENT.md](./DEPLOYMENT.md)** for detailed troubleshooting
+
+The most common issue is **cached JavaScript files** on Netlify. Solution: Clear Netlify cache and redeploy.
+
 ## Configuration
 
 ### Snipcart Setup
