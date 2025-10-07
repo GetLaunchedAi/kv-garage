@@ -853,6 +853,26 @@ body.dark-mode #trust-signals .cs-text {
     }
 }
 
+/* FAQ Grid */
+.faq-grid {
+    display: grid !important;
+    grid-template-columns: 1fr !important; /* 1 column on mobile */
+    gap: 2rem !important;
+    margin-bottom: 4rem !important;
+}
+
+@media (min-width: 768px) {
+    .faq-grid {
+        grid-template-columns: repeat(2, 1fr) !important; /* 2 columns on tablet */
+    }
+}
+
+@media (min-width: 1024px) {
+    .faq-grid {
+        grid-template-columns: repeat(4, 1fr) !important; /* 4 columns on larger screens */
+    }
+}
+
 .trust-card {
     background: white !important;
     border-radius: 20px !important;

@@ -29,9 +29,16 @@
 /* Contact Methods */
 .contact-methods {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: 1fr; /* Mobile: 1 column */
     gap: 2rem;
     margin-bottom: 4rem;
+}
+
+/* Desktop: 3 columns (skip 2 columns entirely) */
+@media (min-width: 1024px) {
+    .contact-methods {
+        grid-template-columns: repeat(3, 1fr);
+    }
 }
 
 .contact-method-card {
@@ -283,7 +290,7 @@ body.dark-mode .form-group label {
     background: white;
     border-radius: 16px;
     padding: 3rem 0;
-    margin-bottom: 4rem;
+    /* margin-bottom: 4rem; */
     border: 1px solid var(--border);
     /* box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); */
 }
@@ -302,8 +309,22 @@ body.dark-mode .trust-section {
 
 .trust-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-template-columns: 1fr; /* Mobile: 1 column */
     gap: 2rem;
+}
+
+/* Tablet: 2 columns */
+@media (min-width: 768px) {
+    .trust-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Desktop: 4 columns (skip 3 columns entirely) */
+@media (min-width: 1024px) {
+    .trust-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
 }
 
 .trust-item {
@@ -373,8 +394,22 @@ body.dark-mode .faq-section {
 
 .faq-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: 1fr; /* Mobile: 1 column */
     gap: 2rem;
+}
+
+/* Tablet: 2 columns */
+@media (min-width: 768px) {
+    .faq-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Desktop: 4 columns (skip 3 columns entirely) */
+@media (min-width: 1024px) {
+    .faq-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
 }
 
 .faq-item {
@@ -405,19 +440,15 @@ body.dark-mode .faq-item {
 /* Responsive Design */
 @media (max-width: 768px) {
     .contact-container {
-        margin: 1rem auto;
-        padding: 0 0.5rem;
+        /* margin: 1rem auto; */
+        padding: var(--sectionPadding);
     }
     
     .contact-header h2 {
         font-size: 2rem;
     }
     
-    .contact-methods {
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
-        margin-bottom: 3rem;
-    }
+    /* Contact methods now use responsive breakpoints defined above */
     
     .contact-method-card {
         padding: 1.5rem;
@@ -439,11 +470,7 @@ body.dark-mode .faq-item {
         margin-bottom: 3rem;
     }
     
-    .trust-grid,
-    .faq-grid {
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
-    }
+    /* Trust and FAQ grids now use responsive breakpoints defined above */
 }
 
 @media (max-width: 480px) {

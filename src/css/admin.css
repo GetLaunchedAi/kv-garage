@@ -3,7 +3,7 @@
 .admin-orders-container,
 .admin-dashboard-container {
     max-width: 80rem;
-    margin-inline:  auto;
+    margin-inline: auto;
     /* padding: 0 1rem; */
 }
 
@@ -26,6 +26,7 @@
     border: 1px solid var(--border);
     margin-inline: auto;
 }
+
 body.dark-mode .login-container {
     background-color: var(--medium);
 }
@@ -48,6 +49,7 @@ body.dark-mode .login-container {
     font-weight: 600;
     color: black;
 }
+
 body.dark-mode .login-form label {
     color: white;
 }
@@ -60,6 +62,7 @@ body.dark-mode .login-form label {
     font-size: 1rem;
     transition: border-color 0.2s ease;
 }
+
 body.dark-mode .login-form input {
     border: 1px solid var(--border);
 }
@@ -95,6 +98,7 @@ body.dark-mode .login-form input {
 /* Dashboard Section */
 .dashboard-section {
     display: block;
+    padding: var(--sectionPadding);
 }
 
 .dashboard-header {
@@ -125,9 +129,24 @@ body.dark-mode .login-form input {
 /* Dashboard Stats */
 .dashboard-stats {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-template-columns: 1fr;
+    /* Mobile: 1 column */
     gap: 1.5rem;
     margin-bottom: 3rem;
+}
+
+/* Tablet: 2 columns */
+@media (min-width: 768px) {
+    .dashboard-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Desktop: 4 columns (skip 3 columns entirely) */
+@media (min-width: 1024px) {
+    .dashboard-stats {
+        grid-template-columns: repeat(4, 1fr);
+    }
 }
 
 .stat-card {
@@ -166,12 +185,14 @@ body.dark-mode .login-form input {
     color: var(--muted);
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    text-align: left;
 }
 
 .stat-content span {
     font-size: 2rem;
     font-weight: 700;
     color: var(--text);
+    text-align: left;
 }
 
 /* Quick Actions */
@@ -193,13 +214,28 @@ body.dark-mode .login-form input {
 
 .action-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-template-columns: 1fr;
+    /* Mobile: 1 column */
     gap: 1.5rem;
+}
+
+/* Tablet: 2 columns */
+@media (min-width: 768px) {
+    .action-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Desktop: 4 columns (skip 3 columns entirely) */
+@media (min-width: 1024px) {
+    .action-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
 }
 
 .action-card {
     background: white;
-    border: 1px solid var(--border);
+    border: 1px solid rgba(0, 0, 0, 0.08);
     border-radius: 12px;
     padding: 1.5rem;
     text-decoration: none;
@@ -207,7 +243,12 @@ body.dark-mode .login-form input {
     transition: all 0.3s ease;
     cursor: pointer;
     display: block;
+    text-align: left;
+    pointer-events: auto;
+    position: relative;
+    z-index: 1;
 }
+
 body.dark-mode .action-card {
     background: var(--medium);
     border: 1px solid var(--border);
@@ -236,6 +277,34 @@ body.dark-mode .action-card {
     font-size: 0.9rem;
     color: var(--muted);
     line-height: 1.4;
+}
+
+/* Button action cards specific styling */
+button.action-card {
+    width: 100%;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    background: white;
+    font-family: inherit;
+    font-size: inherit;
+    text-align: left;
+    outline: none;
+}
+
+button.action-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    border-color: var(--primary);
+}
+
+button.action-card:focus {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+body.dark-mode button.action-card {
+    background: var(--medium);
+    border: 1px solid var(--border);
+    color: var(--text);
 }
 
 /* Recent Activity */
@@ -334,6 +403,10 @@ body.dark-mode .action-card {
     color: var(--text);
 }
 
+body.dark-mode .upload-form label {
+    color: white;
+}
+
 .upload-form input,
 .upload-form select {
     width: 100%;
@@ -342,6 +415,16 @@ body.dark-mode .action-card {
     border-radius: 8px;
     font-size: 1rem;
     transition: border-color 0.2s ease;
+    color: black;
+}
+
+body.dark-mode .upload-form input,
+body.dark-mode .upload-form select {
+    color: white;
+}
+
+body.dark-mode .upload-form select {
+    color: black;
 }
 
 .upload-form input:focus,
@@ -356,6 +439,10 @@ body.dark-mode .action-card {
     margin-top: 0.25rem;
     font-size: 0.8rem;
     color: var(--muted);
+}
+
+body.dark-mode .upload-form small {
+    color: white;
 }
 
 .form-actions {
@@ -378,6 +465,11 @@ body.dark-mode .action-card {
     padding: 1.5rem;
     margin-bottom: 1rem;
     transition: box-shadow 0.2s ease;
+}
+
+body.dark-mode .request-item {
+    background: var(--medium);
+    border: 1px solid var(--border);
 }
 
 .request-item:hover {
@@ -405,6 +497,10 @@ body.dark-mode .action-card {
     color: var(--muted);
 }
 
+body.dark-mode .request-date {
+    color: white;
+}
+
 .request-content {
     margin-bottom: 1rem;
 }
@@ -426,9 +522,33 @@ body.dark-mode .action-card {
     flex-wrap: wrap;
 }
 
+/* Base Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(4px);
+}
+
+.modal.show {
+    display: flex;
+}
+
 /* Modal Enhancements */
 .modal-content.large {
     max-width: 900px;
+    background-color: white;
+}
+
+body.dark-mode .modal-content.large {
+    background-color: var(--medium);
 }
 
 .no-data {
@@ -448,8 +568,8 @@ body.dark-mode .action-card {
 /* Pack Management Specific Styles */
 .admin-packs-container {
     max-width: 80rem;
-    margin: 2rem auto;
-    padding: 0 1rem;
+    /* margin: 2rem auto; */
+    padding: var(--sectionPadding);
 }
 
 .packs-section {
@@ -516,10 +636,15 @@ body.dark-mode .action-card {
 .table-controls input,
 .table-controls select {
     padding: 0.5rem;
-    border: 1px solid var(--border);
+    border: 1px solid rgba(0, 0, 0, 0.08);
     border-radius: 6px;
     background: white;
-    color: var(--text);
+    color: black;
+}
+
+body.dark-mode .table-controls input,
+body.dark-mode .table-controls select {
+    color: black;
 }
 
 #packs-table {
@@ -585,6 +710,11 @@ body.dark-mode #packs-table td {
     color: #991b1b;
 }
 
+.status-in_review {
+    background: #f3e8ff;
+    color: #7c3aed;
+}
+
 .type-badge {
     padding: 0.25rem 0.5rem;
     border-radius: 4px;
@@ -633,15 +763,25 @@ body.dark-mode #packs-table td {
     color: var(--text);
 }
 
+body.dark-mode .pack-form label {
+    color: white;
+}
+
 .pack-form input,
 .pack-form select,
 .pack-form textarea {
     padding: 0.75rem;
-    border: 1px solid var(--border);
+    border: 1px solid rgba(0, 0, 0, 0.08);
     border-radius: 8px;
     font-size: 1rem;
     transition: border-color 0.2s ease;
     background: white;
+}
+
+body.dark-mode .pack-form input,
+body.dark-mode .pack-form select,
+body.dark-mode .pack-form textarea {
+    color: black;
 }
 
 .pack-form input:focus,
@@ -681,6 +821,11 @@ body.dark-mode #packs-table td {
 }
 
 .btn-secondary {
+    background: var(--muted);
+    color: white;
+}
+
+body.dark-mode .btn-secondary {
     background: var(--muted);
     color: white;
 }
@@ -730,36 +875,36 @@ body.dark-mode #packs-table td {
         align-items: flex-start;
         gap: 1rem;
     }
-    
+
     .admin-actions {
         width: 100%;
         justify-content: flex-start;
     }
-    
+
     .pack-stats {
         grid-template-columns: repeat(2, 1fr);
     }
-    
+
     .table-header {
         flex-direction: column;
         align-items: flex-start;
         gap: 1rem;
     }
-    
+
     .table-controls {
         width: 100%;
         flex-direction: column;
         align-items: stretch;
     }
-    
+
     .pack-form .form-row {
         grid-template-columns: 1fr;
     }
-    
+
     #packs-table {
         font-size: 0.8rem;
     }
-    
+
     #packs-table th,
     #packs-table td {
         padding: 0.5rem;
@@ -770,11 +915,11 @@ body.dark-mode #packs-table td {
     .pack-stats {
         grid-template-columns: 1fr;
     }
-    
+
     .admin-actions {
         flex-direction: column;
     }
-    
+
     .btn {
         width: 100%;
         margin-bottom: 0.5rem;
@@ -814,6 +959,10 @@ body.dark-mode #packs-table td {
     color: var(--text);
     font-size: 0.9rem;
     cursor: pointer;
+}
+
+body.dark-mode .filter-select {
+    color: white;
 }
 
 /* Stats Cards */
@@ -856,6 +1005,7 @@ body.dark-mode #packs-table td {
 body.dark-mode .stat-card span {
     color: var(--primary);
 }
+
 /* Orders Table */
 .orders-table-container {
     background: var(--card-bg);
@@ -888,11 +1038,13 @@ body.dark-mode .orders-table th {
     background: var(--medium);
     color: white;
 }
+
 .orders-table td {
     padding: 1rem;
     border-bottom: 1px solid var(--border);
     color: var(--text);
 }
+
 body.dark-mode .orders-table td {
     color: white;
 }
@@ -918,8 +1070,13 @@ body.dark-mode .orders-table td {
 }
 
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 /* Status Badges */
@@ -1043,7 +1200,8 @@ body.dark-mode .orders-table td {
     left: 0;
     width: 100vw;
     height: 100vh;
-    z-index: 300000; /* Higher than header's 200000 */
+    z-index: 300000;
+    /* Higher than header's 200000 */
     align-items: center;
     justify-content: center;
     padding: 1rem;
@@ -1093,7 +1251,8 @@ body.dark-mode .orders-table td {
 
 .modal-content {
     position: relative;
-    background: white; /* Ensure solid background */
+    background: white;
+    /* Ensure solid background */
     border-radius: 12px;
     max-width: 90vw;
     width: 100%;
@@ -1101,10 +1260,17 @@ body.dark-mode .orders-table td {
     overflow-y: auto;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
     z-index: 300001;
-    transform: translateZ(0); /* Force hardware acceleration */
+    transform: translateZ(0);
+    /* Force hardware acceleration */
     outline: none;
-    margin: auto; /* Additional centering */
-    align-self: center; /* Ensure content is centered within flex container */
+    margin: auto;
+    /* Additional centering */
+    align-self: center;
+    /* Ensure content is centered within flex container */
+}
+
+body.dark-mode .modal-content {
+    background-color: var(--medium);
 }
 
 .modal-header {
@@ -1140,6 +1306,10 @@ body.dark-mode .orders-table td {
     position: absolute;
     top: 1rem;
     right: 1rem;
+}
+
+body.dark-mode .modal-close {
+    color: white;
 }
 
 .modal-close:hover {
@@ -1232,12 +1402,12 @@ body.dark-mode .orders-table td {
     .orders-table {
         font-size: 0.8rem;
     }
-    
+
     .orders-table th,
     .orders-table td {
         padding: 0.75rem 0.5rem;
     }
-    
+
     .action-buttons {
         flex-direction: column;
     }
@@ -1249,28 +1419,28 @@ body.dark-mode .orders-table td {
         gap: 1rem;
         align-items: stretch;
     }
-    
+
     .admin-actions {
         justify-content: center;
     }
-    
+
     .orders-stats {
         grid-template-columns: repeat(2, 1fr);
     }
-    
+
     .orders-table-container {
         overflow-x: auto;
     }
-    
+
     .orders-table {
         min-width: 600px;
     }
-    
+
     .modal-content {
         margin: 0.5rem;
         max-height: calc(100vh - 1rem);
     }
-    
+
     .order-detail-grid {
         grid-template-columns: 1fr;
     }
@@ -1280,17 +1450,22 @@ body.dark-mode .orders-table td {
     .orders-stats {
         grid-template-columns: 1fr;
     }
-    
+
     .stat-card {
         padding: 1rem;
     }
-    
+
     .stat-card span {
         font-size: 1.5rem;
     }
-    
+
     .modal-header,
     .modal-body {
         padding: 1rem;
     }
+}
+
+
+#orders-section {
+    padding: var(--sectionPadding);
 }

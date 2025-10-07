@@ -430,10 +430,12 @@
     height: .5rem;
     background: var(--primary);
     opacity: 1;
-    bottom: 5rem;
+    bottom: -.5rem;
     border-radius: .25rem;
-    left: -.375rem;
-    right: -.375rem;
+    left: 50%;
+    right: auto;
+    width: 80%;
+    transform: translateX(-50%);
     z-index: -1;
   }
 

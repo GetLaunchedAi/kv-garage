@@ -199,18 +199,31 @@ class AdminDashboard {
 
     async loadRecentActivity() {
         try {
-            const response = await fetch(`${API_BASE_URL}/admin/analytics?period=7`, {
-                headers: {
-                    'Authorization': `Bearer ${this.authToken}`
-                }
-            });
-
+            // Load recent activity from JSON data (mock data for now)
+            const response = await fetch(`${JSON_DATA_URL}/packs.json`);
+            
             if (response.ok) {
                 const data = await response.json();
-                this.renderRecentActivity(data.data);
+                // Create mock recent activity from packs data
+                const mockActivity = {
+                    recent_orders: data.packs ? data.packs.slice(0, 5).map((pack, index) => ({
+                        id: `ORD-${1000 + index}`,
+                        customer_name: `Customer ${index + 1}`,
+                        pack_name: pack.name,
+                        amount: pack.price,
+                        status: ['pending', 'completed', 'shipped'][index % 3],
+                        created_at: new Date(Date.now() - (index * 24 * 60 * 60 * 1000)).toISOString()
+                    })) : []
+                };
+                this.renderRecentActivity(mockActivity);
             }
         } catch (error) {
             console.error('Error loading recent activity:', error);
+            // Show fallback message
+            const activityList = document.getElementById('activity-list');
+            if (activityList) {
+                activityList.innerHTML = '<p class="no-data">No recent activity available</p>';
+            }
         }
     }
 
@@ -223,44 +236,40 @@ class AdminDashboard {
             return;
         }
 
-        // Create activity items from available data
-        const activities = [];
-        
-        // Add top selling packs as activity items
-        if (analytics.topSellingPacks && analytics.topSellingPacks.length > 0) {
-            analytics.topSellingPacks.slice(0, 3).forEach(pack => {
-                activities.push(`
+        // Create activity items from recent orders
+        if (analytics.recent_orders && analytics.recent_orders.length > 0) {
+            const activitiesHtml = analytics.recent_orders.map(order => {
+                const statusClass = `status-${order.status}`;
+                const timeAgo = this.getTimeAgo(new Date(order.created_at));
+                
+                return `
                     <div class="activity-item">
-                        <div class="activity-icon">📦</div>
                         <div class="activity-content">
-                            <h4>Top Seller: ${pack.name}</h4>
-                            <p>Sales: ${pack.sales} • Revenue: $${pack.revenue.toFixed(2)}</p>
+                            <p class="activity-message">New order from ${order.customer_name}</p>
+                            <p class="activity-details">Order #${order.id} - ${order.pack_name} - $${order.amount}</p>
+                            <div class="activity-meta">
+                                <span class="status-badge ${statusClass}">${order.status}</span>
+                                <span class="activity-time">${timeAgo}</span>
+                            </div>
                         </div>
-                        <div class="activity-time">
-                            <span>Recent</span>
-                        </div>
                     </div>
-                `);
-            });
-        }
+                `;
+            }).join('');
 
-        // Add revenue summary
-        if (analytics.totalRevenue) {
-            activities.push(`
-                <div class="activity-item">
-                    <div class="activity-icon">💰</div>
-                    <div class="activity-content">
-                        <h4>Period Summary</h4>
-                        <p>Total Revenue: $${analytics.totalRevenue.toFixed(2)} • Orders: ${analytics.totalOrders}</p>
-                    </div>
-                    <div class="activity-time">
-                        <span>Last 7 days</span>
-                    </div>
-                </div>
-            `);
+            activityList.innerHTML = activitiesHtml;
+        } else {
+            activityList.innerHTML = '<p class="no-data">No recent activity</p>';
         }
+    }
 
-        activityList.innerHTML = activities.length > 0 ? activities.join('') : '<p class="no-data">No recent activity</p>';
+    getTimeAgo(date) {
+        const now = new Date();
+        const diffInSeconds = Math.floor((now - date) / 1000);
+        
+        if (diffInSeconds < 60) return 'Just now';
+        if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
+        if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
+        return `${Math.floor(diffInSeconds / 86400)}d ago`;
     }
 
     async openManifestUpload() {
@@ -279,7 +288,7 @@ class AdminDashboard {
                 this.populatePackSelect(data.packs || data.data);
             }
 
-            document.getElementById('manifest-upload-modal').style.display = 'flex';
+            document.getElementById('manifest-upload-modal').classList.add('show');
             document.body.style.overflow = 'hidden';
 
         } catch (error) {
@@ -301,7 +310,7 @@ class AdminDashboard {
     }
 
     closeManifestUpload() {
-        document.getElementById('manifest-upload-modal').style.display = 'none';
+        document.getElementById('manifest-upload-modal').classList.remove('show');
         document.body.style.overflow = 'auto';
         document.getElementById('manifest-upload-form').reset();
     }
@@ -367,19 +376,28 @@ class AdminDashboard {
             </div>
         `;
 
-        document.getElementById('custom-requests-modal').style.display = 'flex';
+        document.getElementById('custom-requests-modal').classList.add('show');
         document.body.style.overflow = 'hidden';
 
         try {
-            const response = await fetch(`${API_BASE_URL}/custom-packs/requests`, {
-                headers: {
-                    'Authorization': `Bearer ${this.authToken}`
-                }
-            });
-
+            // Load custom requests from JSON data (mock data for now)
+            const response = await fetch(`${JSON_DATA_URL}/packs.json`);
+            
             if (response.ok) {
                 const data = await response.json();
-                this.renderCustomRequests(data.data);
+                // Create mock custom requests from packs data
+                const mockRequests = data.packs ? data.packs.slice(0, 3).map((pack, index) => ({
+                    id: `REQ-${2000 + index}`,
+                    customer_name: `Customer ${index + 1}`,
+                    customer_email: `customer${index + 1}@example.com`,
+                    pack_name: pack.name,
+                    custom_requirements: `Custom requirements for ${pack.name}`,
+                    status: ['pending', 'in_review', 'completed'][index % 3],
+                    created_at: new Date(Date.now() - (index * 2 * 24 * 60 * 60 * 1000)).toISOString(),
+                    estimated_value: pack.price * 1.2
+                })) : [];
+                
+                this.renderCustomRequests(mockRequests);
             } else {
                 throw new Error('Failed to load custom requests');
             }
@@ -435,7 +453,7 @@ class AdminDashboard {
     }
 
     closeCustomPackRequests() {
-        document.getElementById('custom-requests-modal').style.display = 'none';
+        document.getElementById('custom-requests-modal').classList.remove('show');
         document.body.style.overflow = 'auto';
     }
 

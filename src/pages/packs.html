@@ -206,7 +206,7 @@ eleventyNavigation:
     <div class="modal-header">
       <h2 id="manifest-modal-title">Pack Manifest</h2>
       <button id="download-manifest-modal-btn" class="btn btn-primary btn-sm">
-        📋 Download CSV
+        📋 Download PDF
       </button>
     </div>
 
@@ -330,11 +330,15 @@ eleventyNavigation:
       
       // Manifest download button
       const downloadManifestBtn = document.getElementById('download-manifest-modal-btn');
-      downloadManifestBtn?.addEventListener('click', () => this.downloadManifest());
+      downloadManifestBtn?.addEventListener('click', async () => await this.downloadManifest('pdf'));
 
       // Custom pack events
       this.customPackBtn?.addEventListener('click', () => this.openCustomPackModal());
       this.customPackForm?.addEventListener('submit', (e) => this.handleCustomPackSubmit(e));
+      
+      // Custom pack cancel button
+      const cancelCustomPackBtn = document.getElementById('cancel-custom-pack');
+      cancelCustomPackBtn?.addEventListener('click', () => this.closeCustomPackModal());
 
       // Close modals on overlay click
       document.addEventListener('click', (e) => {
@@ -718,8 +722,8 @@ eleventyNavigation:
 
       // Manifest buttons
       document.getElementById('view-full-manifest').onclick = () => this.viewManifest(this.currentPack.id);
-      document.getElementById('download-csv').onclick = () => this.downloadManifest();
-      document.getElementById('download-pdf').onclick = () => this.downloadManifest();
+      document.getElementById('download-csv').onclick = () => this.downloadManifest('csv');
+      document.getElementById('download-pdf').onclick = async () => await this.downloadManifest('pdf');
     }
 
 
@@ -928,7 +932,8 @@ eleventyNavigation:
         
         <div class="manifest-items">
           <h4>Items in Pack</h4>
-          <table class="manifest-table">
+          <div class="manifest-table">
+            <table>
             <thead>
               <tr>
                 <th>SKU</th>
@@ -953,7 +958,8 @@ eleventyNavigation:
                 </tr>
               `).join('')}
             </tbody>
-          </table>
+            </table>
+          </div>
         </div>
       `;
       
@@ -978,9 +984,12 @@ eleventyNavigation:
       document.body.style.overflow = 'auto';
     }
 
-    downloadManifest() {
-      // Generate CSV download
-      this.generateCSVDownload();
+    async downloadManifest(format = 'csv') {
+      if (format === 'pdf') {
+        await this.generatePDFDownload();
+      } else {
+        this.generateCSVDownload();
+      }
     }
 
     generateCSVDownload() {
@@ -1011,6 +1020,147 @@ eleventyNavigation:
       a.click();
       document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
+    }
+
+    async generatePDFDownload() {
+      try {
+        // Load jsPDF library if not already loaded
+        await this.loadJsPDF();
+        
+        const manifest = this.manifestContent;
+        const packName = this.manifestModalTitle.textContent.split(' - ')[0];
+        
+        // Create PDF using jsPDF
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        
+        let yPosition = 20;
+        const pageHeight = 280;
+        const margin = 20;
+        const contentWidth = 170;
+        
+        // Helper function to add new page if needed
+        const checkNewPage = (requiredSpace = 10) => {
+          if (yPosition + requiredSpace > pageHeight) {
+            pdf.addPage();
+            yPosition = 20;
+            return true;
+          }
+          return false;
+        };
+        
+        // Helper function to add text with word wrapping
+        const addWrappedText = (text, x, y, maxWidth, fontSize = 10) => {
+          pdf.setFontSize(fontSize);
+          const lines = pdf.splitTextToSize(text, maxWidth);
+          pdf.text(lines, x, y);
+          return y + (lines.length * fontSize * 0.4);
+        };
+        
+        // Title
+        pdf.setFontSize(20);
+        pdf.setFont(undefined, 'bold');
+        pdf.text(`Pack Manifest: ${packName}`, margin, yPosition);
+        yPosition += 15;
+        
+        // Date
+        pdf.setFontSize(10);
+        pdf.setFont(undefined, 'normal');
+        const currentDate = new Date().toLocaleDateString();
+        pdf.text(`Generated: ${currentDate}`, margin, yPosition);
+        yPosition += 15;
+        
+        // Extract table headers
+        const headerRow = manifest.querySelector('.manifest-table thead tr');
+        if (headerRow) {
+          const headers = Array.from(headerRow.querySelectorAll('th')).map(th => th.textContent.trim());
+          
+          // Add table headers
+          pdf.setFontSize(12);
+          pdf.setFont(undefined, 'bold');
+          let xPosition = margin;
+          const columnWidth = contentWidth / headers.length;
+          
+          headers.forEach((header, index) => {
+            pdf.text(header, xPosition, yPosition);
+            xPosition += columnWidth;
+          });
+          
+          yPosition += 10;
+          
+          // Add line under headers
+          pdf.setLineWidth(0.5);
+          pdf.line(margin, yPosition - 2, margin + contentWidth, yPosition - 2);
+          yPosition += 5;
+        }
+        
+        // Extract and add table data
+        const rows = manifest.querySelectorAll('.manifest-table tbody tr');
+        pdf.setFontSize(10);
+        pdf.setFont(undefined, 'normal');
+        
+        rows.forEach((row, rowIndex) => {
+          checkNewPage(15);
+          
+          const cells = row.querySelectorAll('td');
+          let xPosition = margin;
+          const columnWidth = contentWidth / cells.length;
+          
+          cells.forEach((cell, cellIndex) => {
+            const cellText = cell.textContent.trim();
+            // Truncate long text to fit in column
+            const maxTextWidth = columnWidth - 2;
+            const truncatedText = pdf.splitTextToSize(cellText, maxTextWidth)[0];
+            pdf.text(truncatedText, xPosition, yPosition);
+            xPosition += columnWidth;
+          });
+          
+          yPosition += 8;
+          
+          // Add separator line every 5 rows
+          if ((rowIndex + 1) % 5 === 0) {
+            pdf.setLineWidth(0.2);
+            pdf.line(margin, yPosition - 2, margin + contentWidth, yPosition - 2);
+            yPosition += 3;
+          }
+        });
+        
+        // Add footer
+        checkNewPage(20);
+        yPosition += 10;
+        pdf.setFontSize(8);
+        pdf.setFont(undefined, 'italic');
+        pdf.text('Generated by KV Garage - www.kvgarage.com', margin, yPosition);
+        yPosition += 5;
+        pdf.text('Phone: (616) 228-2244 | Email: support@kvgarage.com', margin, yPosition);
+        
+        // Download the PDF
+        const fileName = `${packName.replace(/\s+/g, '_')}_manifest.pdf`;
+        pdf.save(fileName);
+        
+      } catch (error) {
+        console.error('Error generating PDF:', error);
+        alert('Failed to generate PDF. Please try again.');
+      }
+    }
+    
+    async loadJsPDF() {
+      if (window.jsPDF) {
+        return;
+      }
+      
+      return new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+        script.onload = () => {
+          console.log('jsPDF loaded successfully');
+          resolve();
+        };
+        script.onerror = () => {
+          reject(new Error('Failed to load jsPDF library'));
+        };
+        document.head.appendChild(script);
+      });
     }
   }
 

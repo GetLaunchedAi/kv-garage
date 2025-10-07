@@ -49,9 +49,23 @@
 
 .trust-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: 1fr; /* Mobile: 1 column */
   gap: 2rem;
   margin-bottom: 2rem;
+}
+
+/* Tablet: 2 columns */
+@media (min-width: 768px) {
+  .trust-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Desktop: 4 columns (skip 3 columns entirely) */
+@media (min-width: 1024px) {
+  .trust-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }
 
 .trust-item {
@@ -576,6 +590,7 @@ body.dark-mode .modal-overlay {
   max-height: 90vh;
   width: 100%;
   overflow-y: auto;
+  overflow-x: auto;
   z-index: 300001;
   transform: translateZ(0); /* Force hardware acceleration */
   outline: none; /* Remove focus outline, handled by close button */
@@ -716,14 +731,18 @@ body.dark-mode .manifest-preview {
 .manifest-category h4 {
   font-size: 0.875rem;
   font-weight: 600;
-  color: var(--text-primary);
+  color: black;
   margin-bottom: 0.5rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
+body.dark-mode .manifest-category h4 {
+  color: white;
+}
 
 .manifest-items {
   display: flex;
+  flex-direction: column;
   flex-wrap: wrap;
   gap: 0.5rem;
 }
@@ -739,6 +758,7 @@ body.dark-mode .manifest-preview {
 body.dark-mode .manifest-item {
   background: var(--medium);
   border: 1px solid var(--btn-secondary);
+  color: white;
 }
 .item-quantity {
   font-weight: 600;
@@ -933,12 +953,57 @@ body.dark-mode .summary-value {
   color: var(--profit-color);
 }
 
+.manifest-content {
+  width: 100%;
+  overflow: visible; /* Allow content to extend beyond container if needed */
+}
+
 .manifest-table {
   overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  display: block; /* Ensure it behaves as a block container */
+}
+
+/* Enhanced mobile scrolling behavior */
+@media (max-width: 768px) {
+  .manifest-table {
+    /* Ensure proper scrolling on mobile */
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+  
+  .manifest-table::after {
+    content: "← Scroll to see more →";
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    pointer-events: none;
+    opacity: 0.8;
+    z-index: 1;
+  }
+  
+  /* Make table cells slightly smaller on mobile to encourage scrolling */
+  .manifest-table th,
+  .manifest-table td {
+    min-width: 100px;
+    padding: 0.5rem;
+    font-size: 0.875rem;
+  }
 }
 
 .manifest-table table {
-  width: 100%;
+  min-width: 100%;
+  width: max-content; /* Allow table to be wider than container */
   border-collapse: collapse;
 }
 
@@ -947,6 +1012,8 @@ body.dark-mode .summary-value {
   padding: 0.75rem;
   text-align: left;
   border-bottom: 1px solid var(--pack-border);
+  white-space: nowrap; /* Prevent text wrapping */
+  min-width: 120px; /* Ensure minimum column width */
 }
 
 .manifest-table th {
@@ -987,8 +1054,11 @@ body.dark-mode .manifest-table td {
 .form-group label {
   font-size: 0.875rem;
   font-weight: 600;
-  color: var(--text-primary);
+  color: black;
   margin-bottom: 0.5rem;
+}
+body.dark-mode .form-group label {
+  color: white;
 }
 
 .form-group input,
@@ -1059,10 +1129,7 @@ body.dark-mode .manifest-table td {
     gap: 1.5rem;
   }
   
-  .trust-grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
+  /* Trust grid now uses responsive breakpoints defined above */
   
   .pack-info {
     grid-template-columns: 1fr;

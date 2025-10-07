@@ -360,6 +360,8 @@ body.dark-mode{
   cursor: pointer;
   transition: all 0.2s ease;
   margin-bottom: 16px;
+  position: relative;
+  z-index: 200001 !important;
 }
 
 .filter-toggle:hover {
@@ -381,7 +383,7 @@ body.dark-mode{
   height: 100vh;
   background: var(--bg);
   border-right: 1px solid var(--border);
-  z-index: 1000;
+  z-index: 200002 !important;
   transform: translateX(-100%);
   transition: transform 0.3s ease;
   overflow-y: auto;
@@ -731,7 +733,7 @@ body.dark-mode{
   width: 100%;
   height: 100%;
   background: rgba(0, 0, 0, 0.5);
-  z-index: 999;
+  z-index: 200001 !important;
   opacity: 0;
   visibility: hidden;
   transition: all 0.3s ease;
@@ -987,12 +989,16 @@ body.dark-mode{
   .filter-toggle {
     display: flex;
     margin: 12px;
+    position: relative;
+    z-index: 200001 !important;
+    pointer-events: auto !important;
   }
 
   .filter-sidebar {
     position: fixed;
     width: 77.5%;
     transform: translateX(-100%);
+    z-index: 200002 !important;
   }
 
   .filter-sidebar.open {

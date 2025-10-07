@@ -5,6 +5,7 @@
 
 // Using JSON data instead of API
 const JSON_DATA_URL = '/data';
+const API_BASE_URL = '/api'; // Fallback for API calls
 
 class AdminOrderManager {
     constructor() {
@@ -110,18 +111,32 @@ class AdminOrderManager {
                 params.append('status', this.statusFilter);
             }
 
-            const response = await fetch(`${API_BASE_URL}/admin/orders?${params}`, {
-                headers: {
-                    'Authorization': `Bearer ${this.getAuthToken()}`
-                }
-            });
+            // Load orders from JSON data (mock data for now)
+            const response = await fetch(`${JSON_DATA_URL}/packs.json`);
             
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             
-            const { data: orders } = await response.json();
-            this.orders = orders;
+            const data = await response.json();
+            // Create mock orders from packs data
+            const mockOrders = data.packs ? data.packs.map((pack, index) => ({
+                id: `ORD-${1000 + index}`,
+                customer_name: `Customer ${index + 1}`,
+                customer_email: `customer${index + 1}@example.com`,
+                pack_name: pack.name,
+                pack_id: pack.id,
+                payment_mode: ['credit_card', 'bank_transfer', 'paypal'][index % 3],
+                amount: pack.price,
+                status: ['pending', 'reserved', 'completed', 'shipped', 'cancelled'][index % 5],
+                created_at: new Date(Date.now() - (index * 24 * 60 * 60 * 1000)).toISOString(),
+                updated_at: new Date(Date.now() - (index * 12 * 60 * 60 * 1000)).toISOString()
+            })) : [];
+            
+            // Apply status filter if set
+            this.orders = this.statusFilter 
+                ? mockOrders.filter(order => order.status === this.statusFilter)
+                : mockOrders;
             
             this.renderOrders();
             this.updateStats();
