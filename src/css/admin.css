@@ -568,7 +568,7 @@ body.dark-mode .modal-content.large {
 /* Pack Management Specific Styles */
 .admin-packs-container {
     max-width: 80rem;
-    /* margin: 2rem auto; */
+    margin-inline: auto;
     padding: var(--sectionPadding);
 }
 
