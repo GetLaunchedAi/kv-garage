@@ -250,7 +250,7 @@ class PackDetailSystem {
             ${manifest.items.map(item => `
               <tr>
                 <td>${item.sku}</td>
-                <td>${item.name}</td>
+                <td>${item.item_name}</td>
                 <td>${item.brand}</td>
                 <td>${item.category}</td>
                 <td>${item.quantity}</td>
@@ -338,7 +338,7 @@ class PackDetailSystem {
     this.packDetailContent.innerHTML = `
       <div class="pack-detail-header">
         <div class="pack-image-large">
-          <img src="${pack.image || '/images/landing.avif'}" alt="${pack.name}" loading="lazy">
+          <img src="${pack.image || '/images/products/collage_1.png'}" alt="${pack.name}" loading="lazy">
           ${isLowStock && !isOutOfStock ? `<div class="stock-badge">Limited: ${pack.available_quantity} left</div>` : ''}
           ${isOutOfStock ? `<div class="stock-badge out-of-stock">Sold Out</div>` : ''}
         </div>
@@ -387,7 +387,7 @@ class PackDetailSystem {
           <div class="pack-actions-large">
             ${!isOutOfStock ? `
               <button class="pack-btn-large primary" onclick="this.initiatePurchase('full')">Buy Now - $${pack.price.toFixed(2)}</button>
-              <button class="pack-btn-large secondary" onclick="this.initiatePurchase('deposit')">Reserve with 50% - $${pack.deposit_price.toFixed(2)}</button>
+              <button class="pack-btn-large secondary" onclick="this.initiatePurchase('deposit')">Reserve with 70% - $${pack.deposit_price.toFixed(2)}</button>
             ` : `
               <button class="pack-btn-large disabled" disabled>Sold Out</button>
             `}
@@ -560,7 +560,7 @@ class PackDetailSystem {
                 <div class="manifest-item-large">
                   <div class="item-info">
                     <span class="item-quantity">${item.quantity}x</span>
-                    <span class="item-name">${item.product_name}</span>
+                    <span class="item-name">${item.item_name}</span>
                     <span class="item-sku">${item.sku}</span>
                   </div>
                   <div class="item-value">
@@ -602,7 +602,7 @@ class PackDetailSystem {
     this.relatedPacksGrid.innerHTML = packs.map(pack => `
       <div class="pack-card">
         <div class="pack-image">
-          <img src="${pack.image || '/images/landing.jpg'}" alt="${pack.name}" loading="lazy">
+          <img src="${pack.image || '/images/products/collage_1.png'}" alt="${pack.name}" loading="lazy">
         </div>
         <div class="pack-content">
           <div class="pack-header">

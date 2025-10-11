@@ -207,7 +207,7 @@ class AdminOrderManager {
     createOrderRow(order) {
         const statusClass = `status-${order.status}`;
         const statusLabel = this.getStatusLabel(order.status);
-        const paymentMode = order.payment_mode === 'full' ? 'Full Payment' : '50% Deposit';
+        const paymentMode = order.payment_mode === 'full' ? 'Full Payment' : '70% Deposit';
         
         return `
             <tr class="order-row" data-order-id="${order.id}" style="cursor: pointer;">
@@ -387,7 +387,7 @@ class AdminOrderManager {
                     </div>
                     <div class="order-detail-item">
                         <span class="order-detail-label">Payment Mode</span>
-                        <span class="order-detail-value">${isDeposit ? '50% Deposit' : 'Full Payment'}</span>
+                        <span class="order-detail-value">${isDeposit ? '70% Deposit' : 'Full Payment'}</span>
                     </div>
                     <div class="order-detail-item">
                         <span class="order-detail-label">Order Date</span>

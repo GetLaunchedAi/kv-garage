@@ -121,7 +121,7 @@ eleventyNavigation:
     <div class="modal-body">
       <div class="pack-info">
         <div class="pack-image">
-          <img id="modal-pack-image" src="/src/images/landing.avif" alt="Pack image">
+          <img id="modal-pack-image" src="/images/products/collage_1.png" alt="Pack image">
         </div>
         <div class="pack-details">
           <div class="price-info">
@@ -180,7 +180,7 @@ eleventyNavigation:
             <input type="radio" id="deposit-payment" name="payment-type" value="deposit">
             <label for="deposit-payment">
               <span class="payment-amount" id="deposit-payment-amount">$0</span>
-              <span class="payment-desc">Pay 50% now, 50% when ready to ship</span>
+              <span class="payment-desc">Pay 70% now, 30% when ready to ship</span>
             </label>
           </div>
         </div>
@@ -478,7 +478,7 @@ eleventyNavigation:
           const reserveBtn = document.createElement('button');
           reserveBtn.className = 'pack-btn reserve';
           reserveBtn.setAttribute('data-action', 'reserve');
-          reserveBtn.textContent = `Reserve with 50% Deposit ($${pack.deposit_price.toFixed(2)})`;
+          reserveBtn.textContent = `Reserve with 70% Deposit ($${pack.deposit_price.toFixed(2)})`;
 
           actionsContainer.appendChild(buyBtn);
           actionsContainer.appendChild(reserveBtn);
@@ -526,7 +526,7 @@ eleventyNavigation:
       return `
       <div class="pack-card ${isOutOfStock ? 'out-of-stock' : ''}" data-pack-id="${pack.id}">
         <div class="pack-image">
-          <img src="${pack.image_url || '/images/landing.jpg'}" alt="${pack.name}" loading="lazy">
+          <img src="${pack.image_url || '/images/products/collage_1.png'}" alt="${pack.name}" loading="lazy">
           ${isLimited ? `<div class="stock-badge limited">Limited — ${pack.available_quantity} left</div>` : ''}
           ${isOutOfStock ? `<div class="stock-badge out-of-stock">Sold Out</div>` : ''}
         </div>
@@ -544,11 +544,11 @@ eleventyNavigation:
             </div>
             <div class="price-row">
               <span class="price-label">Est. Resale:</span>
-              <span class="price-value profit">$${pack.estimated_resale_value.toFixed(2)}</span>
+              <span class="price-value profit">${pack.estimated_resale_value}</span>
             </div>
             <div class="price-row">
               <span class="price-label">Est. Profit:</span>
-              <span class="price-value profit">$${(pack.estimated_resale_value - pack.price).toFixed(2)}</span>
+              <span class="price-value profit">${pack.estimated_resale_value.replace(/\$([0-9,]+)–\$([0-9,]+)/, (match, min, max) => `$${(parseFloat(min.replace(/,/g, '')) - pack.price).toFixed(0)}–$${(parseFloat(max.replace(/,/g, '')) - pack.price).toFixed(0)}`)}</span>
             </div>
           </div>
           
@@ -570,7 +570,7 @@ eleventyNavigation:
             <button class="pack-btn secondary" data-action="manifest">View Manifest</button>
             ${!isOutOfStock ? `
               <button class="pack-btn buy" data-action="buy">Buy Now ($${pack.price.toFixed(2)})</button>
-              <button class="pack-btn reserve" data-action="reserve">Reserve with 50% Deposit ($${pack.deposit_price.toFixed(2)})</button>
+              <button class="pack-btn reserve" data-action="reserve">Reserve with 70% Deposit ($${pack.deposit_price.toFixed(2)})</button>
             ` : ''}
           </div>
         </div>
@@ -639,10 +639,10 @@ eleventyNavigation:
       document.getElementById('modal-pack-name').textContent = pack.name;
       document.getElementById('modal-pack-type').textContent = pack.type.toUpperCase();
       document.getElementById('modal-pack-status').textContent = pack.available_quantity > 0 ? 'Available' : 'Sold Out';
-      document.getElementById('modal-pack-image').src = pack.image_url || '/images/placeholder.jpg';
+      document.getElementById('modal-pack-image').src = pack.image_url || '/images/products/collage_1.png';
       document.getElementById('modal-pack-price').textContent = `$${pack.price.toFixed(2)}`;
-      document.getElementById('modal-pack-resale').textContent = `$${pack.estimated_resale_value.toFixed(2)}`;
-      document.getElementById('modal-pack-profit').textContent = `$${(pack.estimated_resale_value - pack.price).toFixed(2)}`;
+      document.getElementById('modal-pack-resale').textContent = pack.estimated_resale_value;
+      document.getElementById('modal-pack-profit').textContent = pack.estimated_resale_value.replace(/\$([0-9,]+)–\$([0-9,]+)/, (match, min, max) => `$${(parseFloat(min.replace(/,/g, '')) - pack.price).toFixed(0)}–$${(parseFloat(max.replace(/,/g, '')) - pack.price).toFixed(0)}`);
       document.getElementById('modal-pack-units').textContent = `${pack.number_of_units}`;
       document.getElementById('modal-pack-available').textContent = pack.available_quantity;
       document.getElementById('modal-pack-description').textContent = pack.description;
@@ -697,7 +697,7 @@ eleventyNavigation:
           ${items.slice(0, 3).map(item => `
             <div class="manifest-item">
               <span class="item-quantity">${item.quantity}x</span>
-              <span class="item-name">${item.product_name}</span>
+              <span class="item-name">${item.item_name}</span>
             </div>
           `).join('')}
           ${items.length > 3 ? `<div class="more-items">+${items.length - 3} more items</div>` : ''}
@@ -733,7 +733,7 @@ eleventyNavigation:
       // Calculate totals
       const totalItems = manifestItems.reduce((sum, item) => sum + item.quantity, 0);
       const totalCost = pack.price;
-      const estimatedValue = pack.estimated_resale_value;
+      const estimatedValue = pack.estimated_resale_value; // Now a string range
 
       const content = document.getElementById('manifest-content');
       content.innerHTML = `
@@ -744,7 +744,7 @@ eleventyNavigation:
         </div>
         <div class="summary-item">
           <span class="summary-label">Est. Value:</span>
-          <span class="summary-value">$${estimatedValue.toFixed(2)}</span>
+          <span class="summary-value">${estimatedValue}</span>
         </div>
         <div class="summary-item">
           <span class="summary-label">Your Cost:</span>
@@ -752,7 +752,7 @@ eleventyNavigation:
         </div>
         <div class="summary-item">
           <span class="summary-label">Est. Profit:</span>
-          <span class="summary-value profit">$${(estimatedValue - totalCost).toFixed(2)}</span>
+          <span class="summary-value profit">${estimatedValue.replace(/\$([0-9,]+)–\$([0-9,]+)/, (match, min, max) => `$${(parseFloat(min.replace(/,/g, '')) - totalCost).toFixed(0)}–$${(parseFloat(max.replace(/,/g, '')) - totalCost).toFixed(0)}`)}</span>
         </div>
       </div>
       
@@ -949,7 +949,7 @@ eleventyNavigation:
               ${manifest.items.map(item => `
                 <tr>
                   <td>${item.sku}</td>
-                  <td>${item.name}</td>
+                  <td>${item.item_name}</td>
                   <td>${item.brand}</td>
                   <td>${item.category}</td>
                   <td>${item.quantity}</td>

@@ -146,11 +146,18 @@ body.dark-mode .catalog-header h2 {
 
 .pack-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  grid-template-columns: 1fr; /* Mobile: 1 column */
   gap: 2rem;
   margin-bottom: 3rem;
   max-width: 80rem;
   margin-inline: auto;
+}
+
+/* Tablet and larger: 2 columns */
+@media (min-width: 768px) {
+  .pack-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 .pack-card {
@@ -1125,7 +1132,6 @@ body.dark-mode .form-group label {
 
 @media (max-width: 768px) {
   .pack-grid {
-    grid-template-columns: 1fr;
     gap: 1.5rem;
   }
   
