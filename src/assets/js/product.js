@@ -38,6 +38,7 @@
     state.base = Number(p.price ?? p.base_price ?? 0);
     render(p);
     wireSnipcart(p);
+    loadPhoneCaseAddons(p, list);
   }
 
   function fail(msg) {
@@ -179,6 +180,102 @@
 
   load();
 })();
+
+/* ============================================ */
+/*              Phone Case Add-ons              */
+/* ============================================ */
+
+function loadPhoneCaseAddons(currentProduct, allProducts) {
+  const addonsSection = document.getElementById('phone-case-addons');
+  const addonsGrid = document.getElementById('addonsGrid');
+  
+  if (!addonsSection || !addonsGrid) return;
+
+  // Don't show add-ons if the current product is already a phone case
+  if (isPhoneCase(currentProduct)) {
+    addonsSection.style.display = 'none';
+    return;
+  }
+
+  // Get relevant phone cases based on the current product
+  const relevantCases = getRelevantPhoneCases(currentProduct, allProducts);
+  
+  if (relevantCases.length === 0) {
+    addonsSection.style.display = 'none';
+    return;
+  }
+
+  // Display the add-ons section
+  addonsSection.style.display = 'block';
+  addonsGrid.innerHTML = relevantCases.map(createAddonCard).join('');
+}
+
+function isPhoneCase(product) {
+  const title = (product.title || '').toLowerCase();
+  const category = (product.category || '').toLowerCase();
+  return title.includes('case') || category.includes('mobile accessories');
+}
+
+function getRelevantPhoneCases(currentProduct, allProducts) {
+  // Get all phone cases
+  const phoneCases = allProducts.filter(product => 
+    product.category === 'Mobile Accessories' && 
+    (product.title || '').toLowerCase().includes('case')
+  );
+
+  // If current product is iPhone-related, show iPhone cases
+  const currentTitle = (currentProduct.title || '').toLowerCase();
+  const currentCategory = (currentProduct.category || '').toLowerCase();
+  
+  if (currentTitle.includes('iphone') || currentCategory.includes('iphone')) {
+    return phoneCases.filter(case_ => 
+      (case_.title || '').toLowerCase().includes('iphone')
+    );
+  }
+  
+  // If current product is mobile/phone related, show all cases
+  if (currentCategory.includes('mobile') || currentCategory.includes('phone') || 
+      currentTitle.includes('phone') || currentTitle.includes('mobile')) {
+    return phoneCases.slice(0, 4); // Show up to 4 cases
+  }
+  
+  // For other products, show a couple of popular cases
+  return phoneCases.slice(0, 2);
+}
+
+function createAddonCard(caseProduct) {
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const money = v => (Number(v) || 0).toFixed(2);
+  
+  const IS_DEV = /^(www\.)?phpstack-1518311-5868490.cloudwaysapps\.com$/.test(location.hostname);
+  const productUrl = IS_DEV
+    ? `/product/?slug=${encodeURIComponent(caseProduct.slug || caseProduct.id)}`
+    : `/products/${encodeURIComponent(caseProduct.slug || caseProduct.id)}/`;
+
+  return `
+    <div class="addon-card">
+      <div class="addon-card__image">
+        <img src="${esc(caseProduct.image || '/images/placeholder.jpg')}" 
+             alt="${esc(caseProduct.title || 'Phone case')}" 
+             loading="lazy">
+      </div>
+      <div class="addon-card__content">
+        <h3 class="addon-card__title">${esc(caseProduct.title || 'Phone case')}</h3>
+        <p class="addon-card__price">$${money(caseProduct.price || 0)}</p>
+        <p class="addon-card__description">${esc(caseProduct.description || '')}</p>
+        <button class="addon-card__btn snipcart-add-item" 
+                data-item-id="${esc(caseProduct.slug || caseProduct.id)}"
+                data-item-name="${esc(caseProduct.title || caseProduct.slug)}"
+                data-item-url="${esc(productUrl)}"
+                data-item-image="${esc(caseProduct.image || '')}"
+                data-item-description="${esc(caseProduct.description || '')}"
+                data-item-price="${Number(caseProduct.price || 0)}">
+          Add to Cart
+        </button>
+      </div>
+    </div>
+  `;
+}
 
 /* ============================================ */
 /*           Related Products (Carousel)        */

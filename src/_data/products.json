@@ -11,7 +11,9 @@
       "url": "https://www.kvgarage.com/products/iphone-16-pro-max-clear-case-magsafe",
       "status": "New Arrival",
       "description": "Clear protective case with MagSafe compatibility for iPhone 16 Pro Max",
-      "image": "/images/products/product_1.avif"
+      "image": "/images/products/product_1.avif",
+      "slug": "iphone-16-pro-max-clear-case-magsafe",
+      "sku": "iphone-16-pro-max-clear-case-magsafe"
     },
     {
       "title": "iPhone 16 Pro Clear Magnetic Case",
@@ -21,7 +23,9 @@
       "url": "https://www.kvgarage.com/products/iphone-16-pro-clear-magnetic-case",
       "status": "New Arrival",
       "description": "Clear magnetic case for iPhone 16 Pro with enhanced grip and protection",
-      "image": "/images/products/product_2.avif"
+      "image": "/images/products/product_2.avif",
+      "slug": "iphone-16-pro-clear-magnetic-case",
+      "sku": "iphone-16-pro-clear-magnetic-case"
     },
     {
       "title": "iPhone 16 Plus MagSafe Clear Case",
@@ -31,7 +35,9 @@
       "url": "https://www.kvgarage.com/products/iphone-16-plus-magsafe-clear-case",
       "status": "New Arrival",
       "description": "MagSafe compatible clear case for iPhone 16 Plus",
-      "image": "/images/products/product_3.avif"
+      "image": "/images/products/product_3.avif",
+      "slug": "iphone-16-plus-magsafe-clear-case",
+      "sku": "iphone-16-plus-magsafe-clear-case"
     },
     {
       "title": "iPhone 16 Clear Magnetic Case",
@@ -41,7 +47,9 @@
       "url": "https://www.kvgarage.com/products/iphone-16-clear-magnetic-case",
       "status": "New Arrival",
       "description": "Clear magnetic case for iPhone 16 with wireless charging support",
-      "image": "/images/products/product_4.avif"
+      "image": "/images/products/product_4.avif",
+      "slug": "iphone-16-clear-magnetic-case",
+      "sku": "iphone-16-clear-magnetic-case"
     },
     {
       "title": "Puregear 6ft. USB-C To USB-A Cable for USB-C Devices - Black",
@@ -51,7 +59,9 @@
       "url": "https://www.kvgarage.com/products/puregear-6ft-usb-c-to-usb-a-cable-black",
       "status": "New Arrival",
       "description": "6-foot USB-C to USB-A cable in black for charging and data transfer",
-      "image": "/images/products/product_5.avif"
+      "image": "/images/products/product_5.avif",
+      "slug": "puregear-6ft-usb-c-to-usb-a-cable-black",
+      "sku": "puregear-6ft-usb-c-to-usb-a-cable-black"
     },
     {
       "title": "Micro USB Cable 10ft Tangle-Free Design for USB Devices",
@@ -61,7 +71,9 @@
       "url": "https://www.kvgarage.com/products/micro-usb-cable-10ft-tangle-free",
       "status": "New Arrival",
       "description": "10-foot tangle-free micro USB cable for Android devices and more",
-      "image": "/images/products/product_6.avif"
+      "image": "/images/products/product_6.avif",
+      "slug": "micro-usb-cable-10ft-tangle-free",
+      "sku": "micro-usb-cable-10ft-tangle-free"
     },
     {
       "title": "NEW Micro USB Cable Data Cord For Android Smartphone and more",
@@ -71,7 +83,9 @@
       "url": "https://www.kvgarage.com/products/new-micro-usb-cable-data-cord",
       "status": "New Arrival",
       "description": "New micro USB data cable for Android smartphones and compatible devices",
-      "image": "/images/products/product_7.avif"
+      "image": "/images/products/product_7.avif",
+      "slug": "new-micro-usb-cable-data-cord",
+      "sku": "new-micro-usb-cable-data-cord"
     },
     {
       "title": "Monster 6ft Micro USB Cable Tough Charging for Android Devices",
@@ -81,7 +95,9 @@
       "url": "https://www.kvgarage.com/products/monster-6ft-micro-usb-cable-tough",
       "status": "New Arrival",
       "description": "6-foot Monster micro USB cable with tough charging for Android devices",
-      "image": "/images/products/product_8.avif"
+      "image": "/images/products/product_8.avif",
+      "slug": "monster-6ft-micro-usb-cable-tough",
+      "sku": "monster-6ft-micro-usb-cable-tough"
     },
     {
       "title": "Zagg iPhone 5.4\" 2021 Glass Elite Privacy 360 Screen Protector Invisible Shield",
@@ -91,7 +107,9 @@
       "url": "https://www.kvgarage.com/products/zagg-iphone-5-4-2021-glass-elite-privacy-360",
       "status": "New Arrival",
       "description": "Zagg Glass Elite Privacy 360 screen protector for iPhone 5.4\" 2021 models",
-      "image": "/images/products/product_9.avif"
+      "image": "/images/products/product_9.avif",
+      "slug": "zagg-iphone-5-4-2021-glass-elite-privacy-360",
+      "sku": "zagg-iphone-5-4-2021-glass-elite-privacy-360"
     },
     {
       "title": "2021 iPhone 13 Mini Screen Protector Clear",
@@ -101,7 +119,9 @@
       "url": "https://www.kvgarage.com/products/2021-iphone-13-mini-screen-protector-clear",
       "status": "New Arrival",
       "description": "Clear screen protector for 2021 iPhone 13 Mini",
-      "image": "/images/products/product_10.avif"
+      "image": "/images/products/product_10.avif",
+      "slug": "2021-iphone-13-mini-screen-protector-clear",
+      "sku": "2021-iphone-13-mini-screen-protector-clear"
     },
     {
       "title": "Case-Mate (44mm) Tough Watch Bumper for Samsung Watch Active2 - Protector",
@@ -111,7 +131,9 @@
       "url": "https://www.kvgarage.com/products/case-mate-44mm-tough-watch-bumper-samsung-active2",
       "status": "New Arrival",
       "description": "Tough watch bumper protector for Samsung Watch Active2 (44mm)",
-      "image": "/images/products/product_11.avif"
+      "image": "/images/products/product_11.avif",
+      "slug": "case-mate-44mm-tough-watch-bumper-samsung-active2",
+      "sku": "case-mate-44mm-tough-watch-bumper-samsung-active2"
     },
     {
       "title": "PopSockets Pop Grip & Stand- Memphis Mod Translucent plant-based materials",
@@ -121,18 +143,22 @@
       "url": "https://www.kvgarage.com/products/popsockets-pop-grip-stand-memphis-mod-translucent",
       "status": "New Arrival",
       "description": "PopSockets Pop Grip & Stand in Memphis Mod design with translucent plant-based materials",
-      "image": "/images/products/product_12.avif"
+      "image": "/images/products/product_12.avif",
+      "slug": "popsockets-pop-grip-stand-memphis-mod-translucent",
+      "sku": "popsockets-pop-grip-stand-memphis-mod-translucent"
     },
     {
       "title": "WHOLESALE DEAL: 6 VERIFIED MACBOOKS – $2000",
       "category": "Wholesale Deals",
-      "price": 2000.00,
+      "price": 2000,
       "currency": "USD",
       "url": "https://www.kvgarage.com/products/wholesale-deal-6-verified-macbooks-2000",
       "status": "Wholesale Deal",
       "description": "Wholesale deal: 6 verified MacBooks for $2000 total - perfect for resellers",
       "quantity": "6 for $2,000",
-      "image": "/images/products/product_13.avif"
+      "image": "/images/products/product_13.avif",
+      "slug": "wholesale-deal-6-verified-macbooks-2000",
+      "sku": "wholesale-deal-6-verified-macbooks-2000"
     }
   ]
 }

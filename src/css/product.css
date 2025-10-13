@@ -153,6 +153,177 @@
 }
 
 /* ============================================ */
+/*                Phone Case Add-ons            */
+/* ============================================ */
+
+.addons {
+  max-width: 1200px;
+  margin: 48px auto;
+  padding: 0 12px;
+}
+
+.addons-head {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.addons-head h2 {
+  margin: 0 0 8px 0;
+  font-size: clamp(1.4rem, 2.5vw, 1.8rem);
+  color: #111;
+}
+
+.addons-head p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 1rem;
+}
+
+.addons-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  margin-top: 24px;
+}
+
+.addon-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.addon-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-color: #d1d5db;
+}
+
+.addon-card__image {
+  position: relative;
+  height: 200px;
+  overflow: hidden;
+  background: #f8fafc;
+}
+
+.addon-card__image img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transition: transform 0.3s ease;
+}
+
+.addon-card:hover .addon-card__image img {
+  transform: scale(1.05);
+}
+
+.addon-card__content {
+  padding: 20px;
+}
+
+.addon-card__title {
+  margin: 0 0 8px 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #111;
+  line-height: 1.3;
+}
+
+.addon-card__price {
+  margin: 0 0 12px 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #0a7f2e;
+}
+
+.addon-card__description {
+  margin: 0 0 16px 0;
+  font-size: 0.9rem;
+  color: #6b7280;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.addon-card__btn {
+  width: 100%;
+  padding: 12px 16px;
+  background: #111;
+  color: #fff;
+  border: 1px solid #111;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.addon-card__btn:hover {
+  background: #333;
+  border-color: #333;
+}
+
+.addon-card__btn:active {
+  transform: translateY(1px);
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .addon-card {
+    background: #1f2937;
+    border-color: #374151;
+  }
+  
+  .addon-card:hover {
+    border-color: #4b5563;
+  }
+  
+  .addon-card__image {
+    background: #111827;
+  }
+  
+  .addon-card__title {
+    color: #f9fafb;
+  }
+  
+  .addon-card__description {
+    color: #9ca3af;
+  }
+  
+  .addons-head h2 {
+    color: #f9fafb;
+  }
+  
+  .addons-head p {
+    color: #9ca3af;
+  }
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .addons {
+    margin: 32px auto;
+  }
+  
+  .addons-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .addon-card__image {
+    height: 160px;
+  }
+  
+  .addon-card__content {
+    padding: 16px;
+  }
+}
+
+/* ============================================ */
 /*           Related Products (Carousel)        */
 /* ============================================ */
 
