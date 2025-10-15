@@ -1,9 +1,9 @@
 /**
- * Simple Cart System for KV Garage Catalog
- * Handles adding items to cart and basic cart management
+ * Global Cart System for KV Garage
+ * Handles cart functionality across all pages
  */
 
-class SimpleCart {
+class GlobalCart {
   constructor() {
     this.cart = this.loadCart();
     this.init();
@@ -207,10 +207,10 @@ class SimpleCart {
 
 // Initialize cart when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-  window.simpleCart = new SimpleCart();
+  window.globalCart = new GlobalCart();
 });
 
 // Export for use in other scripts
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = SimpleCart;
+  module.exports = GlobalCart;
 }

@@ -1248,3 +1248,221 @@ body.dark-mode #dark-mode-toggle .sun {
     background: #061623;
   }
 }
+
+/* ============================================
+   Global Icon Button Dark Mode Styles
+   ============================================ */
+/* Dark mode icon buttons - ensure they stay white */
+body.dark-mode #navigation .icon-btn {
+  color: #fff !important;
+}
+
+body.dark-mode #navigation .icon-btn svg path {
+  fill: #fff !important;
+}
+
+/* Override scroll state in dark mode */
+body.dark-mode.scroll #navigation .icon-btn {
+  color: #fff !important;
+}
+
+body.dark-mode.scroll #navigation .icon-btn:hover {
+  background-color: rgba(255, 255, 255, .12) !important;
+}
+
+/* ============================================
+   Global Cart Styles
+   ============================================ */
+.cart-count {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: #ff5a5f;
+  color: #fff;
+  font: 700 11px/18px system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  text-align: center;
+  display: none;
+}
+
+/* Cart Modal Styles */
+.cart-modal {
+  position: fixed;
+  top: 0;
+  right: -400px;
+  width: 400px;
+  height: 100vh;
+  background: #fff;
+  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+  z-index: 10000;
+  transition: right 0.3s ease;
+  overflow-y: auto;
+}
+
+/* Higher z-index on larger screens */
+@media only screen and (min-width: 1024px) {
+  .cart-modal {
+    z-index: 300000;
+  }
+}
+
+.cart-modal.active {
+  right: 0;
+}
+
+.cart-modal-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cart-modal-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: var(--headerColor);
+}
+
+.cart-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #666;
+}
+
+.cart-items {
+  padding: 1rem;
+}
+
+.cart-item {
+  display: flex;
+  align-items: center;
+  padding: 1rem 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.cart-item-image {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 0.5rem;
+  margin-right: 1rem;
+}
+
+.cart-item-details {
+  flex: 1;
+}
+
+.cart-item-details h4 {
+  margin: 0 0 0.25rem 0;
+  font-size: 1rem;
+  color: var(--headerColor);
+}
+
+.cart-item-details p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.remove-item {
+  background: #ff5a5f;
+  color: #fff;
+  border: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.empty-cart {
+  text-align: center;
+  color: #666;
+  padding: 2rem;
+  font-style: italic;
+}
+
+.cart-footer {
+  padding: 1.5rem;
+  border-top: 1px solid #e0e0e0;
+  background: #f8f9fa;
+}
+
+.cart-total-display {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.checkout-btn {
+  width: 100%;
+  padding: 1rem;
+  background: var(--primary);
+  color: #000;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.checkout-btn:hover {
+  background: var(--primaryDark);
+  color: #fff;
+}
+
+/* Dark mode cart styles */
+body.dark-mode .cart-modal {
+  background: var(--dark);
+  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .cart-modal-header {
+  border-bottom-color: #444;
+}
+
+body.dark-mode .cart-modal-header h3 {
+  color: #fff;
+}
+
+body.dark-mode .cart-close {
+  color: #ccc;
+}
+
+body.dark-mode .cart-item {
+  border-bottom-color: #333;
+}
+
+body.dark-mode .cart-item-details h4 {
+  color: #fff;
+}
+
+body.dark-mode .cart-item-details p {
+  color: #ccc;
+}
+
+body.dark-mode .empty-cart {
+  color: #ccc;
+}
+
+body.dark-mode .cart-footer {
+  background: var(--medium);
+  border-top-color: #444;
+}
+
+body.dark-mode .cart-total-display {
+  color: #fff;
+}

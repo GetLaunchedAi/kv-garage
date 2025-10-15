@@ -70,8 +70,29 @@
         <main id="main">{{ content | safe }}</main>
         {% include "footer.html" %}
 
+        <!-- Global Cart Modal -->
+        <div class="cart-modal" id="cartModal">
+          <div class="cart-modal-header">
+            <h3>Shopping Cart</h3>
+            <button class="cart-close" onclick="window.globalCart.toggleCart()">×</button>
+          </div>
+          <div class="cart-items" id="cartItems">
+            <p class="empty-cart">Your cart is empty</p>
+          </div>
+          <div class="cart-footer">
+            <div class="cart-total-display">
+              <span>Total:</span>
+              <span class="cart-total-amount">$0.00</span>
+            </div>
+            <button class="checkout-btn" onclick="window.globalCart.checkout()">
+              Proceed to Checkout
+            </button>
+          </div>
+        </div>
+
         <script defer src="/assets/js/nav.js"></script>
         <script defer src="/assets/js/dark.js"></script>
+        <script defer src="/assets/js/global-cart.js"></script>
 
         <!--
         This script adds a class to the body after scrolling 100px

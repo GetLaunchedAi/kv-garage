@@ -455,32 +455,9 @@ packs: _data/packs.json
   '(max-width: 400px) 400px, (max-width: 850px) 850px, 1920px'%}
 </section>
 
-<!-- ============================================ -->
-<!--                Cart Modal                    -->
-<!-- ============================================ -->
-
-<div class="cart-modal" id="cartModal">
-  <div class="cart-modal-header">
-    <h3>Shopping Cart</h3>
-    <button class="cart-close" onclick="window.simpleCart.toggleCart()">×</button>
-  </div>
-  <div class="cart-items" id="cartItems">
-    <p class="empty-cart">Your cart is empty</p>
-  </div>
-  <div class="cart-footer">
-    <div class="cart-total-display">
-      <span>Total:</span>
-      <span class="cart-total-amount">$0.00</span>
-    </div>
-    <button class="checkout-btn" onclick="window.simpleCart.checkout()">
-      Proceed to Checkout
-    </button>
-  </div>
-</div>
 
 <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
 <script src="/assets/js/catalog-pdf-generator.js"></script>
-<script src="/assets/js/catalog-cart.js"></script>
 <script>
   if (window.netlifyIdentity) {
     window.netlifyIdentity.on("init", (user) => {
