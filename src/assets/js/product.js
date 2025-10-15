@@ -247,7 +247,7 @@ function createAddonCard(caseProduct) {
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const money = v => (Number(v) || 0).toFixed(2);
   
-  const IS_DEV = /^(www\.)?phpstack-1518311-5868490.cloudwaysapps\.com$/.test(location.hostname);
+  const IS_PROD = /^(www\.)?kvgarage\.com$/.test(location.hostname);
   const productUrl = IS_DEV
     ? `/product/?slug=${encodeURIComponent(caseProduct.slug || caseProduct.id)}`
     : `/products/${encodeURIComponent(caseProduct.slug || caseProduct.id)}/`;
@@ -290,7 +290,7 @@ function createAddonCard(caseProduct) {
   const DATA_URL = root.getAttribute('data-src') || '/products.json';
 
 //   const IS_DEV = /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
-  const IS_DEV = /^(www\.)?phpstack-1518311-5868490.cloudwaysapps\.com$/.test(location.hostname);
+  const IS_PROD = /^(www\.)?kvgarage\.com$/.test(location.hostname);
 
   const esc = s => String(s ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const money = v => (Number(v)||0).toFixed(2);
@@ -300,9 +300,9 @@ function createAddonCard(caseProduct) {
     const seg = location.pathname.replace(/\/+$/,'').split('/').pop();
     return seg === 'product' ? '' : seg;
   })();
-  const productUrl = p => IS_DEV
-    ? `/product/?slug=${encodeURIComponent(p.slug || p.id)}`
-    : `/products/${encodeURIComponent(p.slug || p.id)}/`;
+  const productUrl = p => IS_PROD
+    ? `/products/${encodeURIComponent(p.slug || p.id)}/`
+    : `/product/?slug=${encodeURIComponent(p.slug || p.id)}`;
 
   const card = p => `
     <article class="rel-card">

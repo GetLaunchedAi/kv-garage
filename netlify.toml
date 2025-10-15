@@ -9,6 +9,13 @@
 [build.processing]
   skip_processing = false
 
+# Pretty product URL -> PDP rewrite (must come before SPA fallback)
+[[redirects]]
+  from = "/products/:slug/"
+  to = "/product/?slug=:slug"
+  status = 200
+  force = false
+
 # SPA fallback for client-side routing (exclude static files)
 [[redirects]]
   from = "/*"

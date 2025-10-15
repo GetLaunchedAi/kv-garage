@@ -170,7 +170,10 @@
 .addons-head h2 {
   margin: 0 0 8px 0;
   font-size: clamp(1.4rem, 2.5vw, 1.8rem);
-  color: #111;
+  color: #000 !important;
+}
+body.dark-mode .addons-head h2 {
+  color: #fff;
 }
 
 .addons-head p {

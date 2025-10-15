@@ -5,10 +5,12 @@ metaTitle: "Liquidation Pallets, Mobile Accessories & Tech Deals | Kv Garage"
 tagTitle: "Home - Resale & Wholesale Deals"
 preloadImg: "/images/bannerimg.png"
 preloadCSS: "/css/local.css"
+additionalCSS: "/css/catalog.css"
 permalink: "/"
 eleventyNavigation:
   key: Home
   order: 100
+packs: _data/packs.json
 ---
 
 <!-- Enter html code below -->
@@ -106,6 +108,89 @@ eleventyNavigation:
     </p>
   </div>
 </section> -->
+
+<!-- ============================================ -->
+<!--                Catalog Table                 -->
+<!-- ============================================ -->
+
+<section id="catalog">
+  <div class="cs-container">
+    <div class="cs-flex-group">
+      <span class="cs-topper">Wholesale Packs</span>
+      <h2 class="cs-title">KV Garage Catalog</h2>
+      <p class="cs-text">
+        Browse our curated wholesale packs with detailed manifests and estimated resale values. 
+        All packs are tested, verified, and ready for immediate resale.
+      </p>
+    </div>
+    
+    <div class="catalog-table-wrapper">
+      <table class="catalog-table">
+        <thead>
+          <tr>
+            <th>Pack</th>
+            <th>Price</th>
+            <th>Units</th>
+            <th>Contents</th>
+            <th>Est. Resale Value</th>
+            <th>Image</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for pack in packs.packs %}
+          <tr class="catalog-row">
+            <td class="pack-name">
+              <strong>{{ pack.name }}</strong>
+            </td>
+            <td class="pack-price">
+              <span class="price">${{ pack.price.toFixed(2) }}</span>
+            </td>
+            <td class="pack-units">
+              ~{{ pack.units }}
+            </td>
+            <td class="pack-contents">
+              {{ pack.short_description }}
+            </td>
+            <td class="pack-resale">
+              <span class="resale-value">{{ pack.estimated_resale_value }}</span>
+            </td>
+            <td class="pack-image">
+              <img 
+                src="{{ pack.image_url }}" 
+                alt="{{ pack.name }}"
+                loading="lazy"
+                decoding="async"
+                class="catalog-image"
+              />
+            </td>
+            <td class="pack-action">
+              <button 
+                class="add-to-cart cs-button-solid catalog-btn"
+                data-pack-id="{{ pack.id }}"
+                data-pack-name="{{ pack.name }}"
+                data-pack-price="{{ pack.price }}"
+                data-pack-image="{{ pack.image_url }}"
+                data-pack-slug="{{ pack.slug }}"
+              >
+                Add to Cart
+              </button>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    
+    <div class="catalog-footer">
+      <p class="catalog-note">
+        <strong>Note:</strong> All packs include detailed manifests and ship within 3-5 business days. 
+        Tracking information provided within 24 hours of shipment.
+      </p>
+      <a href="/packs/" class="cs-button-transparent">View All Packs</a>
+    </div>
+  </div>
+</section>
 
 <!-- ============================================ -->
 <!--                Trust Signals                 -->
@@ -370,8 +455,32 @@ eleventyNavigation:
   '(max-width: 400px) 400px, (max-width: 850px) 850px, 1920px'%}
 </section>
 
+<!-- ============================================ -->
+<!--                Cart Modal                    -->
+<!-- ============================================ -->
+
+<div class="cart-modal" id="cartModal">
+  <div class="cart-modal-header">
+    <h3>Shopping Cart</h3>
+    <button class="cart-close" onclick="window.simpleCart.toggleCart()">×</button>
+  </div>
+  <div class="cart-items" id="cartItems">
+    <p class="empty-cart">Your cart is empty</p>
+  </div>
+  <div class="cart-footer">
+    <div class="cart-total-display">
+      <span>Total:</span>
+      <span class="cart-total-amount">$0.00</span>
+    </div>
+    <button class="checkout-btn" onclick="window.simpleCart.checkout()">
+      Proceed to Checkout
+    </button>
+  </div>
+</div>
+
 <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
 <script src="/assets/js/catalog-pdf-generator.js"></script>
+<script src="/assets/js/catalog-cart.js"></script>
 <script>
   if (window.netlifyIdentity) {
     window.netlifyIdentity.on("init", (user) => {
