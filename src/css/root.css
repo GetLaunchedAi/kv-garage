@@ -578,7 +578,7 @@
 
   #navigation .logo {
     margin-right: auto;
-    height: 8rem;
+    height: 12rem;
     width: auto;
   }
 
@@ -1020,7 +1020,7 @@ body.dark-mode #dark-mode-toggle .sun {
     display: inline-block;
     margin: auto;
     width: auto;
-    height: 8rem !important;
+    height: 12rem !important;
     margin-bottom: 1.875em;
     text-align: center;
   }
