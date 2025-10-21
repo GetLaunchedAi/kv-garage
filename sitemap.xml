@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset
+      xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+            http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+<!-- created with Free Online Sitemap Generator www.xml-sitemaps.com -->
+
+
+<url>
+  <loc>https://kvgarage.netlify.app/</loc>
+  <lastmod>2025-10-21T14:50:57+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+<url>
+  <loc>https://kvgarage.netlify.app/packs/</loc>
+  <lastmod>2025-10-21T14:50:57+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://kvgarage.netlify.app/shop/</loc>
+  <lastmod>2025-10-21T14:50:57+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://kvgarage.netlify.app/about/</loc>
+  <lastmod>2025-10-21T14:50:57+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://kvgarage.netlify.app/contact/</loc>
+  <lastmod>2025-10-21T14:50:57+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://kvgarage.netlify.app/api/catalogs/hero</loc>
+  <lastmod>2025-10-21T14:50:57+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://kvgarage.netlify.app/refund-policy/</loc>
+  <lastmod>2025-10-21T14:50:57+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://kvgarage.netlify.app/www.kalamazoowebsitedesign.com</loc>
+  <lastmod>2025-10-21T14:50:57+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://kvgarage.netlify.app/packs/www.kalamazoowebsitedesign.com</loc>
+  <lastmod>2025-10-21T14:50:57+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://kvgarage.netlify.app/shop/www.kalamazoowebsitedesign.com</loc>
+  <lastmod>2025-10-21T14:50:57+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://kvgarage.netlify.app/about/www.kalamazoowebsitedesign.com</loc>
+  <lastmod>2025-10-21T14:50:57+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://kvgarage.netlify.app/contact/www.kalamazoowebsitedesign.com</loc>
+  <lastmod>2025-10-21T14:50:57+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://kvgarage.netlify.app/api/catalogs/www.kalamazoowebsitedesign.com</loc>
+  <lastmod>2025-10-21T14:50:57+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://kvgarage.netlify.app/refund-policy/www.kalamazoowebsitedesign.com</loc>
+  <lastmod>2025-10-21T14:50:57+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+
+
+</urlset>
