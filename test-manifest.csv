@@ -1,0 +1,11 @@
+sku,item_name,product_name,quantity,condition,condition_grade,notes,estimated_value,category,brand
+CASE-001,iPhone 12/13 Clear Case,iPhone 12/13 Clear Case,25,new,new,Clear protective case various colors,12.00,Phone Cases,Generic
+CASE-002,iPhone 14/15 Silicone Case,iPhone 14/15 Silicone Case,20,new,new,Soft silicone multiple colors,15.00,Phone Cases,Generic
+CASE-003,Samsung Galaxy S21/S22 Case,Samsung Galaxy S21/S22 Case,15,new,new,Protective case with kickstand,18.00,Phone Cases,Generic
+CBL-001,Lightning Cable 6ft,Lightning Cable 6ft,40,new,new,MFi certified braided cable,15.00,Cables,Generic
+CBL-002,USB-C Cable 6ft,USB-C Cable 6ft,35,new,new,Fast charging cable,12.00,Cables,Generic
+CBL-003,Micro USB Cable 3ft,Micro USB Cable 3ft,50,new,new,Standard micro USB cable,8.00,Cables,Generic
+CHR-001,Wireless Charging Pad,Wireless Charging Pad,30,new,new,Qi compatible charging pad,25.00,Chargers,Generic
+CHR-002,Car Charger Dual Port,Car Charger Dual Port,25,new,new,12V car charger with 2 ports,20.00,Chargers,Generic
+ADP-001,Wall Adapter 5W,Wall Adapter 5W,60,new,new,Standard 5W wall adapter,10.00,Adapters,Generic
+ADP-002,Wall Adapter 18W,Wall Adapter 18W,40,new,new,Fast charging 18W adapter,18.00,Adapters,Generic

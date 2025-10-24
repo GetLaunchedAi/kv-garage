@@ -3,9 +3,7 @@
  * Handles order viewing, status updates, and management
  */
 
-// Using JSON data instead of API
-const JSON_DATA_URL = '/data';
-const API_BASE_URL = '/api'; // Fallback for API calls
+// Use global API_BASE_URL from shared-admin-auth.js
 
 class AdminOrderManager {
     constructor() {
@@ -14,26 +12,43 @@ class AdminOrderManager {
         this.itemsPerPage = 20;
         this.statusFilter = '';
         
-        this.init();
+        // Initialize asynchronously
+        this.init().catch(error => {
+            console.error('AdminOrderManager initialization error:', error);
+        });
     }
 
-    init() {
+    async init() {
         this.bindEvents();
-        this.checkAuthentication();
+        // Wait for SharedAdminAuth to be ready before checking authentication
+        await this.waitForSharedAuth();
+        await this.checkAuthentication();
     }
 
-    checkAuthentication() {
+    async waitForSharedAuth() {
+        return new Promise((resolve) => {
+            const checkAuth = () => {
+                if (window.sharedAdminAuth) {
+                    resolve();
+                } else {
+                    setTimeout(checkAuth, 50);
+                }
+            };
+            checkAuth();
+        });
+    }
+
+    async checkAuthentication() {
         try {
             // Use shared authentication system with persistent login
             if (window.sharedAdminAuth) {
-                // Try to auto-login from stored token
-                const autoLoginSuccess = window.sharedAdminAuth.shouldAutoLogin();
+                // Try to auto-login from stored token (now async with refresh capability)
+                const autoLoginSuccess = await window.sharedAdminAuth.shouldAutoLogin();
                 
                 if (autoLoginSuccess && window.sharedAdminAuth.isLoggedIn()) {
                     this.isAuthenticated = true;
                     this.showOrders();
                     this.loadOrders();
-                    console.log('Admin orders: Auto-login successful');
                     return;
                 }
             }
@@ -72,15 +87,36 @@ class AdminOrderManager {
         });
 
         // Refresh button
-        document.getElementById('refresh-orders')?.addEventListener('click', () => {
-            this.loadOrders();
-        });
+        const refreshBtn = document.getElementById('refresh-orders');
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                refreshBtn.disabled = true;
+                refreshBtn.textContent = 'Refreshing...';
+                
+                try {
+                    window.location.reload();
+                } catch (error) {
+                    console.error('Refresh error:', error);
+                    this.showNotification('Failed to refresh orders', 'error');
+                } finally {
+                    refreshBtn.disabled = false;
+                    refreshBtn.textContent = 'Refresh';
+                }
+            });
+        }
 
         // Status filter
         document.getElementById('status-filter')?.addEventListener('change', (e) => {
             this.statusFilter = e.target.value;
             this.currentPage = 1;
             this.loadOrders();
+        });
+
+        // Back to dashboard button
+        document.getElementById('back-to-dashboard')?.addEventListener('click', () => {
+            window.location.href = '/admin/dashboard/';
         });
 
         // Close modal on overlay click
@@ -103,44 +139,40 @@ class AdminOrderManager {
             this.showLoading();
             
             const params = new URLSearchParams({
-                limit: this.itemsPerPage,
-                offset: (this.currentPage - 1) * this.itemsPerPage
+                page: this.currentPage,
+                limit: this.itemsPerPage
             });
             
             if (this.statusFilter) {
                 params.append('status', this.statusFilter);
             }
 
-            // Load orders from JSON data (mock data for now)
-            const response = await fetch(`${JSON_DATA_URL}/packs.json`);
+            // Load orders from the real API
+            const url = `${window.API_BASE_URL}/orders?${params.toString()}`;
+            
+            const response = await fetch(url, {
+                headers: {
+                    'Authorization': `Bearer ${this.getAuthToken()}`
+                }
+            });
             
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             
             const data = await response.json();
-            // Create mock orders from packs data
-            const mockOrders = data.packs ? data.packs.map((pack, index) => ({
-                id: `ORD-${1000 + index}`,
-                customer_name: `Customer ${index + 1}`,
-                customer_email: `customer${index + 1}@example.com`,
-                pack_name: pack.name,
-                pack_id: pack.id,
-                payment_mode: ['credit_card', 'bank_transfer', 'paypal'][index % 3],
-                amount: pack.price,
-                status: ['pending', 'reserved', 'completed', 'shipped', 'cancelled'][index % 5],
-                created_at: new Date(Date.now() - (index * 24 * 60 * 60 * 1000)).toISOString(),
-                updated_at: new Date(Date.now() - (index * 12 * 60 * 60 * 1000)).toISOString()
-            })) : [];
             
-            // Apply status filter if set
-            this.orders = this.statusFilter 
-                ? mockOrders.filter(order => order.status === this.statusFilter)
-                : mockOrders;
-            
-            this.renderOrders();
-            this.updateStats();
-            this.renderPagination();
+            if (data.success) {
+                // Use real orders from API
+                this.orders = data.orders || [];
+                
+                this.renderOrders();
+                this.updateStats();
+                this.renderPagination();
+                
+            } else {
+                throw new Error(data.error || 'Failed to load orders');
+            }
             
         } catch (error) {
             console.error('Error loading orders:', error);
@@ -150,7 +182,7 @@ class AdminOrderManager {
                 localStorage.removeItem('admin_token');
                 this.showLogin();
             } else {
-                this.showError('Failed to load orders. Please try again.');
+                this.showError(`Failed to load orders: ${error.message}`);
             }
         }
     }
@@ -208,6 +240,8 @@ class AdminOrderManager {
         const statusClass = `status-${order.status}`;
         const statusLabel = this.getStatusLabel(order.status);
         const paymentMode = order.payment_mode === 'full' ? 'Full Payment' : '70% Deposit';
+        const paymentStatus = order.payment_status || 'unknown';
+        const paymentStatusClass = `payment-${paymentStatus}`;
         
         return `
             <tr class="order-row" data-order-id="${order.id}" style="cursor: pointer;">
@@ -226,13 +260,17 @@ class AdminOrderManager {
                     </div>
                 </td>
                 <td>
-                    <span class="payment-mode">${paymentMode}</span>
+                    <div class="payment-info">
+                        <span class="payment-mode">${paymentMode}</span>
+                        <div class="payment-status ${paymentStatusClass}">${paymentStatus}</div>
+                        ${order.payment_intent_id ? `<div class="payment-id">${order.payment_intent_id.substring(0, 12)}...</div>` : ''}
+                    </div>
                 </td>
                 <td>
                     <div class="amount-info">
-                        <div class="amount-paid">$${order.amount_paid.toFixed(2)}</div>
+                        <div class="amount-paid">$${(order.amount || 0).toFixed(2)}</div>
                         ${order.payment_mode === 'deposit' ? 
-                            `<div class="remaining-amount">Remaining: $${(order.total_amount - order.amount_paid).toFixed(2)}</div>` : 
+                            `<div class="remaining-amount">Remaining: $${((order.total_amount || 0) - (order.amount || 0)).toFixed(2)}</div>` : 
                             ''
                         }
                     </div>
@@ -247,7 +285,7 @@ class AdminOrderManager {
                 </td>
                 <td>
                     <div class="action-buttons" onclick="event.stopPropagation()">
-                        <button class="btn btn-sm btn-primary" onclick="this.showOrderDetails('${order.id}')">
+                        <button class="btn btn-sm btn-primary" onclick="window.showOrderDetails('${order.id}')">
                             View
                         </button>
                         ${this.getStatusActionButtons(order)}
@@ -263,21 +301,21 @@ class AdminOrderManager {
         switch (order.status) {
             case 'pending':
                 buttons.push(`
-                    <button class="btn btn-sm btn-success" onclick="this.updateOrderStatus('${order.id}', 'reserved')">
+                    <button class="btn btn-sm btn-success" onclick="window.updateOrderStatus('${order.id}', 'reserved')">
                         Mark Reserved
                     </button>
                 `);
                 break;
             case 'reserved':
                 buttons.push(`
-                    <button class="btn btn-sm btn-success" onclick="this.updateOrderStatus('${order.id}', 'completed')">
+                    <button class="btn btn-sm btn-success" onclick="window.updateOrderStatus('${order.id}', 'completed')">
                         Mark Completed
                     </button>
                 `);
                 break;
             case 'completed':
                 buttons.push(`
-                    <button class="btn btn-sm btn-warning" onclick="this.updateOrderStatus('${order.id}', 'shipped')">
+                    <button class="btn btn-sm btn-warning" onclick="window.updateOrderStatus('${order.id}', 'shipped')">
                         Mark Shipped
                     </button>
                 `);
@@ -286,7 +324,7 @@ class AdminOrderManager {
         
         if (order.status !== 'cancelled' && order.status !== 'shipped') {
             buttons.push(`
-                <button class="btn btn-sm btn-danger" onclick="this.updateOrderStatus('${order.id}', 'cancelled')">
+                <button class="btn btn-sm btn-danger" onclick="window.updateOrderStatus('${order.id}', 'cancelled')">
                     Cancel
                 </button>
             `);
@@ -321,7 +359,7 @@ class AdminOrderManager {
         const totalOrders = this.orders.length;
         const pendingOrders = this.orders.filter(o => o.status === 'pending').length;
         const completedOrders = this.orders.filter(o => o.status === 'completed' || o.status === 'shipped').length;
-        const totalRevenue = this.orders.reduce((sum, order) => sum + order.amount_paid, 0);
+        const totalRevenue = this.orders.reduce((sum, order) => sum + (order.amount_paid || order.amount || 0), 0);
 
         document.getElementById('total-orders').textContent = totalOrders;
         document.getElementById('pending-orders').textContent = pendingOrders;
@@ -333,11 +371,11 @@ class AdminOrderManager {
         // Simple pagination - in a real app, you'd get total count from the API
         const pagination = document.getElementById('pagination');
         pagination.innerHTML = `
-            <button ${this.currentPage === 1 ? 'disabled' : ''} onclick="this.goToPage(${this.currentPage - 1})">
+            <button ${this.currentPage === 1 ? 'disabled' : ''} onclick="window.goToPage(${this.currentPage - 1})">
                 Previous
             </button>
             <span class="page-info">Page ${this.currentPage}</span>
-            <button ${this.orders.length < this.itemsPerPage ? 'disabled' : ''} onclick="this.goToPage(${this.currentPage + 1})">
+            <button ${this.orders.length < this.itemsPerPage ? 'disabled' : ''} onclick="window.goToPage(${this.currentPage + 1})">
                 Next
             </button>
         `;
@@ -345,7 +383,7 @@ class AdminOrderManager {
 
     async showOrderDetails(orderId) {
         try {
-            const response = await fetch(`${API_BASE_URL}/orders/${orderId}`, {
+            const response = await fetch(`${window.API_BASE_URL}/orders/${orderId}`, {
                 headers: {
                     'Authorization': `Bearer ${this.getAuthToken()}`
                 }
@@ -355,12 +393,17 @@ class AdminOrderManager {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             
-            const { data: order } = await response.json();
-            this.renderOrderModal(order);
+            const data = await response.json();
+            
+            if (data.success) {
+                this.renderOrderModal(data.data);
+            } else {
+                throw new Error(data.error || 'Failed to load order details');
+            }
             
         } catch (error) {
             console.error('Error loading order details:', error);
-            alert('Failed to load order details. Please try again.');
+            this.showNotification('Failed to load order details. Please try again.', 'error');
         }
     }
 
@@ -368,8 +411,12 @@ class AdminOrderManager {
         const modal = document.getElementById('order-detail-modal');
         const content = document.getElementById('order-detail-content');
         
+        
+        // Handle different data structures from API
+        const amountPaid = order.amount_paid || order.amount || 0;
+        const totalAmount = order.total_amount || order.amount || 0;
         const isDeposit = order.payment_mode === 'deposit';
-        const remainingAmount = order.total_amount - order.amount_paid;
+        const remainingAmount = totalAmount - amountPaid;
         
         content.innerHTML = `
             <div class="order-detail-section">
@@ -429,11 +476,11 @@ class AdminOrderManager {
                 <div class="order-detail-grid">
                     <div class="order-detail-item">
                         <span class="order-detail-label">Total Amount</span>
-                        <span class="order-detail-value">$${order.total_amount.toFixed(2)}</span>
+                        <span class="order-detail-value">$${totalAmount.toFixed(2)}</span>
                     </div>
                     <div class="order-detail-item">
                         <span class="order-detail-label">Amount Paid</span>
-                        <span class="order-detail-value">$${order.amount_paid.toFixed(2)}</span>
+                        <span class="order-detail-value">$${amountPaid.toFixed(2)}</span>
                     </div>
                     ${isDeposit ? `
                         <div class="order-detail-item">
@@ -442,9 +489,15 @@ class AdminOrderManager {
                         </div>
                     ` : ''}
                     <div class="order-detail-item">
-                        <span class="order-detail-label">Stripe Session ID</span>
-                        <span class="order-detail-value">${order.stripe_checkout_session_id || 'N/A'}</span>
+                        <span class="order-detail-label">Payment ID</span>
+                        <span class="order-detail-value">${order.stripe_checkout_session_id || order.payment_intent_id || 'N/A'}</span>
                     </div>
+                    ${order.payment_status ? `
+                        <div class="order-detail-item">
+                            <span class="order-detail-label">Payment Status</span>
+                            <span class="order-detail-value">${order.payment_status}</span>
+                        </div>
+                    ` : ''}
                 </div>
             </div>
 
@@ -452,18 +505,29 @@ class AdminOrderManager {
                 <h4>Actions</h4>
                 <div class="action-buttons">
                     ${this.getStatusActionButtons(order)}
-                    <button class="btn btn-secondary" onclick="this.closeOrderModal()">Close</button>
+                    <button class="btn btn-secondary" onclick="window.closeOrderModal()">Close</button>
                 </div>
             </div>
         `;
         
         modal.style.display = 'flex';
+        modal.classList.add('show');
         document.body.style.overflow = 'hidden';
+        
+        // Force modal to be visible with a slight delay to ensure DOM updates
+        setTimeout(() => {
+            if (window.getComputedStyle(modal).display === 'none') {
+                modal.style.display = 'flex !important';
+                modal.style.visibility = 'visible';
+                modal.style.opacity = '1';
+            }
+        }, 100);
     }
 
     closeOrderModal() {
         const modal = document.getElementById('order-detail-modal');
         modal.style.display = 'none';
+        modal.classList.remove('show');
         document.body.style.overflow = 'auto';
     }
 
@@ -472,8 +536,17 @@ class AdminOrderManager {
             return;
         }
 
+        // Find the button that was clicked and update its state
+        const clickedButton = event.target;
+        const originalText = clickedButton.textContent;
+        const originalDisabled = clickedButton.disabled;
+        
         try {
-            const response = await fetch(`${API_BASE_URL}/orders/${orderId}/status`, {
+            // Update button state
+            clickedButton.disabled = true;
+            clickedButton.textContent = 'Updating...';
+            
+            const response = await fetch(`${window.API_BASE_URL}/orders/${orderId}/status`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -489,15 +562,40 @@ class AdminOrderManager {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
-            // Reload orders to reflect the change
-            this.loadOrders();
-            this.closeOrderModal();
+            // Update local data
+            const orderIndex = this.orders.findIndex(order => order.id === orderId);
+            if (orderIndex !== -1) {
+                this.orders[orderIndex].status = newStatus;
+                this.orders[orderIndex].updated_at = new Date().toISOString();
+                
+                // Re-render the orders table with updated data
+                this.renderOrders();
+                this.updateStats();
+                
+                // Update order detail modal if it's open for this order
+                const modal = document.getElementById('order-detail-modal');
+                if (modal && modal.style.display === 'flex') {
+                    const orderDetailContent = document.getElementById('order-detail-content');
+                    if (orderDetailContent && orderDetailContent.innerHTML.includes(orderId)) {
+                        // Re-render the modal with updated order data
+                        this.renderOrderModal(this.orders[orderIndex]);
+                    }
+                }
+            }
             
-            alert('Order status updated successfully!');
+            // Show success notification
+            this.showNotification(`Order status updated to ${newStatus} successfully!`, 'success');
+            
+            // Close modal
+            this.closeOrderModal();
             
         } catch (error) {
             console.error('Error updating order status:', error);
-            alert('Failed to update order status. Please try again.');
+            this.showNotification(`Failed to update order status: ${error.message}`, 'error');
+        } finally {
+            // Restore button state
+            clickedButton.disabled = originalDisabled;
+            clickedButton.textContent = originalText;
         }
     }
 
@@ -550,6 +648,10 @@ class AdminOrderManager {
         this.isAuthenticated = false;
         this.showLogin();
         this.showNotification('Logged out successfully', 'info');
+    }
+
+    delay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
     }
 
     showNotification(message, type = 'info') {
@@ -620,4 +722,7 @@ window.goToPage = function(page) {
         window.adminOrderManager.goToPage(page);
     }
 };
+
+// Export class globally
+window.AdminOrderManager = AdminOrderManager;
 

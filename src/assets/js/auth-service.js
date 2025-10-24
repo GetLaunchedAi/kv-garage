@@ -31,7 +31,6 @@ class AuthService {
     
     // Mark as initialized
     this.initialized = true;
-    console.log('AuthService initialized');
   }
 
   checkExistingSession() {
@@ -66,11 +65,7 @@ class AuthService {
 
   async login(email, password) {
     try {
-      const API_BASE_URL = window.location.hostname === 'localhost' 
-        ? 'http://localhost:3001/api' 
-        : '/api';
-
-      const response = await fetch(`${API_BASE_URL}/admin/login`, {
+      const response = await fetch(`${window.API_BASE_URL}/admin/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

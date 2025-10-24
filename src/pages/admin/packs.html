@@ -14,7 +14,7 @@ permalink: "admin/packs/"
 
 <section id="int-hero">
     <h1 id="home-h">Pack Management</h1>
-    {% image './src/images/about_banner_img.png', 'vinyl floors', '', 'lazy',
+    {% image './src/images/banner_img.png', 'vinyl floors', '', 'lazy',
     '(max-width: 850px) 850px, 1920px'%}
   </section>
 
@@ -40,10 +40,15 @@ permalink: "admin/packs/"
     <!-- Pack Management Section (shown when authenticated) -->
     <div id="packs-section" class="packs-section" style="display: none;">
         <div class="packs-header">
-            <h2>Pack Management</h2>
+            <div class="admin-header-left">
+                <button id="back-to-dashboard" class="btn btn-back">
+                    <span>←</span> Back to Dashboard
+                </button>
+                <h2>Pack Management</h2>
+            </div>
             <div class="admin-actions">
                 <button id="create-pack-btn" class="btn btn-primary">Create New Pack</button>
-                <button id="refresh-packs" class="btn btn-secondary">Refresh</button>
+                <button id="refresh-packs" type="button" class="btn btn-secondary">Refresh</button>
                 <button id="logout-btn" class="btn btn-danger">Logout</button>
             </div>
         </div>
@@ -138,8 +143,10 @@ permalink: "admin/packs/"
                             <select id="pack-type" name="type" required>
                                 <option value="">Select type...</option>
                                 <option value="starter">Starter</option>
+                                <option value="growth">Growth</option>
                                 <option value="reseller">Reseller</option>
                                 <option value="pro">Pro</option>
+                                <option value="macbook">Macbook</option>
                             </select>
                         </div>
                     </div>
@@ -157,8 +164,19 @@ permalink: "admin/packs/"
                     
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="estimated-resale">Estimated Resale Value *</label>
-                            <input type="number" id="estimated-resale" name="estimated_resale_value" step="0.01" min="0" required>
+                            <label>Estimated Resale Value Range *</label>
+                            <div class="range-inputs">
+                                <div class="range-input-group">
+                                    <label for="resale-min" class="range-label">Min Value</label>
+                                    <input type="number" id="resale-min" name="resale_min" step="0.01" min="0" required>
+                                </div>
+                                <span class="range-separator">to</span>
+                                <div class="range-input-group">
+                                    <label for="resale-max" class="range-label">Max Value</label>
+                                    <input type="number" id="resale-max" name="resale_max" step="0.01" min="0" required>
+                                </div>
+                            </div>
+                            <div id="range-preview" class="range-preview">Preview: $0–$0</div>
                         </div>
                         <div class="form-group">
                             <label for="number-units">Number of Units *</label>
@@ -176,13 +194,30 @@ permalink: "admin/packs/"
                         <input type="url" id="pack-image" name="image_url">
                     </div>
                     
-                    <div class="form-group">
-                        <label for="pack-status">Status</label>
-                        <select id="pack-status" name="status">
-                            <option value="available">Available</option>
-                            <option value="limited">Limited</option>
-                            <option value="sold_out">Sold Out</option>
-                        </select>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="pack-status">Status</label>
+                            <select id="pack-status" name="status">
+                                <option value="available">Available</option>
+                                <option value="limited">Limited</option>
+                                <option value="sold_out">Sold Out</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="available-quantity">Available Quantity</label>
+                            <input type="number" id="available-quantity" name="available_quantity" min="0" value="0">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="reserved-quantity">Reserved Quantity</label>
+                            <input type="number" id="reserved-quantity" name="reserved_quantity" min="0" value="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="short-description">Short Description</label>
+                            <input type="text" id="short-description" name="short_description" placeholder="Brief description for cards">
+                        </div>
                     </div>
                     
                     <div class="form-actions">

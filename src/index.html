@@ -10,7 +10,6 @@ permalink: "/"
 eleventyNavigation:
   key: Home
   order: 100
-packs: _data/packs.json
 ---
 
 <!-- Enter html code below -->
@@ -137,47 +136,8 @@ packs: _data/packs.json
             <th>Action</th>
           </tr>
         </thead>
-        <tbody>
-          {% for pack in packs.packs %}
-          <tr class="catalog-row">
-            <td class="pack-name">
-              <strong>{{ pack.name }}</strong>
-            </td>
-            <td class="pack-price">
-              <span class="price">${{ pack.price.toFixed(2) }}</span>
-            </td>
-            <td class="pack-units">
-              ~{{ pack.units }}
-            </td>
-            <td class="pack-contents">
-              {{ pack.short_description }}
-            </td>
-            <td class="pack-resale">
-              <span class="resale-value">{{ pack.estimated_resale_value }}</span>
-            </td>
-            <td class="pack-image">
-              <img 
-                src="{{ pack.image_url }}" 
-                alt="{{ pack.name }}"
-                loading="lazy"
-                decoding="async"
-                class="catalog-image"
-              />
-            </td>
-            <td class="pack-action">
-              <button 
-                class="add-to-cart cs-button-solid catalog-btn"
-                data-pack-id="{{ pack.id }}"
-                data-pack-name="{{ pack.name }}"
-                data-pack-price="{{ pack.price }}"
-                data-pack-image="{{ pack.image_url }}"
-                data-pack-slug="{{ pack.slug }}"
-              >
-                Add to Cart
-              </button>
-            </td>
-          </tr>
-          {% endfor %}
+        <tbody id="homepage-packs-table">
+          <!-- Packs will be loaded dynamically -->
         </tbody>
       </table>
     </div>
@@ -295,7 +255,7 @@ packs: _data/packs.json
   <div class="cs-container">
     <!-- Left Image Section -->
     <div class="cs-left">
-      {% image './src/images/about_img_0.avif', 'flooring', 'cs-picture
+      {% image './src/images/about_img_0.png', 'flooring', 'cs-picture
       cs-picture1', 'lazy'%}
     </div>
     <!-- Right Content Section-->
@@ -346,7 +306,7 @@ packs: _data/packs.json
   <div class="cs-container">
     <!-- Left Image Section -->
     <div class="cs-left">
-      {% image './src/images/featured_img_0.avif', 'flooring', 'cs-picture
+      {% image './src/images/featured_img_0.png', 'flooring', 'cs-picture
       cs-picture1', 'lazy'%}
     </div>
     <!-- Right Content Section-->
@@ -458,7 +418,20 @@ packs: _data/packs.json
 
 <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
 <script src="/assets/js/catalog-pdf-generator.js"></script>
+<script src="/assets/js/pack-loader.js"></script>
 <script>
+  // Initialize pack loading for homepage
+  document.addEventListener('DOMContentLoaded', async () => {
+    try {
+      console.log('Loading packs for homepage...');
+      const packs = await window.packLoader.getFeaturedPacks(4);
+      window.packLoader.renderPacksTable(packs, 'homepage-packs-table');
+      console.log('Homepage packs loaded successfully');
+    } catch (error) {
+      console.error('Error loading homepage packs:', error);
+    }
+  });
+
   if (window.netlifyIdentity) {
     window.netlifyIdentity.on("init", (user) => {
       if (!user) {

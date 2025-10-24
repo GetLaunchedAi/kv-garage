@@ -93,6 +93,9 @@ class PackDetailSystem {
   constructor() {
     this.packId = this.getPackIdFromUrl();
     this.packs = []; // Store packs data for manifest loading
+    this.apiBaseUrl = window.location.hostname === 'localhost' 
+      ? 'http://localhost:3001/api' 
+      : '/api';
     this.initializeElements();
     this.loadPackDetails();
   }
@@ -161,7 +164,33 @@ class PackDetailSystem {
     try {
       this.showLoading();
       
-      // Load packs from JSON file
+      // Try API first
+      try {
+        const apiResponse = await fetch(`${this.apiBaseUrl}/packs/${this.packId}`);
+        if (apiResponse.ok) {
+          const apiData = await apiResponse.json();
+          const pack = apiData.pack || apiData.data;
+          
+          if (pack) {
+            // Load all packs for related packs and manifest
+            const allPacksResponse = await fetch(`${this.apiBaseUrl}/packs`);
+            if (allPacksResponse.ok) {
+              const allPacksData = await allPacksResponse.json();
+              this.packs = allPacksData.packs || allPacksData.data || [];
+            }
+            
+            this.renderPackDetails(pack);
+            this.loadRelatedPacks(pack.type);
+            this.showManifestActions();
+            this.hideLoading();
+            return;
+          }
+        }
+      } catch (apiError) {
+        console.warn('API loading failed, trying JSON fallback:', apiError);
+      }
+      
+      // Fallback to JSON
       const response = await fetch('/data/packs.json');
       if (!response.ok) throw new Error('Failed to load pack data');
       
@@ -346,7 +375,7 @@ class PackDetailSystem {
         <div class="pack-info-large">
           <div class="pack-header-large">
             <h1 class="pack-name-large">${pack.name}</h1>
-            <span class="pack-type-large ${pack.type}">${pack.type.toUpperCase()}</span>
+            <span class="pack-type-badge type-${pack.type}">${pack.type.toUpperCase()}</span>
           </div>
           
           <div class="pack-pricing-large">
@@ -386,12 +415,12 @@ class PackDetailSystem {
           
           <div class="pack-actions-large">
             ${!isOutOfStock ? `
-              <button class="pack-btn-large primary" onclick="this.initiatePurchase('full')">Buy Now - $${pack.price.toFixed(2)}</button>
-              <button class="pack-btn-large secondary" onclick="this.initiatePurchase('deposit')">Reserve with 70% - $${pack.deposit_price.toFixed(2)}</button>
+              <button class="pack-btn-large primary" onclick="initiatePurchase('full')">Buy Now - $${pack.price.toFixed(2)}</button>
+              <button class="pack-btn-large secondary" onclick="initiatePurchase('deposit')">Reserve with 70% - $${pack.deposit_price.toFixed(2)}</button>
             ` : `
               <button class="pack-btn-large disabled" disabled>Sold Out</button>
             `}
-            <button class="pack-btn-large tertiary" onclick="this.downloadManifest('pdf')">Download Manifest PDF</button>
+            <button class="pack-btn-large tertiary" onclick="downloadManifest('pdf')">Download Manifest PDF</button>
           </div>
         </div>
       </div>
@@ -607,7 +636,7 @@ class PackDetailSystem {
         <div class="pack-content">
           <div class="pack-header">
             <h3 class="pack-name">${pack.name}</h3>
-            <span class="pack-type ${pack.type}">${pack.type.toUpperCase()}</span>
+            <span class="pack-type-badge type-${pack.type}">${pack.type.toUpperCase()}</span>
           </div>
           <div class="pack-pricing">
             <div class="price-row">
@@ -631,14 +660,13 @@ class PackDetailSystem {
     // Bind purchase events
     window.initiatePurchase = async (paymentType) => {
       try {
-        // Import checkout functionality
-        const { createCheckoutSession } = await import('/assets/js/checkout.js');
+        // Store pack data for payment form
+        localStorage.setItem('selectedPackId', pack.id);
+        localStorage.setItem('selectedPackData', JSON.stringify(pack));
+        localStorage.setItem('paymentType', paymentType);
         
-        // Create checkout session
-        const sessionUrl = await createCheckoutSession(pack.id, paymentType);
-        
-        // Redirect to Stripe checkout
-        window.location.href = sessionUrl;
+        // Redirect to payment form
+        window.location.href = '/payment-form.html';
         
       } catch (error) {
         console.error('Checkout error:', error);

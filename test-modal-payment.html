@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Modal Payment Buttons</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 2rem;
+            background: #f8f9fa;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .test-section {
+            background: white;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .pack-btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 0.5rem;
+            transition: all 0.2s ease;
+        }
+        .pack-btn.primary {
+            background: #007bff;
+            color: white;
+        }
+        .pack-btn.secondary {
+            background: #28a745;
+            color: white;
+        }
+        .pack-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        .status {
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            margin: 0.5rem 0;
+            font-weight: 500;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Test Modal Payment Buttons</h1>
+        
+        <div class="test-section">
+            <h2>Test Pack Modal</h2>
+            <button id="open-modal-btn" class="pack-btn primary">Open Pack Modal</button>
+            
+            <div id="test-results">
+                <div class="status success">Click the button above to test modal payment buttons</div>
+            </div>
+        </div>
+
+        <!-- Test Modal -->
+        <div id="pack-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Test Pack - iPhone Cases</h3>
+                    <button class="modal-close" id="modal-close">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p><strong>Price:</strong> $149.99</p>
+                    <p><strong>Deposit:</strong> $104.99</p>
+                    <p>Premium iPhone cases with MagSafe compatibility</p>
+                    
+                    <div class="pack-actions">
+                        <button id="buy-now-btn" class="pack-btn primary">Buy Now</button>
+                        <button id="reserve-btn" class="pack-btn secondary">Reserve with Deposit</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Test pack data
+        const testPack = {
+            id: "test-pack-1",
+            name: "Test Pack - iPhone Cases",
+            price: 149.99,
+            deposit_price: 104.99,
+            available_quantity: 10,
+            inStock: true
+        };
+
+        // Modal functionality
+        const modal = document.getElementById('pack-modal');
+        const openBtn = document.getElementById('open-modal-btn');
+        const closeBtn = document.getElementById('modal-close');
+        const buyBtn = document.getElementById('buy-now-btn');
+        const reserveBtn = document.getElementById('reserve-btn');
+        const results = document.getElementById('test-results');
+
+        // Open modal
+        openBtn.addEventListener('click', () => {
+            modal.classList.add('show');
+            results.innerHTML = '<div class="status success">Modal opened. Test the payment buttons below.</div>';
+        });
+
+        // Close modal
+        closeBtn.addEventListener('click', () => {
+            modal.classList.remove('show');
+        });
+
+        // Close modal on overlay click
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.remove('show');
+            }
+        });
+
+        // Payment button handlers
+        buyBtn.addEventListener('click', () => {
+            try {
+                // Store pack data for payment form
+                localStorage.setItem('selectedPackId', testPack.id);
+                localStorage.setItem('selectedPackData', JSON.stringify(testPack));
+                localStorage.setItem('paymentType', 'full');
+                
+                results.innerHTML = '<div class="status success">Buy Now clicked! Data stored in localStorage. Would redirect to payment form.</div>';
+                console.log('Buy Now clicked:', testPack);
+                
+                // In a real scenario, this would redirect to payment form
+                // window.location.href = '/payment-form.html';
+                
+            } catch (error) {
+                results.innerHTML = `<div class="status error">Error: ${error.message}</div>`;
+                console.error('Buy Now error:', error);
+            }
+        });
+
+        reserveBtn.addEventListener('click', () => {
+            try {
+                // Store pack data for payment form
+                localStorage.setItem('selectedPackId', testPack.id);
+                localStorage.setItem('selectedPackData', JSON.stringify(testPack));
+                localStorage.setItem('paymentType', 'deposit');
+                
+                results.innerHTML = '<div class="status success">Reserve with Deposit clicked! Data stored in localStorage. Would redirect to payment form.</div>';
+                console.log('Reserve clicked:', testPack);
+                
+                // In a real scenario, this would redirect to payment form
+                // window.location.href = '/payment-form.html';
+                
+            } catch (error) {
+                results.innerHTML = `<div class="status error">Error: ${error.message}</div>`;
+                console.error('Reserve error:', error);
+            }
+        });
+
+        // Test localStorage data
+        function checkStoredData() {
+            const packId = localStorage.getItem('selectedPackId');
+            const packData = localStorage.getItem('selectedPackData');
+            const paymentType = localStorage.getItem('paymentType');
+            
+            if (packId && packData && paymentType) {
+                results.innerHTML = `
+                    <div class="status success">
+                        <strong>Data stored successfully:</strong><br>
+                        Pack ID: ${packId}<br>
+                        Payment Type: ${paymentType}<br>
+                        Pack Data: ${packData}
+                    </div>
+                `;
+            }
+        }
+
+        // Check for existing data on page load
+        checkStoredData();
+    </script>
+</body>
+</html>

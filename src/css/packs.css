@@ -14,6 +14,8 @@
   --starter-color: #3b82f6;
   --reseller-color: #10b981;
   --pro-color: #f59e0b;
+  --growth-color: #06b6d4;
+  --macbook-color: #8b5cf6;
   
   /* Status colors */
   --available-color: #10b981;
@@ -660,6 +662,32 @@ body.dark-mode .modal-header h2 {
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
+}
+
+/* Type-specific badge colors */
+.pack-type-badge.type-starter {
+  background: var(--starter-color);
+  color: white;
+}
+
+.pack-type-badge.type-growth {
+  background: var(--growth-color);
+  color: white;
+}
+
+.pack-type-badge.type-macbook {
+  background: var(--macbook-color);
+  color: white;
+}
+
+.pack-type-badge.type-reseller {
+  background: var(--reseller-color);
+  color: white;
+}
+
+.pack-type-badge.type-pro {
+  background: var(--pro-color);
+  color: white;
 }
 
 .pack-status-badge {

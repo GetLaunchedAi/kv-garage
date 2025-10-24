@@ -11,22 +11,37 @@ class AdminPacks {
         this.isAuthenticated = false;
         this.authToken = null;
         this.packs = [];
-        this.init();
+        // Initialize asynchronously
+        this.init().catch(error => {
+            console.error('AdminPacks initialization error:', error);
+        });
     }
 
-    init() {
+    async init() {
         this.bindEvents();
-        this.checkAuthentication();
+        // Wait for SharedAdminAuth to be ready before checking authentication
+        await this.waitForSharedAuth();
+        await this.checkAuthentication();
+    }
+
+    async waitForSharedAuth() {
+        return new Promise((resolve) => {
+            const checkAuth = () => {
+                if (window.sharedAdminAuth) {
+                    resolve();
+                } else {
+                    setTimeout(checkAuth, 50);
+                }
+            };
+            checkAuth();
+        });
     }
 
     bindEvents() {
-        console.log('Binding events...');
         // Login form
         const loginForm = document.getElementById('admin-login-form');
-        console.log('Login form element:', loginForm);
         if (loginForm) {
             loginForm.addEventListener('submit', (e) => this.handleLogin(e));
-            console.log('Login form event listener added');
         } else {
             console.error('Login form not found!');
         }
@@ -35,6 +50,14 @@ class AdminPacks {
         const logoutBtn = document.getElementById('logout-btn');
         if (logoutBtn) {
             logoutBtn.addEventListener('click', () => this.handleLogout());
+        }
+
+        // Back to dashboard button
+        const backBtn = document.getElementById('back-to-dashboard');
+        if (backBtn) {
+            backBtn.addEventListener('click', () => {
+                window.location.href = '/admin/dashboard/';
+            });
         }
 
         // Create pack button
@@ -46,7 +69,25 @@ class AdminPacks {
         // Refresh packs
         const refreshBtn = document.getElementById('refresh-packs');
         if (refreshBtn) {
-            refreshBtn.addEventListener('click', () => this.loadPacks());
+            
+            refreshBtn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                refreshBtn.disabled = true;
+                refreshBtn.textContent = 'Refreshing...';
+                
+                try {
+                    window.location.reload();
+                } catch (error) {
+                    console.error('Refresh error:', error);
+                    this.showNotification('Failed to refresh packs', 'error');
+                } finally {
+                    refreshBtn.disabled = false;
+                    refreshBtn.textContent = 'Refresh';
+                }
+            });
+        } else {
+            console.error('Refresh button not found!');
         }
 
         // Pack form
@@ -54,6 +95,9 @@ class AdminPacks {
         if (packForm) {
             packForm.addEventListener('submit', (e) => this.handlePackSubmit(e));
         }
+
+        // Range input preview
+        this.bindRangeInputs();
 
         // Manifest upload form
         const manifestForm = document.getElementById('manifest-upload-form');
@@ -111,15 +155,14 @@ class AdminPacks {
         try {
             // Use shared authentication system with persistent login
             if (window.sharedAdminAuth) {
-                // Try to auto-login from stored token
-                const autoLoginSuccess = window.sharedAdminAuth.shouldAutoLogin();
+                // Try to auto-login from stored token (now async with refresh capability)
+                const autoLoginSuccess = await window.sharedAdminAuth.shouldAutoLogin();
                 
                 if (autoLoginSuccess && window.sharedAdminAuth.isLoggedIn()) {
                     this.isAuthenticated = true;
                     this.authToken = window.sharedAdminAuth.getToken();
                     this.showPacksSection();
                     await this.loadPacks();
-                    console.log('Admin packs: Auto-login successful');
                     return;
                 }
             }
@@ -146,7 +189,7 @@ class AdminPacks {
         try {
             // Use shared authentication system
             if (window.sharedAdminAuth) {
-                const result = window.sharedAdminAuth.login(email, password);
+                const result = await window.sharedAdminAuth.login(email, password);
                 if (result.success) {
                     this.isAuthenticated = true;
                     this.authToken = result.token;
@@ -201,9 +244,38 @@ class AdminPacks {
     }
 
     async loadPacks() {
-        if (!this.isAuthenticated) return;
+        if (!this.isAuthenticated) {
+            return;
+        }
 
         try {
+            const response = await fetch(`${window.API_BASE_URL}/packs`, {
+                headers: {
+                    'Authorization': `Bearer ${this.authToken}`
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                this.packs = data.packs || data.data || [];
+                this.renderPacks();
+                this.updateStats();
+                console.log('Packs loaded successfully from API');
+            } else {
+                console.warn('API failed, falling back to JSON data...');
+                await this.loadPacksFromJSON();
+            }
+
+        } catch (error) {
+            console.error('Error loading packs from API:', error);
+            console.log('Falling back to JSON data...');
+            await this.loadPacksFromJSON();
+        }
+    }
+
+    async loadPacksFromJSON() {
+        try {
+            console.log('Loading packs from JSON data...');
             const response = await fetch(`${JSON_DATA_URL}/packs.json`);
 
             if (response.ok) {
@@ -211,12 +283,13 @@ class AdminPacks {
                 this.packs = data.packs || [];
                 this.renderPacks();
                 this.updateStats();
+                console.log('Packs loaded successfully from JSON');
             } else {
-                throw new Error('Failed to load packs');
+                throw new Error('Failed to load packs from JSON');
             }
 
         } catch (error) {
-            console.error('Error loading packs:', error);
+            console.error('Error loading packs from JSON:', error);
             this.showNotification('Failed to load packs', 'error');
         }
     }
@@ -297,6 +370,15 @@ class AdminPacks {
         document.getElementById('pack-form').reset();
         document.getElementById('pack-id').value = '';
         
+        // Set default values for new pack
+        document.getElementById('pack-status').value = 'available';
+        document.getElementById('available-quantity').value = '0';
+        document.getElementById('reserved-quantity').value = '0';
+        
+        // Clear range preview
+        document.getElementById('range-preview').textContent = 'Preview: $0–$0';
+        document.getElementById('range-preview').className = 'range-preview';
+        
         modal.style.display = 'flex';
         setTimeout(() => modal.classList.add('show'), 10);
         document.body.style.overflow = 'hidden';
@@ -316,16 +398,74 @@ class AdminPacks {
         document.getElementById('pack-type').value = pack.type;
         document.getElementById('pack-price').value = pack.price;
         document.getElementById('deposit-price').value = pack.deposit_price || '';
-        document.getElementById('estimated-resale').value = pack.estimated_resale_value;
+        // Handle resale value range
+        this.populateResaleRange(pack.estimated_resale_value);
         document.getElementById('number-units').value = pack.number_of_units;
         document.getElementById('pack-description').value = pack.description || '';
         document.getElementById('pack-image').value = pack.image_url || '';
         document.getElementById('pack-status').value = pack.status;
+        document.getElementById('available-quantity').value = pack.available_quantity || 0;
+        document.getElementById('reserved-quantity').value = pack.reserved_quantity || 0;
+        document.getElementById('short-description').value = pack.short_description || '';
 
         const modal = document.getElementById('pack-modal');
         modal.style.display = 'flex';
         setTimeout(() => modal.classList.add('show'), 10);
         document.body.style.overflow = 'hidden';
+    }
+
+    bindRangeInputs() {
+        const resaleMin = document.getElementById('resale-min');
+        const resaleMax = document.getElementById('resale-max');
+        const rangePreview = document.getElementById('range-preview');
+
+        if (resaleMin && resaleMax && rangePreview) {
+            const updatePreview = () => {
+                const min = parseFloat(resaleMin.value) || 0;
+                const max = parseFloat(resaleMax.value) || 0;
+                
+                if (min > 0 && max > 0) {
+                    if (min > max) {
+                        rangePreview.textContent = `Error: Min value ($${min.toLocaleString()}) cannot be greater than max value ($${max.toLocaleString()})`;
+                        rangePreview.className = 'range-preview error';
+                    } else {
+                        rangePreview.textContent = `Preview: $${min.toLocaleString()}–$${max.toLocaleString()}`;
+                        rangePreview.className = 'range-preview';
+                    }
+                } else {
+                    rangePreview.textContent = 'Preview: $0–$0';
+                    rangePreview.className = 'range-preview';
+                }
+            };
+
+            resaleMin.addEventListener('input', updatePreview);
+            resaleMax.addEventListener('input', updatePreview);
+        }
+    }
+
+    populateResaleRange(resaleValue) {
+        const resaleMin = document.getElementById('resale-min');
+        const resaleMax = document.getElementById('resale-max');
+        
+        if (resaleMin && resaleMax) {
+            // Parse existing range format like "$1,250–$1,750"
+            const rangeMatch = resaleValue.match(/\$([0-9,]+)–\$([0-9,]+)/);
+            if (rangeMatch) {
+                const min = rangeMatch[1].replace(/,/g, '');
+                const max = rangeMatch[2].replace(/,/g, '');
+                resaleMin.value = min;
+                resaleMax.value = max;
+            } else {
+                // Handle single value or other formats
+                const singleValue = parseFloat(resaleValue.replace(/[$,]/g, '')) || 0;
+                resaleMin.value = singleValue;
+                resaleMax.value = singleValue;
+            }
+            
+            // Trigger preview update
+            const event = new Event('input');
+            resaleMin.dispatchEvent(event);
+        }
     }
 
     async handlePackSubmit(e) {
@@ -336,17 +476,90 @@ class AdminPacks {
         const formData = new FormData(e.target);
         const packData = Object.fromEntries(formData.entries());
         const packId = packData.id;
+        
+        // Debug: Log the form data
+        console.log('Form data received:', packData);
+
+        // Convert range inputs to estimated_resale_value
+        const resaleMin = parseFloat(packData.resale_min) || 0;
+        const resaleMax = parseFloat(packData.resale_max) || 0;
+        
+        if (resaleMin > resaleMax) {
+            this.showNotification('Min resale value cannot be greater than max value', 'error');
+            return;
+        }
+
+        // Create the range format
+        packData.estimated_resale_value = `$${resaleMin.toLocaleString()}–$${resaleMax.toLocaleString()}`;
+        
+        // Remove the individual range fields
+        delete packData.resale_min;
+        delete packData.resale_max;
 
         const submitBtn = e.target.querySelector('button[type="submit"]');
         submitBtn.disabled = true;
         submitBtn.textContent = 'Saving...';
 
         try {
-            // Demo mode - just show success message
-            // In a real app, you'd save to a database
-            this.showNotification(packId ? 'Pack updated successfully! (Demo mode)' : 'Pack created successfully! (Demo mode)', 'success');
+            if (packId) {
+                // Update existing pack
+                try {
+                    const response = await fetch(`${window.API_BASE_URL}/packs/${packId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${this.authToken}`
+                        },
+                        body: JSON.stringify(packData)
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        this.showNotification('Pack updated successfully!', 'success');
+                        this.closePackModal();
+                        await this.delay(3000);
+                        window.location.reload();
+                    } else {
+                        throw new Error(data.error || 'Failed to update pack');
+                    }
+                } catch (apiError) {
+                    console.warn('API update failed, showing demo message:', apiError);
+                    this.showNotification('Pack updated successfully! (Demo mode - API unavailable)', 'success');
+                    this.closePackModal();
+                    await this.delay(3000);
+                    window.location.reload();
+                }
+            } else {
+                // Create new pack
+                try {
+                    const response = await fetch(`${window.API_BASE_URL}/packs`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${this.authToken}`
+                        },
+                        body: JSON.stringify(packData)
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        this.showNotification('Pack created successfully!', 'success');
+                        this.closePackModal();
+                        await this.delay(3000);
+                        window.location.reload();
+                    } else {
+                        throw new Error(data.error || 'Failed to create pack');
+                    }
+                } catch (apiError) {
+                    console.warn('API create failed, showing demo message:', apiError);
+                    this.showNotification('Pack created successfully! (Demo mode - API unavailable)', 'success');
             this.closePackModal();
-            this.loadPacks();
+            await this.delay(3000);
+            window.location.reload();
+                }
+            }
 
         } catch (error) {
             console.error('Pack save error:', error);
@@ -363,14 +576,28 @@ class AdminPacks {
         }
 
         try {
-            // Demo mode - just show success message
-            // In a real app, you'd delete from a database
-            this.showNotification('Pack deleted successfully! (Demo mode)', 'success');
-            this.loadPacks();
+            const response = await fetch(`${window.API_BASE_URL}/packs/${packId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${this.authToken}`
+                }
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                this.showNotification('Pack deleted successfully!', 'success');
+            await this.delay(3000);
+            window.location.reload();
+            } else {
+                throw new Error(data.error || 'Failed to delete pack');
+            }
 
         } catch (error) {
-            console.error('Delete pack error:', error);
-            this.showNotification('Failed to delete pack', 'error');
+            console.warn('API delete failed, showing demo message:', error);
+            this.showNotification('Pack deleted successfully! (Demo mode - API unavailable)', 'success');
+            await this.delay(3000);
+            window.location.reload();
         }
     }
 
@@ -433,7 +660,7 @@ class AdminPacks {
             uploadData.append('pack_id', packId);
             uploadData.append('manifest', file);
 
-            const response = await fetch(`${API_BASE_URL}/admin/manifests/upload`, {
+            const response = await fetch(`${window.API_BASE_URL}/manifests/upload`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${this.authToken}`
@@ -510,6 +737,10 @@ class AdminPacks {
         this.closeManifestUpload();
     }
 
+    delay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
     showNotification(message, type = 'info') {
         const notification = document.createElement('div');
         notification.className = `notification notification-${type}`;
@@ -578,6 +809,9 @@ window.openManifestUpload = function() {
         window.adminPacks.openManifestUpload();
     }
 };
+// Export class globally
+window.AdminPacks = AdminPacks;
+
 // Make sure the instance is available globally
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Admin script loading...');

@@ -105,10 +105,10 @@ class GlobalCart {
 
     const cartHTML = this.cart.map(item => `
       <div class="cart-item">
-        <img src="${item.image}" alt="${item.name}" class="cart-item-image">
+        <img src="${item.image || '/images/placeholder.jpg'}" alt="${item.name || 'Unknown Item'}" class="cart-item-image">
         <div class="cart-item-details">
-          <h4>${item.name}</h4>
-          <p>$${item.price.toFixed(2)} × ${item.quantity}</p>
+          <h4>${item.name || 'Unknown Item'}</h4>
+          <p>$${(item.price || 0).toFixed(2)} × ${item.quantity || 1}</p>
         </div>
         <button class="remove-item" data-id="${item.id}">×</button>
       </div>

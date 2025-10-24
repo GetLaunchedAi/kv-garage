@@ -13,13 +13,16 @@ eleventyNavigation:
   order: 100
 ---
 
+<!-- Load shared pack loader utility -->
+<script src="/assets/js/pack-loader.js"></script>
+
 <!-- ============================================ -->
 <!--                    HERO SECTION              -->
 <!-- ============================================ -->
 
 <section id="int-hero">
   <h1 id="home-h">Wholesale Packs for Resellers</h1>
-  {% image './src/images/about_banner_img.png', 'vinyl floors', '', 'lazy',
+  {% image './src/images/banner_img.png', 'vinyl floors', '', 'lazy',
   '(max-width: 850px) 850px, 1920px'%}
 </section>
 
@@ -361,35 +364,27 @@ eleventyNavigation:
 
     async loadPacks() {
       try {
-        console.log('Loading packs from JSON data');
+        console.log('Loading packs using shared pack loader...');
         this.showLoading();
 
-        // Load packs from JSON file
-        const response = await fetch('/data/packs.json');
-        
-        if (!response.ok) {
-          throw new Error(`Failed to load packs: ${response.status} ${response.statusText}`);
-        }
+        // Use the shared pack loader with API-first approach
+        this.packs = await window.packLoader.loadPacks();
+        console.log('Packs loaded:', this.packs.length);
+        console.log('Packs data:', this.packs);
 
-        const data = await response.json();
-        console.log('Packs data received:', data);
-        
-        if (!data || !data.packs) {
-          throw new Error('No packs data found in JSON file');
-        }
-        
-        this.packs = data.packs;
-        console.log('Processed packs:', this.packs);
-
-        if (this.packs.length === 0) {
-          console.warn('No packs received');
+        // Check if we got valid pack data
+        if (!this.packs || !Array.isArray(this.packs)) {
+          console.error('Invalid packs data received:', this.packs);
+          throw new Error('Invalid pack data format');
         }
 
         this.renderPacks();
         this.hideLoading();
 
-        // Note: Real-time inventory updates disabled when using JSON data
-        // this.startInventoryUpdates();
+        // Start real-time inventory updates when using API
+        if (this.packs.length > 0) {
+          this.startInventoryUpdates();
+        }
       } catch (error) {
         console.error('Error loading packs:', error);
         this.showError();
@@ -473,12 +468,12 @@ eleventyNavigation:
           const buyBtn = document.createElement('button');
           buyBtn.className = 'pack-btn buy';
           buyBtn.setAttribute('data-action', 'buy');
-          buyBtn.textContent = `Buy Now ($${pack.price.toFixed(2)})`;
+          buyBtn.textContent = `Buy Now ($${parseFloat(pack.price).toFixed(2)})`;
 
           const reserveBtn = document.createElement('button');
           reserveBtn.className = 'pack-btn reserve';
           reserveBtn.setAttribute('data-action', 'reserve');
-          reserveBtn.textContent = `Reserve with 70% Deposit ($${pack.deposit_price.toFixed(2)})`;
+          reserveBtn.textContent = `Reserve with 70% Deposit ($${parseFloat(pack.deposit_price).toFixed(2)})`;
 
           actionsContainer.appendChild(buyBtn);
           actionsContainer.appendChild(reserveBtn);
@@ -534,13 +529,13 @@ eleventyNavigation:
         <div class="pack-content">
           <div class="pack-header">
             <h3 class="pack-name">${pack.name}</h3>
-            <span class="pack-type">${pack.type.toUpperCase()}</span>
+            <span class="pack-type-badge type-${pack.type}">${pack.type.toUpperCase()}</span>
           </div>
           
           <div class="pack-pricing">
             <div class="price-row">
               <span class="price-label">Your Cost:</span>
-              <span class="price-value">$${pack.price.toFixed(2)}</span>
+              <span class="price-value">$${parseFloat(pack.price).toFixed(2)}</span>
             </div>
             <div class="price-row">
               <span class="price-label">Est. Resale:</span>
@@ -548,7 +543,7 @@ eleventyNavigation:
             </div>
             <div class="price-row">
               <span class="price-label">Est. Profit:</span>
-              <span class="price-value profit">${pack.estimated_resale_value.replace(/\$([0-9,]+)–\$([0-9,]+)/, (match, min, max) => `$${(parseFloat(min.replace(/,/g, '')) - pack.price).toFixed(0)}–$${(parseFloat(max.replace(/,/g, '')) - pack.price).toFixed(0)}`)}</span>
+              <span class="price-value profit">${pack.estimated_resale_value.replace(/\$([0-9,]+)–\$([0-9,]+)/, (match, min, max) => `$${(parseFloat(min.replace(/,/g, '')) - parseFloat(pack.price)).toFixed(0)}–$${(parseFloat(max.replace(/,/g, '')) - parseFloat(pack.price)).toFixed(0)}`)}</span>
             </div>
           </div>
           
@@ -569,8 +564,8 @@ eleventyNavigation:
             <button class="pack-btn primary" data-action="view">View Details</button>
             <button class="pack-btn secondary" data-action="manifest">View Manifest</button>
             ${!isOutOfStock ? `
-              <button class="pack-btn buy" data-action="buy">Buy Now ($${pack.price.toFixed(2)})</button>
-              <button class="pack-btn reserve" data-action="reserve">Reserve with 70% Deposit ($${pack.deposit_price.toFixed(2)})</button>
+              <button class="pack-btn buy" data-action="buy">Buy Now ($${parseFloat(pack.price).toFixed(2)})</button>
+              <button class="pack-btn reserve" data-action="reserve">Reserve with 70% Deposit ($${parseFloat(pack.deposit_price).toFixed(2)})</button>
             ` : ''}
           </div>
         </div>
@@ -594,6 +589,16 @@ eleventyNavigation:
     }
 
     async handlePackAction(action, pack) {
+      if (action === 'buy' || action === 'reserve') {
+        // Store pack data for payment form
+        localStorage.setItem('selectedPackId', pack.id);
+        localStorage.setItem('selectedPackData', JSON.stringify(pack));
+        localStorage.setItem('paymentType', action === 'buy' ? 'full' : 'deposit');
+        
+        // Redirect to payment form
+        window.location.href = '/payment-form.html';
+        return;
+      }
       console.log('handlePackAction called with action:', action, 'pack:', pack);
       switch (action) {
         case 'view':
@@ -615,11 +620,14 @@ eleventyNavigation:
     async openPackModal(pack) {
       this.currentPack = pack;
 
-      // Load manifest data from JSON
-      try {
-        const response = await fetch('/data/manifests.json');
-        const data = await response.json();
-        const manifestItems = data.manifests[pack.id];
+        // Load manifest data from API
+        try {
+          const response = await fetch(`${this.apiBaseUrl}/manifests/${pack.id}`);
+          if (!response.ok) {
+            throw new Error('Failed to load manifest from API');
+          }
+          const data = await response.json();
+          const manifestItems = data.manifest.items;
 
         // Add manifest to pack object
         pack.manifest = manifestItems || [];
@@ -637,19 +645,21 @@ eleventyNavigation:
     populatePackModal(pack) {
       // Update modal content
       document.getElementById('modal-pack-name').textContent = pack.name;
-      document.getElementById('modal-pack-type').textContent = pack.type.toUpperCase();
+      const modalPackType = document.getElementById('modal-pack-type');
+      modalPackType.textContent = pack.type.toUpperCase();
+      modalPackType.className = `pack-type-badge type-${pack.type}`;
       document.getElementById('modal-pack-status').textContent = pack.available_quantity > 0 ? 'Available' : 'Sold Out';
       document.getElementById('modal-pack-image').src = pack.image_url || '/images/products/collage_1.png';
-      document.getElementById('modal-pack-price').textContent = `$${pack.price.toFixed(2)}`;
+      document.getElementById('modal-pack-price').textContent = `$${parseFloat(pack.price).toFixed(2)}`;
       document.getElementById('modal-pack-resale').textContent = pack.estimated_resale_value;
-      document.getElementById('modal-pack-profit').textContent = pack.estimated_resale_value.replace(/\$([0-9,]+)–\$([0-9,]+)/, (match, min, max) => `$${(parseFloat(min.replace(/,/g, '')) - pack.price).toFixed(0)}–$${(parseFloat(max.replace(/,/g, '')) - pack.price).toFixed(0)}`);
+      document.getElementById('modal-pack-profit').textContent = pack.estimated_resale_value.replace(/\$([0-9,]+)–\$([0-9,]+)/, (match, min, max) => `$${(parseFloat(min.replace(/,/g, '')) - parseFloat(pack.price)).toFixed(0)}–$${(parseFloat(max.replace(/,/g, '')) - parseFloat(pack.price)).toFixed(0)}`);
       document.getElementById('modal-pack-units').textContent = `${pack.number_of_units}`;
       document.getElementById('modal-pack-available').textContent = pack.available_quantity;
       document.getElementById('modal-pack-description').textContent = pack.description;
 
       // Update payment amounts
-      document.getElementById('full-payment-amount').textContent = `$${pack.price.toFixed(2)}`;
-      document.getElementById('deposit-payment-amount').textContent = `$${pack.deposit_price.toFixed(2)}`;
+      document.getElementById('full-payment-amount').textContent = `$${parseFloat(pack.price).toFixed(2)}`;
+      document.getElementById('deposit-payment-amount').textContent = `$${parseFloat(pack.deposit_price).toFixed(2)}`;
 
       // Render manifest preview
       this.renderManifestPreview(pack.manifest);
@@ -806,15 +816,17 @@ eleventyNavigation:
 
     async initiatePurchase(pack, paymentType) {
       try {
-        // Import checkout functionality
-        const { createCheckoutSession } = await import('/assets/js/checkout.js');
-
-        // Create checkout session
-        const sessionUrl = await createCheckoutSession(pack.id, paymentType);
-
-        // Redirect to Stripe checkout
-        window.location.href = sessionUrl;
-
+        // Store pack data for payment form
+        localStorage.setItem('selectedPackId', pack.id);
+        localStorage.setItem('selectedPackData', JSON.stringify(pack));
+        localStorage.setItem('paymentType', paymentType);
+        
+        // Close modal
+        this.closeModal();
+        
+        // Redirect to payment form
+        window.location.href = '/payment-form.html';
+        
       } catch (error) {
         console.error('Checkout error:', error);
         alert(`Error: ${error.message}`);
@@ -858,7 +870,7 @@ eleventyNavigation:
       const data = Object.fromEntries(formData.entries());
 
       try {
-        const response = await fetch(`${this.apiBaseUrl}/custom-packs/request`, {
+        const response = await fetch(`${this.apiBaseUrl}/custom-requests/request`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -883,8 +895,8 @@ eleventyNavigation:
         console.log('viewManifest called with packId:', packId);
         console.log('Loading manifest for pack:', packId);
         
-        // Load manifest from JSON file
-        const response = await fetch('/data/manifests.json');
+        // Load manifest from API
+        const response = await fetch(`${this.apiBaseUrl}/manifests/${packId}`);
         if (!response.ok) {
           console.error('Manifest response not ok:', response.status, response.statusText);
           throw new Error('Failed to load manifest');
@@ -892,7 +904,7 @@ eleventyNavigation:
         
         const data = await response.json();
         console.log('Manifest data received:', data);
-        const manifestItems = data.manifests[packId];
+        const manifestItems = data.manifest.items;
         
         if (!manifestItems) {
           throw new Error('No manifest data found for this pack');

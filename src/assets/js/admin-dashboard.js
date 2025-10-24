@@ -3,26 +3,39 @@
  * Handles admin authentication, dashboard management, and admin tools
  */
 
-// Using JSON data instead of API
-const JSON_DATA_URL = '/data';
-const API_BASE_URL = '/api'; // Fallback for API calls
+// API Configuration - using global API_BASE_URL from shared-admin-auth.js
+const JSON_DATA_URL = '/data'; // Fallback for static data
 
-console.log('Admin Dashboard script loading...');
 
 try {
 class AdminDashboard {
     constructor() {
         this.isAuthenticated = false;
         this.authToken = null;
-        this.init();
+        // Initialize asynchronously
+        this.init().catch(error => {
+            console.error('AdminDashboard initialization error:', error);
+        });
     }
 
-    init() {
+    async init() {
         this.bindEvents();
-        // Delay authentication check to ensure sharedAdminAuth is available
-        setTimeout(() => {
-            this.checkAuthentication();
-        }, 100);
+        // Wait for SharedAdminAuth to be ready before checking authentication
+        await this.waitForSharedAuth();
+        await this.checkAuthentication();
+    }
+
+    async waitForSharedAuth() {
+        return new Promise((resolve) => {
+            const checkAuth = () => {
+                if (window.sharedAdminAuth) {
+                    resolve();
+                } else {
+                    setTimeout(checkAuth, 50);
+                }
+            };
+            checkAuth();
+        });
     }
 
     bindEvents() {
@@ -42,7 +55,22 @@ class AdminDashboard {
             // Refresh dashboard
             const refreshBtn = document.getElementById('refresh-dashboard');
             if (refreshBtn) {
-                refreshBtn.addEventListener('click', () => this.loadDashboardData());
+                refreshBtn.addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    refreshBtn.disabled = true;
+                    refreshBtn.textContent = 'Refreshing...';
+                    
+                    try {
+                        window.location.reload();
+                    } catch (error) {
+                        console.error('Refresh error:', error);
+                        this.showNotification('Failed to refresh dashboard', 'error');
+                    } finally {
+                        refreshBtn.disabled = false;
+                        refreshBtn.textContent = 'Refresh';
+                    }
+                });
             }
 
             // Manifest upload form
@@ -73,15 +101,14 @@ class AdminDashboard {
         try {
             // Use shared authentication system with persistent login
             if (window.sharedAdminAuth) {
-                // Try to auto-login from stored token
-                const autoLoginSuccess = window.sharedAdminAuth.shouldAutoLogin();
+                // Try to auto-login from stored token (now async with refresh capability)
+                const autoLoginSuccess = await window.sharedAdminAuth.shouldAutoLogin();
                 
                 if (autoLoginSuccess && window.sharedAdminAuth.isLoggedIn()) {
                     this.isAuthenticated = true;
                     this.authToken = window.sharedAdminAuth.getToken();
                     this.showDashboard();
                     await this.loadDashboardData();
-                    console.log('Admin dashboard: Auto-login successful');
                     return;
                 }
             }
@@ -108,7 +135,7 @@ class AdminDashboard {
         try {
             // Use shared authentication system
             if (window.sharedAdminAuth) {
-                const result = window.sharedAdminAuth.login(email, password);
+                const result = await window.sharedAdminAuth.login(email, password);
             if (result.success) {
                 this.isAuthenticated = true;
                     this.authToken = result.token;
@@ -162,24 +189,9 @@ class AdminDashboard {
         if (!this.isAuthenticated) return;
 
         try {
-            // Load pack data from JSON
-            const response = await fetch(`${JSON_DATA_URL}/packs.json`);
-            if (response.ok) {
-                const data = await response.json();
-                const packs = data.packs || [];
-                
-                // Create mock dashboard stats
-                const stats = {
-                    total_packs: packs.length,
-                    active_packs: packs.filter(p => p.status === 'active').length,
-                    total_revenue: packs.reduce((sum, p) => sum + (p.price || 0), 0),
-                    total_units: packs.reduce((sum, p) => sum + (p.units || 0), 0),
-                    total_orders: Math.floor(Math.random() * 50) + 10, // Mock orders
-                    pending_orders: Math.floor(Math.random() * 5) + 1 // Mock pending orders
-                };
-                
-                this.updateDashboardStats(stats);
-            }
+            // Get real dashboard stats from API
+            const stats = await this.getRealDashboardStats();
+            this.updateDashboardStats(stats);
 
             // Load recent activity
             await this.loadRecentActivity();
@@ -187,6 +199,64 @@ class AdminDashboard {
         } catch (error) {
             console.error('Error loading dashboard data:', error);
             this.showNotification('Failed to load dashboard data', 'error');
+        }
+    }
+
+    async getRealDashboardStats() {
+        try {
+            
+            // Fetch real orders data
+            const ordersResponse = await fetch(`${window.API_BASE_URL}/orders?limit=1000`, {
+                headers: {
+                    'Authorization': `Bearer ${this.authToken}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            let ordersData = { orders: [], stats: {} };
+            if (ordersResponse.ok) {
+                ordersData = await ordersResponse.json();
+            }
+            
+            // Fetch packs data for pack-related stats
+            const packsResponse = await fetch(`${window.API_BASE_URL}/packs`, {
+                headers: {
+                    'Authorization': `Bearer ${this.authToken}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            let packsData = { packs: [] };
+            if (packsResponse.ok) {
+                packsData = await packsResponse.json();
+            }
+            
+            const orders = ordersData.orders || [];
+            const packs = packsData.packs || [];
+            
+            // Calculate real stats from actual data
+            const stats = {
+                total_packs: packs.length,
+                active_packs: packs.filter(p => p.status === 'active').length,
+                total_revenue: orders.reduce((sum, order) => sum + (order.total_amount || order.amount || 0), 0),
+                total_units: packs.reduce((sum, p) => sum + (p.units || 0), 0),
+                total_orders: orders.length,
+                pending_orders: orders.filter(o => o.status === 'pending').length
+            };
+            
+            return stats;
+            
+        } catch (error) {
+            console.error('Error fetching real dashboard stats:', error);
+            // Return empty stats if API fails
+            return {
+                total_packs: 0,
+                active_packs: 0,
+                total_revenue: 0,
+                total_units: 0,
+                total_orders: 0,
+                pending_orders: 0
+            };
         }
     }
 
@@ -199,23 +269,23 @@ class AdminDashboard {
 
     async loadRecentActivity() {
         try {
-            // Load recent activity from JSON data (mock data for now)
-            const response = await fetch(`${JSON_DATA_URL}/packs.json`);
+            
+            // Load real recent activity from API
+            const response = await fetch(`${window.API_BASE_URL}/activity/recent?limit=10&days=7`, {
+                headers: {
+                    'Authorization': `Bearer ${this.authToken}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            
             
             if (response.ok) {
                 const data = await response.json();
-                // Create mock recent activity from packs data
-                const mockActivity = {
-                    recent_orders: data.packs ? data.packs.slice(0, 5).map((pack, index) => ({
-                        id: `ORD-${1000 + index}`,
-                        customer_name: `Customer ${index + 1}`,
-                        pack_name: pack.name,
-                        amount: pack.price,
-                        status: ['pending', 'completed', 'shipped'][index % 3],
-                        created_at: new Date(Date.now() - (index * 24 * 60 * 60 * 1000)).toISOString()
-                    })) : []
-                };
-                this.renderRecentActivity(mockActivity);
+                this.renderRecentActivity(data.activities || []);
+            } else {
+                const errorData = await response.json();
+                console.error('Activity fetch error:', errorData);
+                throw new Error(`Failed to load recent activity: ${errorData.error || 'Unknown error'}`);
             }
         } catch (error) {
             console.error('Error loading recent activity:', error);
@@ -227,39 +297,36 @@ class AdminDashboard {
         }
     }
 
-    renderRecentActivity(analytics) {
+    renderRecentActivity(activities) {
         const activityList = document.getElementById('activity-list');
         
-        // If no analytics data or recent orders, show a simple message
-        if (!analytics) {
+        // If no activities, show a simple message
+        if (!activities || activities.length === 0) {
             activityList.innerHTML = '<p class="no-data">No recent activity</p>';
             return;
         }
 
-        // Create activity items from recent orders
-        if (analytics.recent_orders && analytics.recent_orders.length > 0) {
-            const activitiesHtml = analytics.recent_orders.map(order => {
-                const statusClass = `status-${order.status}`;
-                const timeAgo = this.getTimeAgo(new Date(order.created_at));
-                
-                return `
-                    <div class="activity-item">
-                        <div class="activity-content">
-                            <p class="activity-message">New order from ${order.customer_name}</p>
-                            <p class="activity-details">Order #${order.id} - ${order.pack_name} - $${order.amount}</p>
-                            <div class="activity-meta">
-                                <span class="status-badge ${statusClass}">${order.status}</span>
-                                <span class="activity-time">${timeAgo}</span>
-                            </div>
+        // Create activity items from real activity data
+        const activitiesHtml = activities.map(activity => {
+            const timeAgo = this.getTimeAgo(new Date(activity.timestamp));
+            const activityIcon = this.getActivityIcon(activity.type);
+            const activityClass = this.getActivityClass(activity.type);
+            
+            return `
+                <div class="activity-item ${activityClass}">
+                    <div class="activity-icon">${activityIcon}</div>
+                    <div class="activity-content">
+                        <p class="activity-message">${activity.description}</p>
+                        <div class="activity-meta">
+                            <span class="activity-user">${activity.user}</span>
+                            <span class="activity-time">${timeAgo}</span>
                         </div>
                     </div>
-                `;
-            }).join('');
+                </div>
+            `;
+        }).join('');
 
-            activityList.innerHTML = activitiesHtml;
-        } else {
-            activityList.innerHTML = '<p class="no-data">No recent activity</p>';
-        }
+        activityList.innerHTML = activitiesHtml;
     }
 
     getTimeAgo(date) {
@@ -272,12 +339,56 @@ class AdminDashboard {
         return `${Math.floor(diffInSeconds / 86400)}d ago`;
     }
 
+    getActivityIcon(type) {
+        const icons = {
+            'order_created': '🛒',
+            'order_status_changed': '📋',
+            'order_updated': '✏️',
+            'order_cancelled': '❌',
+            'pack_created': '📦',
+            'pack_updated': '📦',
+            'pack_deleted': '🗑️',
+            'manifest_uploaded': '📄',
+            'manifest_processed': '✅',
+            'custom_request_created': '🎯',
+            'custom_request_status_changed': '🔄',
+            'custom_request_reviewed': '👀',
+            'custom_request_approved': '✅',
+            'custom_request_rejected': '❌',
+            'admin_action': '⚙️',
+            'system_action': '🔧'
+        };
+        return icons[type] || '📝';
+    }
+
+    getActivityClass(type) {
+        const classes = {
+            'order_created': 'activity-order',
+            'order_status_changed': 'activity-order',
+            'order_updated': 'activity-order',
+            'order_cancelled': 'activity-order-cancelled',
+            'pack_created': 'activity-pack',
+            'pack_updated': 'activity-pack',
+            'pack_deleted': 'activity-pack-deleted',
+            'manifest_uploaded': 'activity-manifest',
+            'manifest_processed': 'activity-manifest',
+            'custom_request_created': 'activity-request',
+            'custom_request_status_changed': 'activity-request',
+            'custom_request_reviewed': 'activity-request',
+            'custom_request_approved': 'activity-request-approved',
+            'custom_request_rejected': 'activity-request-rejected',
+            'admin_action': 'activity-admin',
+            'system_action': 'activity-system'
+        };
+        return classes[type] || 'activity-default';
+    }
+
     async openManifestUpload() {
         if (!this.isAuthenticated) return;
 
         try {
             // Load packs for selection
-            const response = await fetch(`${API_BASE_URL}/packs`, {
+            const response = await fetch(`${window.API_BASE_URL}/packs`, {
                 headers: {
                     'Authorization': `Bearer ${this.authToken}`
                 }
@@ -288,8 +399,12 @@ class AdminDashboard {
                 this.populatePackSelect(data.packs || data.data);
             }
 
-            document.getElementById('manifest-upload-modal').classList.add('show');
-            document.body.style.overflow = 'hidden';
+            const modal = document.getElementById('manifest-upload-modal');
+            if (modal) {
+                modal.style.display = 'flex';
+                setTimeout(() => modal.classList.add('show'), 10);
+                document.body.style.overflow = 'hidden';
+            }
 
         } catch (error) {
             console.error('Error loading packs:', error);
@@ -310,9 +425,18 @@ class AdminDashboard {
     }
 
     closeManifestUpload() {
-        document.getElementById('manifest-upload-modal').classList.remove('show');
-        document.body.style.overflow = 'auto';
-        document.getElementById('manifest-upload-form').reset();
+        const modal = document.getElementById('manifest-upload-modal');
+        if (modal) {
+            modal.classList.remove('show');
+            setTimeout(() => {
+                modal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }, 300);
+        }
+        const form = document.getElementById('manifest-upload-form');
+        if (form) {
+            form.reset();
+        }
     }
 
     async handleManifestUpload(e) {
@@ -338,7 +462,7 @@ class AdminDashboard {
             uploadData.append('pack_id', packId);
             uploadData.append('manifest', file);
 
-            const response = await fetch(`${API_BASE_URL}/admin/manifests/upload`, {
+            const response = await fetch(`${window.API_BASE_URL}/manifests/upload`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${this.authToken}`
@@ -380,24 +504,17 @@ class AdminDashboard {
         document.body.style.overflow = 'hidden';
 
         try {
-            // Load custom requests from JSON data (mock data for now)
-            const response = await fetch(`${JSON_DATA_URL}/packs.json`);
+            // Load real custom requests from API
+            const response = await fetch(`${window.API_BASE_URL}/custom-requests?t=${Date.now()}`, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
+                    'Content-Type': 'application/json'
+                }
+            });
             
             if (response.ok) {
                 const data = await response.json();
-                // Create mock custom requests from packs data
-                const mockRequests = data.packs ? data.packs.slice(0, 3).map((pack, index) => ({
-                    id: `REQ-${2000 + index}`,
-                    customer_name: `Customer ${index + 1}`,
-                    customer_email: `customer${index + 1}@example.com`,
-                    pack_name: pack.name,
-                    custom_requirements: `Custom requirements for ${pack.name}`,
-                    status: ['pending', 'in_review', 'completed'][index % 3],
-                    created_at: new Date(Date.now() - (index * 2 * 24 * 60 * 60 * 1000)).toISOString(),
-                    estimated_value: pack.price * 1.2
-                })) : [];
-                
-                this.renderCustomRequests(mockRequests);
+                this.renderCustomRequests(data.requests || []);
             } else {
                 throw new Error('Failed to load custom requests');
             }
@@ -429,19 +546,21 @@ class AdminDashboard {
                     </div>
                     <div class="request-content">
                         <p><strong>Email:</strong> ${request.customer_email}</p>
-                        <p><strong>Business:</strong> ${request.business_name || 'N/A'}</p>
-                        <p><strong>Request:</strong> ${request.request_description || request.requested_mix || 'N/A'}</p>
-                        <p><strong>Budget:</strong> $${request.estimated_budget || 'N/A'}</p>
+                        ${request.customer_phone ? `<p><strong>Phone:</strong> ${request.customer_phone}</p>` : ''}
+                        ${request.business_name ? `<p><strong>Business:</strong> ${request.business_name}</p>` : ''}
+                        ${request.estimated_budget ? `<p><strong>Budget:</strong> $${request.estimated_budget}</p>` : ''}
+                        ${request.preferred_categories ? `<p><strong>Categories:</strong> ${request.preferred_categories}</p>` : ''}
+                        <p><strong>Description:</strong> ${request.request_description}</p>
                         ${request.admin_notes ? `<p><strong>Admin Notes:</strong> ${request.admin_notes}</p>` : ''}
                     </div>
                     <div class="request-actions">
-                        <button class="btn btn-sm btn-primary" onclick="updateRequestStatus('${request.id}', 'reviewed')">
+                        <button class="btn btn-sm btn-primary" onclick="updateRequestStatus('${request.id}', 'reviewed')" title="Mark as reviewed">
                             Mark Reviewed
                         </button>
-                        <button class="btn btn-sm btn-success" onclick="updateRequestStatus('${request.id}', 'approved')">
+                        <button class="btn btn-sm btn-success" onclick="updateRequestStatus('${request.id}', 'approved')" title="Approve request">
                             Approve
                         </button>
-                        <button class="btn btn-sm btn-danger" onclick="updateRequestStatus('${request.id}', 'rejected')">
+                        <button class="btn btn-sm btn-danger" onclick="updateRequestStatus('${request.id}', 'rejected')" title="Reject request">
                             Reject
                         </button>
                     </div>
@@ -458,14 +577,17 @@ class AdminDashboard {
     }
 
     async updateRequestStatus(requestId, status) {
-        if (!this.isAuthenticated) return;
+        if (!this.isAuthenticated) {
+            this.showNotification('Please log in to update request status', 'error');
+            return;
+        }
 
         try {
-            const response = await fetch(`${API_BASE_URL}/custom-packs/requests/${requestId}/status`, {
+            const response = await fetch(`${window.API_BASE_URL}/custom-requests/${requestId}/status`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${this.authToken}`
+                    'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
                 },
                 body: JSON.stringify({ status })
             });
@@ -474,12 +596,13 @@ class AdminDashboard {
                 this.showNotification(`Request ${status} successfully!`, 'success');
                 this.openCustomPackRequests(); // Refresh the list
             } else {
-                throw new Error('Failed to update request status');
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to update request status');
             }
 
         } catch (error) {
             console.error('Error updating request status:', error);
-            this.showNotification('Failed to update request status', 'error');
+            this.showNotification(`Failed to update request status: ${error.message}`, 'error');
         }
     }
 
@@ -566,10 +689,12 @@ window.closeCustomPackRequests = function() {
 window.updateRequestStatus = function(requestId, status) {
     if (window.adminDashboard) {
         window.adminDashboard.updateRequestStatus(requestId, status);
+    } else {
+        console.error('AdminDashboard not available. Please refresh the page.');
+        alert('AdminDashboard not available. Please refresh the page.');
     }
 };
 
-console.log('AdminDashboard class defined:', typeof AdminDashboard);
 
 // Make AdminDashboard globally available
 window.AdminDashboard = AdminDashboard;

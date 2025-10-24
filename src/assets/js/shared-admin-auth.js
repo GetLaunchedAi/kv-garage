@@ -7,6 +7,12 @@
 const isProduction = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
 const isNetlify = window.location.hostname.includes('netlify.app');
 
+// API Configuration - make it globally available
+window.API_BASE_URL = window.location.hostname === 'localhost' 
+  ? 'http://localhost:3001/api' 
+  : '/api';
+const API_BASE_URL = window.API_BASE_URL;
+
 /**
  * Shared Admin Authentication System
  * Provides consistent authentication across all admin pages
@@ -28,10 +34,10 @@ class SharedAdminAuth {
 
     /**
      * Reads auth data from local storage and validates it.
-     * Crucially, it does NOT clear the expired token.
-     * @returns {boolean} True if a valid, unexpired token was found.
+     * Attempts to refresh expired tokens automatically.
+     * @returns {boolean} True if a valid, unexpired token was found or refreshed.
      */
-    readAndValidateToken() {
+    async readAndValidateToken() {
         const token = localStorage.getItem('admin_token');
         const tokenExpiry = localStorage.getItem('admin_token_expiry');
         
@@ -43,15 +49,15 @@ class SharedAdminAuth {
             const expiry = parseInt(tokenExpiry);
             
             if (now < expiry) {
+                // Token is still valid according to localStorage
                 this.authToken = token;
                 this.isAuthenticated = true;
                 console.log('✅ Auth state established from valid stored token.');
                 return true;
             } else {
-                // Token is expired, but we keep it in storage for now.
-                console.log('⚠️ Stored token is expired, but not cleared yet.');
-                // We could set this.authToken here if we wanted the expired token for a refresh call.
-                return false; 
+                // Token is expired, try to refresh it
+                console.log('⚠️ Stored token is expired, attempting refresh...');
+                return await this.refreshToken(token);
             }
         }
         console.log('ℹ️ No token found or expiry data missing.');
@@ -59,26 +65,89 @@ class SharedAdminAuth {
     }
 
     /**
-     * Handles the dummy login process and stores the token.
-     * In a real app, this would be an async API call.
+     * Attempts to refresh an expired token using the API
+     * @param {string} expiredToken - The expired token to refresh
+     * @returns {boolean} True if refresh was successful
      */
-    login(email, password) {
-        // ... (Keep your existing demo login logic)
-        if (email === 'admin@kvgarage.com' && password === 'admin123') {
-            const mockToken = 'demo-admin-token-' + Date.now();
-            // Token expiry set to 7 days
-            const tokenExpiry = Date.now() + (7 * 24 * 60 * 60 * 1000); 
+    async refreshToken(expiredToken) {
+        try {
+            console.log('Attempting to refresh expired token...');
             
-            localStorage.setItem('admin_token', mockToken);
-            localStorage.setItem('admin_token_expiry', tokenExpiry.toString());
+            const response = await fetch(`${API_BASE_URL}/admin/refresh`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${expiredToken}`
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Update stored token and expiry
+                    localStorage.setItem('admin_token', data.token);
+                    const tokenExpiry = Date.now() + (24 * 60 * 60 * 1000);
+                    localStorage.setItem('admin_token_expiry', tokenExpiry.toString());
+                    
+                    this.authToken = data.token;
+                    this.isAuthenticated = true;
+                    
+                    console.log('✅ Token refreshed successfully');
+                    return true;
+                }
+            }
             
-            this.authToken = mockToken;
-            this.isAuthenticated = true;
-            console.log('✅ Admin login successful.');
-            return { success: true, token: mockToken };
-        } else {
-            console.log('❌ Login failed: Invalid credentials');
-            return { success: false, error: 'Invalid credentials. Use admin@kvgarage.com / admin123' };
+            // If refresh failed, clear the expired token
+            console.log('❌ Token refresh failed, clearing expired token');
+            this.clearStoredAuth();
+            return false;
+            
+        } catch (error) {
+            console.error('❌ Token refresh error:', error);
+            this.clearStoredAuth();
+            return false;
+        }
+    }
+
+    /**
+     * Handles real API login process
+     */
+    async login(email, password) {
+        try {
+            console.log('Attempting login with API...');
+            
+            const response = await fetch(`${API_BASE_URL}/admin/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email, password })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                // Store token and user info
+                localStorage.setItem('admin_token', data.token);
+                localStorage.setItem('admin_user', JSON.stringify(data.user));
+                
+                // Set expiry (24 hours from now)
+                const tokenExpiry = Date.now() + (24 * 60 * 60 * 1000);
+                localStorage.setItem('admin_token_expiry', tokenExpiry.toString());
+                
+                this.authToken = data.token;
+                this.isAuthenticated = true;
+                
+                console.log('✅ Admin login successful via API');
+                return { success: true, token: data.token, user: data.user };
+            } else {
+                console.log('❌ Login failed:', data.error);
+                return { success: false, error: data.error };
+            }
+        } catch (error) {
+            console.error('❌ Login error:', error);
+            return { success: false, error: 'Login failed. Please check your connection.' };
         }
     }
 
@@ -99,6 +168,7 @@ class SharedAdminAuth {
     clearStoredAuth() {
         localStorage.removeItem('admin_token');
         localStorage.removeItem('admin_token_expiry');
+        localStorage.removeItem('admin_user');
     }
 
     isLoggedIn() {
@@ -113,10 +183,9 @@ class SharedAdminAuth {
      * Determines if the AdminPacks class should attempt to use stored auth.
      * This replaces the redundant autoLogin/shouldAutoLogin functions.
      */
-    shouldAutoLogin() {
-        // Simply return the current state, which was set in init()
-        // OR read/validate it again if needed (as the state might be stale)
-        return this.readAndValidateToken();
+    async shouldAutoLogin() {
+        // Read and validate token (with automatic refresh if needed)
+        return await this.readAndValidateToken();
     }
 }
 

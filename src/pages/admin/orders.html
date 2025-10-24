@@ -14,7 +14,7 @@ permalink: "admin/orders/"
 
 <section id="int-hero">
     <h1 id="home-h">Order Management</h1>
-    {% image './src/images/about_banner_img.png', 'vinyl floors', '', 'lazy',
+    {% image './src/images/banner_img.png', 'vinyl floors', '', 'lazy',
     '(max-width: 850px) 850px, 1920px'%}
   </section>
   
@@ -40,7 +40,12 @@ permalink: "admin/orders/"
     <!-- Orders Section (shown when authenticated) -->
     <div id="orders-section" class="orders-section" style="display: none;">
         <div class="admin-header">
-            <h2>Order Management</h2>
+            <div class="admin-header-left">
+                <button id="back-to-dashboard" class="btn btn-back">
+                    <span>←</span> Back to Dashboard
+                </button>
+                <h2>Order Management</h2>
+            </div>
             <div class="admin-actions">
                 <button id="refresh-orders" class="btn btn-secondary">Refresh</button>
                 <button id="logout-btn" class="btn btn-danger">Logout</button>
