@@ -9,8 +9,14 @@ const winston = require('winston');
 
 class CSVParser {
   constructor() {
+    // Smart Environment Detection
+    const isProduction = process.env.NODE_ENV === 'production';
+    
     this.requiredFields = ['sku', 'item_name', 'quantity', 'condition'];
     this.optionalFields = ['product_name', 'condition_grade', 'notes', 'estimated_value', 'category', 'brand'];
+    
+    // Environment logging
+    console.log(`📊 CSVParser - Environment: ${isProduction ? 'production' : 'localhost'}`);
   }
 
   /**

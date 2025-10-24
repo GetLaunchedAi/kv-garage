@@ -3,6 +3,9 @@
  * Handles admin authentication, manifest uploads, and data management
  */
 
+// Load environment variables
+require('dotenv').config();
+
 const express = require('express');
 const cors = require('cors');
 const multer = require('multer');
@@ -83,6 +86,7 @@ app.use('/api/orders', require('./routes/orders'));
 app.use('/api/custom-requests', require('./routes/custom-requests'));
 app.use('/api/activity', require('./routes/activity'));
 app.use('/api/payments', require('./routes/payments'));
+app.use('/api/leads', require('./routes/leads'));
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

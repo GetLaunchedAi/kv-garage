@@ -3,8 +3,20 @@
  * Handles pack creation, editing, and management
  */
 
-// Using JSON data instead of API
-const JSON_DATA_URL = '/data';
+// Smart Environment Detection
+const isLocalhost = window.location.hostname === 'localhost' || 
+                   window.location.hostname === '127.0.0.1' ||
+                   window.location.hostname === '0.0.0.0';
+
+// API Configuration - Smart detection for all environments
+const API_BASE_URL = window.API_BASE_URL || (isLocalhost 
+  ? 'http://localhost:3001/api' 
+  : '/api');
+const JSON_DATA_URL = '/data'; // Fallback for static data
+
+// Environment logging
+console.log(`🌍 Admin Packs - Environment: ${isLocalhost ? 'localhost' : 'production'}`);
+console.log(`🔗 API Base URL: ${API_BASE_URL}`);
 
 class AdminPacks {
     constructor() {
@@ -260,7 +272,6 @@ class AdminPacks {
                 this.packs = data.packs || data.data || [];
                 this.renderPacks();
                 this.updateStats();
-                console.log('Packs loaded successfully from API');
             } else {
                 console.warn('API failed, falling back to JSON data...');
                 await this.loadPacksFromJSON();
@@ -268,14 +279,12 @@ class AdminPacks {
 
         } catch (error) {
             console.error('Error loading packs from API:', error);
-            console.log('Falling back to JSON data...');
             await this.loadPacksFromJSON();
         }
     }
 
     async loadPacksFromJSON() {
         try {
-            console.log('Loading packs from JSON data...');
             const response = await fetch(`${JSON_DATA_URL}/packs.json`);
 
             if (response.ok) {
@@ -283,7 +292,6 @@ class AdminPacks {
                 this.packs = data.packs || [];
                 this.renderPacks();
                 this.updateStats();
-                console.log('Packs loaded successfully from JSON');
             } else {
                 throw new Error('Failed to load packs from JSON');
             }
@@ -478,7 +486,6 @@ class AdminPacks {
         const packId = packData.id;
         
         // Debug: Log the form data
-        console.log('Form data received:', packData);
 
         // Convert range inputs to estimated_resale_value
         const resaleMin = parseFloat(packData.resale_min) || 0;
@@ -814,20 +821,16 @@ window.AdminPacks = AdminPacks;
 
 // Make sure the instance is available globally
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('Admin script loading...');
     
     // Wait for shared authentication system to be ready
     function waitForSharedAuth() {
         if (window.sharedAdminAuth) {
-            console.log('SharedAdminAuth is ready, initializing AdminPacks...');
             try {
                 window.adminPacks = new AdminPacks();
-                console.log('Admin initialized successfully');
             } catch (error) {
                 console.error('Admin initialization error:', error);
             }
         } else {
-            console.log('Waiting for SharedAdminAuth to be ready...');
             setTimeout(waitForSharedAuth, 100);
         }
     }

@@ -6,9 +6,18 @@
 const jwt = require('jsonwebtoken');
 const winston = require('winston');
 
-// JWT configuration
-const JWT_SECRET = process.env.JWT_SECRET || 'kv-garage-admin-secret-key-change-in-production';
+// Smart Environment Detection
+const isProduction = process.env.NODE_ENV === 'production';
+
+// JWT configuration with environment-specific secrets
+const JWT_SECRET = process.env.JWT_SECRET || (isProduction 
+  ? 'kv-garage-production-secret-key-change-this' 
+  : 'kv-garage-dev-secret-key');
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '24h';
+
+// Environment logging
+console.log(`🔐 Auth Middleware - Environment: ${isProduction ? 'production' : 'localhost'}`);
+console.log(`🔑 JWT Secret: ${JWT_SECRET.substring(0, 10)}...`);
 
 // Demo admin credentials (replace with real authentication in production)
 const ADMIN_CREDENTIALS = {

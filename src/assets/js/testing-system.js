@@ -19,7 +19,6 @@ class TestingSystem {
 
     // Test Categories
     async runAllTests() {
-        console.log('🧪 Starting KV Garage Platform Tests...');
         
         const tests = [
             { name: 'API Connectivity', fn: this.testAPIConnectivity },
@@ -36,7 +35,6 @@ class TestingSystem {
 
         for (const test of tests) {
             try {
-                console.log(`Running ${test.name}...`);
                 const result = await test.fn.call(this);
                 this.testResults.push({
                     name: test.name,
@@ -700,7 +698,6 @@ class TestingSystem {
         }
 
         // Log to console
-        console.log('🧪 Test Results:', this.testResults);
     }
 }
 

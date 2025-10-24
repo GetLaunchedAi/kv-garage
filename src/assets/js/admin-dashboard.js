@@ -3,8 +3,20 @@
  * Handles admin authentication, dashboard management, and admin tools
  */
 
-// API Configuration - using global API_BASE_URL from shared-admin-auth.js
+// Smart Environment Detection
+const isLocalhost = window.location.hostname === 'localhost' || 
+                   window.location.hostname === '127.0.0.1' ||
+                   window.location.hostname === '0.0.0.0';
+
+// API Configuration - Smart detection for all environments
+const API_BASE_URL = window.API_BASE_URL || (isLocalhost 
+  ? 'http://localhost:3001/api' 
+  : '/api');
 const JSON_DATA_URL = '/data'; // Fallback for static data
+
+// Environment logging
+console.log(`🌍 Admin Dashboard - Environment: ${isLocalhost ? 'localhost' : 'production'}`);
+console.log(`🔗 API Base URL: ${API_BASE_URL}`);
 
 
 try {

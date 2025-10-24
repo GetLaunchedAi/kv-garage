@@ -5,7 +5,7 @@
 
 const express = require('express');
 const router = express.Router();
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY || 'sk_test_51SIugHRTEiNjfzF8N8zMrBYuVgL8AkoDbvv6nFbNMlWIbmI8EcrFare32qkRIhXYi2g0UuXl7GigHse0ZqFceHc100xTPdXfg2');
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const fileManager = require('../utils/file-manager');
 const ActivityLogger = require('../utils/activity-logger');
 const winston = require('winston');
@@ -223,7 +223,7 @@ router.post('/webhook', express.raw({type: 'application/json'}), async (req, res
 router.get('/config', (req, res) => {
   res.json({
     success: true,
-    publishable_key: process.env.STRIPE_PUBLISHABLE_KEY || 'pk_test_51SIugHRTEiNjfzF8QPU8nCYV8njWLAVWbuZNmy4Z3twsiJeVnGUIgXybBamax9nR69iWbxwBxOGsAj0SCT3kiafk00n8RG9J46'
+    publishable_key: process.env.STRIPE_PUBLISHABLE_KEY
   });
 });
 

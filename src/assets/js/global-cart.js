@@ -38,6 +38,14 @@ class GlobalCart {
     const packPrice = parseFloat(button.dataset.packPrice);
     const packImage = button.dataset.packImage;
     const packSlug = button.dataset.packSlug;
+    
+
+    // Validate required data
+    if (!packId || !packName || isNaN(packPrice)) {
+      console.error('Invalid cart item data:', { packId, packName, packPrice });
+      alert('Unable to add item to cart - missing required data');
+      return;
+    }
 
     // Check if item already exists in cart
     const existingItem = this.cart.find(item => item.id === packId);
@@ -141,11 +149,41 @@ class GlobalCart {
   loadCart() {
     try {
       const cartData = localStorage.getItem('kv-garage-cart');
-      return cartData ? JSON.parse(cartData) : [];
+      const cart = cartData ? JSON.parse(cartData) : [];
+      
+      // Clean up corrupted items
+      return this.cleanupCorruptedItems(cart);
     } catch (error) {
       console.error('Error loading cart:', error);
       return [];
     }
+  }
+
+  cleanupCorruptedItems(cart) {
+    const validItems = cart.filter(item => {
+      // Check if item has required properties and they're not null/undefined
+      const isValid = item && 
+                     item.id && 
+                     item.name && 
+                     typeof item.price === 'number' && 
+                     !isNaN(item.price) &&
+                     item.quantity > 0;
+      
+      if (!isValid) {
+        console.log('Removing corrupted cart item:', item);
+      }
+      
+      return isValid;
+    });
+    
+    // If we removed items, save the cleaned cart
+    if (validItems.length !== cart.length) {
+      console.log(`Cleaned cart: removed ${cart.length - validItems.length} corrupted items`);
+      this.cart = validItems;
+      this.saveCart();
+    }
+    
+    return validItems;
   }
 
   saveCart() {
@@ -166,6 +204,19 @@ class GlobalCart {
   clearCart() {
     this.cart = [];
     this.saveCart();
+    this.updateCartDisplay();
+  }
+
+  // Method to clear cart from console for debugging
+  debugClearCart() {
+    console.log('Clearing cart for debugging');
+    this.clearCart();
+  }
+
+  // Method to clean corrupted items from console
+  debugCleanCart() {
+    console.log('Cleaning corrupted cart items');
+    this.cart = this.cleanupCorruptedItems(this.cart);
     this.updateCartDisplay();
   }
 
@@ -208,6 +259,9 @@ class GlobalCart {
 // Initialize cart when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
   window.globalCart = new GlobalCart();
+  // Make debug methods available globally
+  window.debugClearCart = () => window.globalCart.debugClearCart();
+  window.debugCleanCart = () => window.globalCart.debugCleanCart();
 });
 
 // Export for use in other scripts

@@ -863,7 +863,15 @@ eleventyNavigation:
           <p class="card__price">${priceDisplay}</p>
           ${p.description ? `<p class="card__description">${esc(p.description)}</p>` : ''}
         </div>
-        <a class="add-to-cart ${isOutOfStock ? 'disabled' : ''}" href="${esc(href)}">${isOutOfStock ? 'Out of Stock' : 'View Details'}</a>
+        <button class="add-to-cart ${isOutOfStock ? 'disabled' : ''}" 
+                data-pack-id="${esc(p.id || p.slug)}"
+                data-pack-name="${esc(p.title || p.name)}"
+                data-pack-price="${esc(p.price || 0)}"
+                data-pack-image="${esc(p.image || '/images/placeholder.jpg')}"
+                data-pack-slug="${esc(p.slug || p.id)}"
+                ${isOutOfStock ? 'disabled' : ''}>
+          ${isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
+        </button>
       </article>`;
   }
 

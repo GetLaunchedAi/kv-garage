@@ -9,9 +9,24 @@ const winston = require('winston');
 
 class FileManager {
   constructor() {
-    // Local development paths
-    this.dataDir = path.join(__dirname, '../public/data');
-    this.backupDir = path.join(__dirname, 'backups');
+    // Smart Environment Detection
+    const isProduction = process.env.NODE_ENV === 'production';
+    
+    // Dynamic path detection based on environment
+    if (isProduction) {
+      // Production paths (Cloudways)
+      this.dataDir = '/var/www/html/data';
+      this.backupDir = path.join(__dirname, 'backups');
+    } else {
+      // Development paths (localhost)
+      this.dataDir = path.join(__dirname, '../public/data');
+      this.backupDir = path.join(__dirname, 'backups');
+    }
+    
+    // Environment logging
+    console.log(`📁 FileManager - Environment: ${isProduction ? 'production' : 'localhost'}`);
+    console.log(`📂 Data Directory: ${this.dataDir}`);
+    console.log(`💾 Backup Directory: ${this.backupDir}`);
     
     // Ensure directories exist
     this.ensureDirectories();

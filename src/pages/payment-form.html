@@ -180,39 +180,43 @@ permalink: "payment-form.html"
         originalConsoleError.apply(console, args);
     };
     
-    // Handle network errors for Stripe analytics
-    const originalFetch = window.fetch;
-    window.fetch = function(...args) {
-        return originalFetch.apply(this, args).catch(error => {
-            if (error.message && error.message.includes('r.stripe.com')) {
-                console.warn('Stripe analytics request blocked - this is normal');
-                // Show ad blocker notice
-                const notice = document.getElementById('ad-blocker-notice');
-                if (notice) {
-                    notice.style.display = 'block';
-                }
-                return Promise.resolve({ ok: false, status: 0 });
+    // Handle network errors for Stripe analytics without overriding fetch
+    window.addEventListener('error', function(event) {
+        if (event.target && event.target.src && event.target.src.includes('r.stripe.com')) {
+            console.warn('Stripe analytics request blocked - this is normal and won\'t affect payments');
+            // Show ad blocker notice
+            const notice = document.getElementById('ad-blocker-notice');
+            if (notice) {
+                notice.style.display = 'block';
             }
-            throw error;
-        });
-    };
+        }
+    });
     
     // Detect ad blocker by trying to load a known ad blocker target
     function detectAdBlocker() {
-        const testScript = document.createElement('script');
-        testScript.src = 'https://r.stripe.com/b';
-        testScript.onerror = function() {
+        // Use a more reliable method that doesn't trigger console errors
+        const testImage = new Image();
+        testImage.onerror = function() {
             const notice = document.getElementById('ad-blocker-notice');
             if (notice) {
                 notice.style.display = 'block';
             }
         };
-        document.head.appendChild(testScript);
+        testImage.onload = function() {
+            // Ad blocker not detected
+        };
+        // Use a different test URL that's less likely to be blocked
+        testImage.src = 'https://www.google-analytics.com/analytics.js';
+        
+        // Fallback timeout
         setTimeout(() => {
-            if (testScript.parentNode) {
-                testScript.parentNode.removeChild(testScript);
+            if (testImage.complete === false) {
+                const notice = document.getElementById('ad-blocker-notice');
+                if (notice) {
+                    notice.style.display = 'block';
+                }
             }
-        }, 1000);
+        }, 2000);
     }
     
     // Run ad blocker detection after page load
@@ -267,14 +271,19 @@ permalink: "payment-form.html"
                 
                 console.log('Pack data prepared:', packData);
                 
+                // Get customer data from form or use defaults
+                const customerName = document.getElementById('customer-name').value || 'Customer';
+                const customerEmail = document.getElementById('customer-email').value || 'customer@example.com';
+                
                 // Store pack data in the payment instance
                 window.stripePayment.packData = packData;
                 window.stripePayment.customerData = {
-                    name: 'Test Customer',
-                    email: 'test@example.com'
+                    name: customerName,
+                    email: customerEmail
                 };
                 
                 console.log('Pack data stored in payment instance:', packData);
+                console.log('Customer data:', { name: customerName, email: customerEmail });
                 
                 // Wait a bit for Stripe to be ready
                 await new Promise(resolve => setTimeout(resolve, 1000));
@@ -282,8 +291,8 @@ permalink: "payment-form.html"
                 // Initialize payment form
                 console.log('Creating payment form...');
                 const success = await window.stripePayment.createPaymentForm('payment-element', packData, {
-                    name: 'Test Customer',
-                    email: 'test@example.com'
+                    name: customerName,
+                    email: customerEmail
                 });
                 
                 if (!success) {

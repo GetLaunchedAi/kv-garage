@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Payment Form - KV Garage</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 2rem;
+            background: #f8f9fa;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .test-section {
+            background: white;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .pack-btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 0.5rem;
+            transition: all 0.2s ease;
+        }
+        .pack-btn.primary {
+            background: #007bff;
+            color: white;
+        }
+        .pack-btn.secondary {
+            background: #28a745;
+            color: white;
+        }
+        .pack-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+        .status {
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            margin: 0.5rem 0;
+            font-weight: 500;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Test Payment Form</h1>
+        
+        <div class="test-section">
+            <h2>Test Pack Selection</h2>
+            <p>Click a button below to test the payment form with different pack data:</p>
+            
+            <button class="pack-btn primary" onclick="testBuyNow()">Test Buy Now ($99.99)</button>
+            <button class="pack-btn secondary" onclick="testReserveDeposit()">Test Reserve with Deposit ($69.99)</button>
+            
+            <div id="test-results">
+                <div class="status info">Click a button above to test payment form initialization</div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>Current localStorage Data</h2>
+            <div id="localStorage-data">
+                <div class="status info">No data stored yet</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Test pack data
+        const testPackBuy = {
+            id: "test-pack-buy",
+            name: "Test Pack - Buy Now",
+            price: 99.99,
+            available_quantity: 10,
+            inStock: true
+        };
+
+        const testPackReserve = {
+            id: "test-pack-reserve", 
+            name: "Test Pack - Reserve",
+            price: 199.99,
+            deposit_price: 139.99,
+            available_quantity: 5,
+            inStock: true
+        };
+
+        function testBuyNow() {
+            try {
+                // Store pack data for payment form
+                localStorage.setItem('selectedPackId', testPackBuy.id);
+                localStorage.setItem('selectedPackData', JSON.stringify(testPackBuy));
+                localStorage.setItem('paymentType', 'full');
+                
+                updateResults('Buy Now test data stored successfully!', 'success');
+                updateLocalStorageDisplay();
+                
+                // Redirect to payment form
+                setTimeout(() => {
+                    window.location.href = '/payment-form.html';
+                }, 1000);
+                
+            } catch (error) {
+                updateResults(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        function testReserveDeposit() {
+            try {
+                // Store pack data for payment form
+                localStorage.setItem('selectedPackId', testPackReserve.id);
+                localStorage.setItem('selectedPackData', JSON.stringify(testPackReserve));
+                localStorage.setItem('paymentType', 'deposit');
+                
+                updateResults('Reserve with Deposit test data stored successfully!', 'success');
+                updateLocalStorageDisplay();
+                
+                // Redirect to payment form
+                setTimeout(() => {
+                    window.location.href = '/payment-form.html';
+                }, 1000);
+                
+            } catch (error) {
+                updateResults(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        function updateResults(message, type) {
+            const results = document.getElementById('test-results');
+            results.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+
+        function updateLocalStorageDisplay() {
+            const display = document.getElementById('localStorage-data');
+            const packId = localStorage.getItem('selectedPackId');
+            const packData = localStorage.getItem('selectedPackData');
+            const paymentType = localStorage.getItem('paymentType');
+            
+            if (packId && packData && paymentType) {
+                const parsedData = JSON.parse(packData);
+                display.innerHTML = `
+                    <div class="status success">
+                        <strong>Stored Data:</strong><br>
+                        Pack ID: ${packId}<br>
+                        Payment Type: ${paymentType}<br>
+                        Pack Name: ${parsedData.name}<br>
+                        Price: $${parsedData.price}<br>
+                        ${parsedData.deposit_price ? `Deposit Price: $${parsedData.deposit_price}<br>` : ''}
+                        Available: ${parsedData.available_quantity}
+                    </div>
+                `;
+            } else {
+                display.innerHTML = '<div class="status info">No data stored yet</div>';
+            }
+        }
+
+        // Update display on page load
+        updateLocalStorageDisplay();
+    </script>
+</body>
+</html>

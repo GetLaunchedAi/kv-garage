@@ -266,7 +266,6 @@ class PerformanceOptimizer {
 
     reportMetric(name, value) {
         // In production, send to analytics service
-        console.log(`Performance Metric - ${name}:`, value);
         
         // Store locally for debugging
         const metrics = JSON.parse(localStorage.getItem('performance_metrics') || '{}');

@@ -3,15 +3,24 @@
  * Provides consistent authentication across all admin pages
  */
 
-// Environment detection
-const isProduction = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+// Smart Environment Detection
+const isLocalhost = window.location.hostname === 'localhost' || 
+                   window.location.hostname === '127.0.0.1' ||
+                   window.location.hostname === '0.0.0.0';
+
+const isProduction = !isLocalhost;
 const isNetlify = window.location.hostname.includes('netlify.app');
 
-// API Configuration - make it globally available
-window.API_BASE_URL = window.location.hostname === 'localhost' 
+// API Configuration - Smart detection for all environments
+window.API_BASE_URL = isLocalhost 
   ? 'http://localhost:3001/api' 
   : '/api';
 const API_BASE_URL = window.API_BASE_URL;
+
+// Environment logging
+console.log(`🌍 Environment detected: ${isLocalhost ? 'localhost' : 'production'}`);
+console.log(`🔗 API Base URL: ${API_BASE_URL}`);
+console.log(`📡 Hostname: ${window.location.hostname}`);
 
 /**
  * Shared Admin Authentication System
@@ -26,7 +35,6 @@ class SharedAdminAuth {
     }
 
     init() {
-        console.log('SharedAdminAuth initializing...');
         // On initialization, we only check if *a* token exists and is valid.
         // We do NOT clear the token here, even if expired.
         this.readAndValidateToken();
@@ -52,15 +60,12 @@ class SharedAdminAuth {
                 // Token is still valid according to localStorage
                 this.authToken = token;
                 this.isAuthenticated = true;
-                console.log('✅ Auth state established from valid stored token.');
                 return true;
             } else {
                 // Token is expired, try to refresh it
-                console.log('⚠️ Stored token is expired, attempting refresh...');
                 return await this.refreshToken(token);
             }
         }
-        console.log('ℹ️ No token found or expiry data missing.');
         return false;
     }
 
@@ -71,7 +76,6 @@ class SharedAdminAuth {
      */
     async refreshToken(expiredToken) {
         try {
-            console.log('Attempting to refresh expired token...');
             
             const response = await fetch(`${API_BASE_URL}/admin/refresh`, {
                 method: 'POST',
@@ -93,13 +97,11 @@ class SharedAdminAuth {
                     this.authToken = data.token;
                     this.isAuthenticated = true;
                     
-                    console.log('✅ Token refreshed successfully');
                     return true;
                 }
             }
             
             // If refresh failed, clear the expired token
-            console.log('❌ Token refresh failed, clearing expired token');
             this.clearStoredAuth();
             return false;
             
@@ -115,7 +117,6 @@ class SharedAdminAuth {
      */
     async login(email, password) {
         try {
-            console.log('Attempting login with API...');
             
             const response = await fetch(`${API_BASE_URL}/admin/login`, {
                 method: 'POST',
@@ -139,10 +140,8 @@ class SharedAdminAuth {
                 this.authToken = data.token;
                 this.isAuthenticated = true;
                 
-                console.log('✅ Admin login successful via API');
                 return { success: true, token: data.token, user: data.user };
             } else {
-                console.log('❌ Login failed:', data.error);
                 return { success: false, error: data.error };
             }
         } catch (error) {
@@ -158,7 +157,6 @@ class SharedAdminAuth {
         this.isAuthenticated = false;
         this.authToken = null;
         this.clearStoredAuth();
-        console.log('✅ Admin logout successful and data cleared.');
     }
 
     /**
@@ -193,7 +191,6 @@ class SharedAdminAuth {
 if (!window.sharedAdminAuth) {
     window.sharedAdminAuth = new SharedAdminAuth();
 } else {
-    console.log('SharedAdminAuth instance already exists, re-validating...');
     window.sharedAdminAuth.readAndValidateToken();
 }
 

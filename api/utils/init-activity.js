@@ -8,7 +8,6 @@ const ActivityLogger = require('./activity-logger');
 
 async function initializeActivitySystem() {
   try {
-    console.log('Initializing activity system...');
     
     // Create initial activity data structure
     const activityData = {
@@ -80,8 +79,6 @@ async function initializeActivitySystem() {
       );
     }
     
-    console.log('Activity system initialized with sample data');
-    console.log('Sample activities created:', sampleActivities.length);
     
   } catch (error) {
     console.error('Error initializing activity system:', error);
@@ -92,7 +89,6 @@ async function initializeActivitySystem() {
 if (require.main === module) {
   initializeActivitySystem()
     .then(() => {
-      console.log('Activity system initialization complete');
       process.exit(0);
     })
     .catch(error => {

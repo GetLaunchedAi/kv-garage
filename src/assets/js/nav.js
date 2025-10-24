@@ -8,11 +8,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const about = document.querySelector('#About\\ Us') || document.querySelector('#About Us');
     const contact = document.querySelector('#Contact');
 
-    console.log('Mobile navigation initialized');
 
     // Check if essential elements exist (hamburger menu and navbar are required)
     if (!navbarMenu || !hamburgerMenu) {
-        console.log('❌ Essential navigation elements not found, skipping nav.js initialization');
         return; // Exit early if essential elements don't exist
     }
 

@@ -20,16 +20,31 @@ class StripePayment {
     
     async initializeStripe() {
         try {
-            // Get Stripe configuration
-            const configResponse = await fetch('http://localhost:3001/api/payments/config');
-            const config = await configResponse.json();
+            // Try to get Stripe configuration from API
+            let publishableKey = null;
             
-            if (!config.success) {
-                throw new Error('Failed to get Stripe configuration');
+            try {
+                const apiBaseUrl = window.location.hostname === 'localhost' 
+                    ? 'http://localhost:3001/api' 
+                    : '/api';
+                const configResponse = await fetch(`${apiBaseUrl}/payments/config`);
+                const config = await configResponse.json();
+                
+                if (config.success && config.publishable_key) {
+                    publishableKey = config.publishable_key;
+                }
+            } catch (apiError) {
+                console.warn('Could not fetch Stripe config from API:', apiError);
+            }
+            
+            // Fallback to test key if no API key is available
+            if (!publishableKey) {
+                publishableKey = 'pk_test_51SIugHRTEiNjfzF8N8zMrBYuVgL8AkoDbvv6nFbNMlWIbmI8EcrFare32qkRIhXYi2g0UuXl7GigHse0ZqFceHc100xTPdXfg2';
+                console.warn('Using fallback Stripe test key');
             }
             
             // Initialize Stripe with analytics disabled to prevent blocking issues
-            this.stripe = Stripe(config.publishable_key, {
+            this.stripe = Stripe(publishableKey, {
                 // Use a stable API version
                 apiVersion: '2023-10-16',
                 // Disable analytics to prevent ad blocker issues
