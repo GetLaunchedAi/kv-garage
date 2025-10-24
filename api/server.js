@@ -86,7 +86,6 @@ app.use('/api/orders', require('./routes/orders'));
 app.use('/api/custom-requests', require('./routes/custom-requests'));
 app.use('/api/activity', require('./routes/activity'));
 app.use('/api/payments', require('./routes/payments'));
-app.use('/api/leads', require('./routes/leads'));
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
