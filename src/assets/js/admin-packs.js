@@ -49,12 +49,6 @@ class AdminPacks {
             refreshBtn.addEventListener('click', () => this.loadPacks());
         }
 
-        // Pack form
-        const packForm = document.getElementById('pack-form');
-        if (packForm) {
-            packForm.addEventListener('submit', (e) => this.handlePackSubmit(e));
-        }
-
         // Manifest upload form
         const manifestForm = document.getElementById('manifest-upload-form');
         if (manifestForm) {
@@ -319,8 +313,10 @@ class AdminPacks {
         document.getElementById('estimated-resale').value = pack.estimated_resale_value;
         document.getElementById('number-units').value = pack.number_of_units;
         document.getElementById('pack-description').value = pack.description || '';
-        document.getElementById('pack-image').value = pack.image_url || '';
+        document.getElementById('image-preview').src = pack.image_url || '';
         document.getElementById('pack-status').value = pack.status;
+        document.getElementById('pack-available-quantity').value = pack.available_quantity || 0;
+        document.getElementById('pack-reserved-quantity').value = pack.reserved_quantity || 0;
 
         const modal = document.getElementById('pack-modal');
         modal.style.display = 'flex';
@@ -328,34 +324,6 @@ class AdminPacks {
         document.body.style.overflow = 'hidden';
     }
 
-    async handlePackSubmit(e) {
-        e.preventDefault();
-        
-        if (!this.isAuthenticated) return;
-
-        const formData = new FormData(e.target);
-        const packData = Object.fromEntries(formData.entries());
-        const packId = packData.id;
-
-        const submitBtn = e.target.querySelector('button[type="submit"]');
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Saving...';
-
-        try {
-            // Demo mode - just show success message
-            // In a real app, you'd save to a database
-            this.showNotification(packId ? 'Pack updated successfully! (Demo mode)' : 'Pack created successfully! (Demo mode)', 'success');
-            this.closePackModal();
-            this.loadPacks();
-
-        } catch (error) {
-            console.error('Pack save error:', error);
-            this.showNotification(`Failed to save pack: ${error.message}`, 'error');
-        } finally {
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Save Pack';
-        }
-    }
 
     async deletePack(packId) {
         if (!confirm('Are you sure you want to delete this pack? This action cannot be undone.')) {
@@ -432,12 +400,12 @@ class AdminPacks {
             const uploadData = new FormData();
             uploadData.append('pack_id', packId);
             uploadData.append('manifest', file);
+            console.log("uploadData", uploadData);
+            console.log("packId", packId);
+            console.log("file", file);
 
-            const response = await fetch(`${API_BASE_URL}/admin/manifests/upload`, {
+            const response = await fetch(`/api/save-manifests.php`, {
                 method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${this.authToken}`
-                },
                 body: uploadData
             });
 

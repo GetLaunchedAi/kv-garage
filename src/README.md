@@ -64,6 +64,7 @@ src/
 **Demo Login Credentials:**
 - Email: `admin@kvgarage.com`
 - Password: `admin123`
+admin@kvgarage.com admin123
 
 ### Admin Pages
 - `/admin/dashboard/` - Main admin dashboard

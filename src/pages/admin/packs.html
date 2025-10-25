@@ -125,7 +125,7 @@ permalink: "admin/packs/"
                 <button class="modal-close" onclick="closePackModal()">&times;</button>
             </div>
             <div class="modal-body">
-                <form id="pack-form" class="pack-form">
+                <form id="pack-form" class="pack-form" action="/api/save-packs.php" method="POST" enctype="multipart/form-data">
                     <input type="hidden" id="pack-id" name="id">
                     
                     <div class="form-row">
@@ -172,10 +172,10 @@ permalink: "admin/packs/"
                     </div>
                     
                     <div class="form-group">
-                        <label for="pack-image">Image URL</label>
-                        <input type="url" id="pack-image" name="image_url">
+                        <label for="pack-image">Image</label>
+                        <input type="file" id="pack-image" name="image" accept="image/*">
+                        <img id="image-preview" src="" alt="Current image" style="max-width: 150px; display: block; margin-top: 10px;">
                     </div>
-                    
                     <div class="form-group">
                         <label for="pack-status">Status</label>
                         <select id="pack-status" name="status">
@@ -183,6 +183,18 @@ permalink: "admin/packs/"
                             <option value="limited">Limited</option>
                             <option value="sold_out">Sold Out</option>
                         </select>
+                    </div>
+                    <div class="form-row">
+
+                        <div class="form-group">
+                            <label for="pack-available-quantity">Available Quantity</label>
+                            <input type="number" id="pack-available-quantity" name="available_quantity" min="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pack-available-quantity">Reserved Quantity</label>
+                            <input type="number" id="pack-reserved-quantity" name="reserved_quantity" min="0" required>
+                        </div>
+                    </div>
                     </div>
                     
                     <div class="form-actions">
@@ -228,3 +240,71 @@ permalink: "admin/packs/"
 
 <script src="/assets/js/shared-admin-auth.js"></script>
 <script src="/assets/js/admin-packs.js"></script>
+<script>
+function closeCustomPackModal() {
+    const modal = document.getElementById('pack-modal');
+    modal.style.display = 'none';
+    // Clear form
+    const form = document.getElementById('pack-form');
+    form.reset();
+    document.getElementById('pack-id').value = '';
+    document.getElementById('image-preview').src = '';
+  }
+document.addEventListener('DOMContentLoaded', () => {
+  const adminForm = document.getElementById('pack-form');
+  if (!adminForm) return;
+
+    adminForm.addEventListener('submit', handleCustomPackSubmit);
+  });
+   async function handleCustomPackSubmit(e) {
+  e.preventDefault();
+  console.log('Submitting custom pack form...');
+
+  const form = e.currentTarget;
+  const formData = new FormData(form);
+
+  // Log to verify what’s being sent
+  console.log("Raw FormData entries:");
+  for (let [key, value] of formData.entries()) {
+    console.log(key, value);
+  }
+
+  // --- Do NOT JSON.stringify here ---
+  // Send as multipart/form-data (PHP can read $_POST + $_FILES)
+  try {
+    const response = await fetch(`/api/save-packs.php`, {
+      method: 'POST',
+      body: formData, // <-- send directly
+    });
+
+    // Always read as text first (helps debug)
+    const text = await response.text();
+    console.log("Raw Response:", text);
+
+    let result;
+    try {
+      result = JSON.parse(text);
+    } catch (err) {
+      console.error("JSON Parse Error:", err);
+      alert("❌ Invalid server response (check console).");
+      return;
+    }
+
+    if (!response.ok || !result.success) {
+      throw new Error(result.error || 'Failed to save pack');
+    }
+
+    alert(`✅ Pack ${result.message?.includes('updated') ? 'updated' : 'created'} successfully!`);
+    console.log("Saved pack:", result.pack);
+
+    // Optional: refresh the UI or close modal
+    closePackModal?.();
+  } catch (err) {
+    console.error("Error saving pack:", err);
+    alert("❌ Failed to save pack. Please try again.");
+  }
+}
+
+
+
+</script>

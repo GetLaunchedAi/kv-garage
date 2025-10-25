@@ -1,8 +1,7 @@
 /**
- * Global Cart System for KV Garage
+ * Global Cart System for KV Garage (Fixed)
  * Handles cart functionality across all pages
  */
-
 class GlobalCart {
   constructor() {
     this.cart = this.loadCart();
@@ -15,35 +14,49 @@ class GlobalCart {
   }
 
   bindEvents() {
-    // Add to cart buttons
+    // Add to cart buttons (delegated)
     document.addEventListener('click', (e) => {
-      if (e.target.classList.contains('add-to-cart')) {
+      const btn = e.target.closest('.add-to-cart');
+      if (btn) {
         e.preventDefault();
-        this.addToCart(e.target);
+        this.addToCart(btn);
       }
     });
 
-    // Cart toggle (if cart button exists)
-    const cartButton = document.querySelector('.cart-toggle');
-    if (cartButton) {
-      cartButton.addEventListener('click', () => {
-        this.toggleCart();
-      });
+    // Remove item buttons (delegated)
+    document.addEventListener('click', (e) => {
+      const btn = e.target.closest('.remove-item');
+      if (btn) {
+        e.preventDefault();
+        this.removeFromCart(btn.dataset.id);
+      }
+    });
+
+    // Toggle cart modal
+    const cartToggle = document.querySelector('.cart-toggle');
+    if (cartToggle) {
+      cartToggle.addEventListener('click', () => this.toggleCart());
+    }
+
+    // Checkout button
+    const checkoutBtn = document.querySelector('.cart-checkout');
+    if (checkoutBtn) {
+      checkoutBtn.addEventListener('click', () => this.checkout());
     }
   }
 
   addToCart(button) {
-    const packId = button.dataset.packId;
-    const packName = button.dataset.packName;
-    const packPrice = parseFloat(button.dataset.packPrice);
-    const packImage = button.dataset.packImage;
-    const packSlug = button.dataset.packSlug;
+    const packId = String(button.dataset.packId);
+    const packName = button.dataset.packName || 'Unnamed Pack';
+    const packPrice = parseFloat(button.dataset.packPrice) || 0;
+    const packImage = button.dataset.packImage || '/images/default.png';
+    const packSlug = button.dataset.packSlug || '';
 
-    // Check if item already exists in cart
-    const existingItem = this.cart.find(item => item.id === packId);
-    
-    if (existingItem) {
-      existingItem.quantity += 1;
+    // find existing item
+    const existing = this.cart.find(i => i.id === packId);
+
+    if (existing) {
+      existing.quantity += 1;
     } else {
       this.cart.push({
         id: packId,
@@ -61,106 +74,85 @@ class GlobalCart {
   }
 
   showAddToCartFeedback(button) {
-    const originalText = button.textContent;
+    const original = button.textContent;
+    button.disabled = true;
     button.textContent = 'Added!';
-    button.style.backgroundColor = 'var(--primary)';
-    button.style.color = '#fff';
-    
+    button.classList.add('added');
+
     setTimeout(() => {
-      button.textContent = originalText;
-      button.style.backgroundColor = '';
-      button.style.color = '';
-    }, 1500);
+      button.textContent = original;
+      button.classList.remove('added');
+      button.disabled = false;
+    }, 1200);
   }
 
   updateCartDisplay() {
-    const cartCount = this.getTotalItems();
-    const cartTotal = this.getTotalPrice();
-    
-    // Update cart count in navigation
-    const cartCountElement = document.querySelector('.cart-count');
-    if (cartCountElement) {
-      cartCountElement.textContent = cartCount;
-      cartCountElement.style.display = cartCount > 0 ? 'block' : 'none';
+    const count = this.getTotalItems();
+    const total = this.getTotalPrice();
+
+    const countEl = document.querySelector('.cart-count');
+    if (countEl) {
+      countEl.textContent = count;
+      countEl.style.display = count > 0 ? 'inline-block' : 'none';
     }
 
-    // Update cart modal total
-    const cartTotalAmount = document.querySelector('.cart-total-amount');
-    if (cartTotalAmount) {
-      cartTotalAmount.textContent = `$${cartTotal.toFixed(2)}`;
-    }
+    const totalEl = document.querySelector('.cart-total-amount');
+    if (totalEl) totalEl.textContent = `$${total.toFixed(2)}`;
 
-    // Update cart items display (if cart modal exists)
-    this.updateCartModal();
+    this.renderCartItems();
   }
 
-  updateCartModal() {
-    const cartItemsContainer = document.querySelector('.cart-items');
-    if (!cartItemsContainer) return;
+  renderCartItems() {
+    const container = document.querySelector('.cart-items');
+    if (!container) return;
 
-    if (this.cart.length === 0) {
-      cartItemsContainer.innerHTML = '<p class="empty-cart">Your cart is empty</p>';
+    if (!this.cart.length) {
+      container.innerHTML = `<p class="empty-cart">Your cart is empty.</p>`;
       return;
     }
 
-    const cartHTML = this.cart.map(item => `
-      <div class="cart-item">
+    container.innerHTML = this.cart.map(item => `
+      <div class="cart-item" data-id="${item.id}">
         <img src="${item.image}" alt="${item.name}" class="cart-item-image">
         <div class="cart-item-details">
           <h4>${item.name}</h4>
           <p>$${item.price.toFixed(2)} × ${item.quantity}</p>
         </div>
-        <button class="remove-item" data-id="${item.id}">×</button>
+        <button class="remove-item" data-id="${item.id}" title="Remove">×</button>
       </div>
     `).join('');
-
-    cartItemsContainer.innerHTML = cartHTML;
-
-    // Bind remove item events
-    cartItemsContainer.querySelectorAll('.remove-item').forEach(button => {
-      button.addEventListener('click', (e) => {
-        this.removeFromCart(e.target.dataset.id);
-      });
-    });
   }
 
-  removeFromCart(itemId) {
-    this.cart = this.cart.filter(item => item.id !== itemId);
+  removeFromCart(id) {
+    this.cart = this.cart.filter(item => item.id !== String(id));
     this.saveCart();
     this.updateCartDisplay();
   }
 
   getTotalItems() {
-    return this.cart.reduce((total, item) => total + item.quantity, 0);
+    return this.cart.reduce((sum, item) => sum + item.quantity, 0);
   }
 
   getTotalPrice() {
-    return this.cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+    return this.cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
   }
 
   loadCart() {
     try {
-      const cartData = localStorage.getItem('kv-garage-cart');
-      return cartData ? JSON.parse(cartData) : [];
-    } catch (error) {
-      console.error('Error loading cart:', error);
+      const raw = localStorage.getItem('kv-garage-cart');
+      return raw ? JSON.parse(raw) : [];
+    } catch {
       return [];
     }
   }
 
   saveCart() {
-    try {
-      localStorage.setItem('kv-garage-cart', JSON.stringify(this.cart));
-    } catch (error) {
-      console.error('Error saving cart:', error);
-    }
+    localStorage.setItem('kv-garage-cart', JSON.stringify(this.cart));
   }
 
   toggleCart() {
-    const cartModal = document.querySelector('.cart-modal');
-    if (cartModal) {
-      cartModal.classList.toggle('active');
-    }
+    const modal = document.querySelector('.cart-modal');
+    if (modal) modal.classList.toggle('active');
   }
 
   clearCart() {
@@ -169,7 +161,6 @@ class GlobalCart {
     this.updateCartDisplay();
   }
 
-  // Method to get cart data for checkout
   getCartData() {
     return {
       items: this.cart,
@@ -177,40 +168,35 @@ class GlobalCart {
       totalPrice: this.getTotalPrice()
     };
   }
+async checkout() {
+  if (this.cart.length === 0) {
+    alert('Your cart is empty!');
+    return;
+  }
 
-  // Simple checkout function - redirects to contact page with cart data
-  checkout() {
-    if (this.cart.length === 0) {
-      alert('Your cart is empty!');
-      return;
-    }
+  try {
+    const res = await fetch('/api/create-checkout-session.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ items: this.cart }),
+    });
 
-    // Create a simple checkout form data
-    const cartData = this.getCartData();
-    const checkoutData = {
-      items: cartData.items.map(item => ({
-        name: item.name,
-        price: item.price,
-        quantity: item.quantity
-      })),
-      total: cartData.totalPrice,
-      timestamp: new Date().toISOString()
-    };
+    const text = await res.text();
+    console.log("Raw Stripe response:", text);
 
-    // Store checkout data in localStorage for the contact page
-    localStorage.setItem('kv-garage-checkout', JSON.stringify(checkoutData));
+    const data = JSON.parse(text);
+    if (!data.ok || !data.url) throw new Error(data.error || 'Invalid Stripe response.');
 
-    // Redirect to contact page for order completion
-    window.location.href = '/contact/?checkout=true';
+    window.location.href = data.url; // ✅ safe redirect
+  } catch (err) {
+    console.error("Stripe Checkout Error:", err);
+    alert("❌ Failed to start Stripe checkout. See console for details.");
   }
 }
 
-// Initialize cart when DOM is loaded
+
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   window.globalCart = new GlobalCart();
 });
-
-// Export for use in other scripts
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = GlobalCart;
-}

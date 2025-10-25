@@ -826,46 +826,65 @@ eleventyNavigation:
   }
 
   // Product card function
-  function card(p) {
-    const href = productUrl(p);
-    const img = p.image || '/images/placeholder.jpg';
-    const title = esc(p.title || p.name || 'Untitled');
-    const price = p.price ? money(p.price) : '0.00';
-    const currency = p.currency || 'USD';
-    const isOutOfStock = p.price === 0 || p.inStock === false;
-    const status = p.status || '';
-    const quantity = p.quantity || '';
-    
-    // Create status badge if status exists
-    const statusBadge = status ? `<span class="status-badge status-${status.toLowerCase().replace(/\s+/g, '-')}">${status}</span>` : '';
-    
-    // Format price display for wholesale deals
-    let priceDisplay = '';
-    if (isOutOfStock) {
-      priceDisplay = 'Out of Stock';
-    } else if (quantity && status === 'Wholesale Deal') {
-      priceDisplay = `$${price} ${currency} (${quantity})`;
-    } else {
-      priceDisplay = `$${price} ${currency}`;
-    }
-    
-    return `<article class="card ${isOutOfStock ? 'out-of-stock' : ''}">
-        <a href="${esc(href)}" class="card__link">
-          <picture class="card__img">
-            <img src="${esc(img)}" alt="${esc(title)}" loading="lazy" decoding="async">
-            ${statusBadge}
-          </picture>
-        </a>
-        <div class="card__content">
-          <h3 class="card__title">
-            <a href="${esc(href)}" title="${esc(title)}">${title}</a>
-          </h3>
-          <p class="card__price">${priceDisplay}</p>
-          ${p.description ? `<p class="card__description">${esc(p.description)}</p>` : ''}
-        </div>
-        <a class="add-to-cart ${isOutOfStock ? 'disabled' : ''}" href="${esc(href)}">${isOutOfStock ? 'Out of Stock' : 'View Details'}</a>
-      </article>`;
+function card(p) {
+  const href = productUrl(p);
+  const img = p.image || '/images/placeholder.jpg';
+  const title = esc(p.title || p.name || 'Untitled');
+  const price = p.price ? money(p.price) : '0.00';
+  const currency = p.currency || 'USD';
+  const isOutOfStock = p.price === 0 || p.inStock === false;
+  const status = p.status || '';
+  const quantity = p.quantity || '';
+
+  // Create status badge if status exists
+  const statusBadge = status
+    ? `<span class="status-badge status-${status.toLowerCase().replace(/\s+/g, '-')}">${status}</span>`
+    : '';
+
+  // Format price display
+  let priceDisplay = '';
+  if (isOutOfStock) {
+    priceDisplay = 'Out of Stock';
+  } else if (quantity && status === 'Wholesale Deal') {
+    priceDisplay = `$${price} ${currency} (${quantity})`;
+  } else {
+    priceDisplay = `$${price} ${currency}`;
   }
+
+  // --- ✅ Build Add-to-Cart Button (with proper data attributes) ---
+  const addToCartButton = `
+    <button 
+      class="add-to-cart ${isOutOfStock ? 'disabled' : ''}" 
+      ${isOutOfStock ? 'disabled' : ''}
+      data-pack-id="${esc(p.id || p.slug || title)}"
+      data-pack-name="${esc(title)}"
+      data-pack-price="${parseFloat(p.price || 0)}"
+      data-pack-image="${esc(img)}"
+      data-pack-slug="${esc(p.slug || title.toLowerCase().replace(/\s+/g, '-'))}">
+      ${isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
+    </button>
+  `;
+
+  // --- ✅ Return the completed card ---
+  return `
+  <article class="card ${isOutOfStock ? 'out-of-stock' : ''}">
+    <a href="${esc(href)}" class="card__link">
+      <picture class="card__img">
+        <img src="${esc(img)}" alt="${esc(title)}" loading="lazy" decoding="async">
+        ${statusBadge}
+      </picture>
+    </a>
+    <div class="card__content">
+      <h3 class="card__title">
+        <a href="${esc(href)}" title="${esc(title)}">${title}</a>
+      </h3>
+      <p class="card__price">${priceDisplay}</p>
+      ${p.description ? `<p class="card__description">${esc(p.description)}</p>` : ''}
+      ${addToCartButton}
+    </div>
+  </article>`;
+}
+
 
   // Initialize the advanced filter system
   const filterSystem = new AdvancedFilterSystem();

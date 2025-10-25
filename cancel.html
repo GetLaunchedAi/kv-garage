@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Payment Canceled | KV Garage</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    :root { --accent:#b91c1c; --bg:#fff7f7; --text:#0f172a; }
+    body { margin:0; font:16px/1.5 system-ui,Segoe UI,Roboto,Arial; color:var(--text); background:var(--bg); }
+    .wrap { max-width:720px; margin:8vh auto; padding:24px; background:#fff; border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,.06); }
+    h1 { margin:0 0 8px; font-size:1.9rem; }
+    .badge { display:inline-flex; gap:.5rem; align-items:center; color:#fff; background:var(--accent); padding:.35rem .7rem; border-radius:999px; font-weight:600; }
+    .actions { margin-top:20px; display:flex; gap:12px; flex-wrap:wrap; }
+    a.btn { text-decoration:none; padding:.7rem 1rem; border-radius:10px; border:1px solid #e5e7eb; background:#0f172a; color:#fff; }
+    a.btn.secondary { background:#fff; color:#0f172a; }
+    .small { color:#475569; font-size:.95rem; margin-top:10px; }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <div class="badge">⚠️ Payment not completed</div>
+    <h1>Your checkout was canceled</h1>
+    <p>No charges were made. You can return to your cart and try again whenever you’re ready.</p>
+    <p class="small">If you believe this was a mistake, please retry checkout or contact support.</p>
+
+    <div class="actions">
+      <a class="btn" href="/shop/">Return to Shop</a>
+      <a class="btn secondary" href="/cart/">View Cart</a>
+    </div>
+  </main>
+</body>
+</html>

@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Payment Successful | KV Garage</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    :root { --accent:#1a7f37; --bg:#f6fff8; --text:#0f172a; }
+    body { margin:0; font:16px/1.5 system-ui,Segoe UI,Roboto,Arial; color:var(--text); background:var(--bg); }
+    .wrap { max-width:720px; margin:8vh auto; padding:24px; background:#fff; border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,.06); }
+    h1 { margin:0 0 8px; font-size:1.9rem; }
+    .badge { display:inline-flex; gap:.5rem; align-items:center; color:#fff; background:var(--accent); padding:.35rem .7rem; border-radius:999px; font-weight:600; }
+    .actions { margin-top:20px; display:flex; gap:12px; flex-wrap:wrap; }
+    a.btn { text-decoration:none; padding:.7rem 1rem; border-radius:10px; border:1px solid #e5e7eb; background:#0f172a; color:#fff; }
+    a.btn.secondary { background:#fff; color:#0f172a; }
+    .small { color:#475569; font-size:.95rem; margin-top:10px; }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <div class="badge">✅ Payment successful</div>
+    <h1>Thank you for your order!</h1>
+    <p>We’re processing your purchase now. A receipt and confirmation were sent to your email.</p>
+
+    <div id="order-note" class="small"></div>
+
+    <div class="actions">
+      <a class="btn" href="/shop/">Continue Shopping</a>
+      <a class="btn secondary" href="/">Back to Home</a>
+    </div>
+  </main>
+
+  <script>
+    // Clear cart data after successful payment
+    try {
+      localStorage.removeItem('kv-garage-cart');
+      localStorage.removeItem('kv-garage-checkout'); // if you used it earlier
+    } catch (e) {}
+
+    // If you include session_id in success_url, we can show a friendly note
+    // success_url should be: https://kvgarage.com/success.html?session_id={CHECKOUT_SESSION_ID}
+    (function () {
+      const params = new URLSearchParams(location.search);
+      const sid = params.get('session_id');
+      if (sid) {
+        const el = document.getElementById('order-note');
+        el.textContent = 'Order reference created. You will receive a confirmation email shortly.';
+      }
+    })();
+  </script>
+</body>
+</html>
