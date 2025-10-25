@@ -9,10 +9,12 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const { authenticateToken, requirePermission } = require('../middleware/auth');
-const fileManager = require('../utils/file-manager');
+const GitDatabase = require('../utils/git-database');
 const csvParser = require('../utils/csv-parser');
-const ActivityLogger = require('../utils/activity-logger');
 const winston = require('winston');
+
+// Initialize Git database
+const gitDb = new GitDatabase();
 
 // Configure multer for CSV uploads
 const upload = multer({
@@ -67,37 +69,27 @@ router.post('/upload', authenticateToken, requirePermission('upload'), upload.si
     // Get statistics
     const stats = csvParser.getStatistics(manifestItems);
     
-    // Read current manifests
-    const manifestsData = await fileManager.readJSON('manifests.json');
-    
-    // Update manifests for the specific pack
-    manifestsData.manifests[pack_id] = manifestItems;
-    
-    // Add metadata
-    manifestsData.manifests[pack_id + '_metadata'] = {
-      uploaded_at: new Date().toISOString(),
-      uploaded_by: req.user.email,
-      file_size: validation.size,
-      items_count: manifestItems.length,
-      statistics: stats
+    // Prepare manifest data for Git
+    const manifestData = {
+      pack_id,
+      items: manifestItems,
+      metadata: {
+        uploaded_at: new Date().toISOString(),
+        uploaded_by: req.user.email,
+        file_size: validation.size,
+        items_count: manifestItems.length,
+        statistics: stats
+      }
     };
     
-    // Write updated manifests
-    await fileManager.writeJSON('manifests.json', manifestsData);
-    
-    // Log activity
-    await ActivityLogger.logManifestActivity(
-      { id: pack_id, name: packData.name || `Pack ${pack_id}` },
-      'uploaded',
-      req.user.email,
-      { items_count: manifestItems.length, file_size: validation.size }
-    );
+    // Upload to Git database
+    await gitDb.uploadManifest(pack_id, manifestData, req.user.email);
     
     winston.info(`Manifest uploaded successfully for pack ${pack_id}: ${manifestItems.length} items`);
     
     res.json({
       success: true,
-      message: `Manifest uploaded successfully for pack ${pack_id}`,
+      message: `Manifest uploaded and committed to Git repository for pack ${pack_id}`,
       data: {
         pack_id,
         items_count: manifestItems.length,
@@ -134,13 +126,11 @@ router.get('/:pack_id', async (req, res) => {
   try {
     const { pack_id } = req.params;
     
-    winston.info(`Fetching manifest for pack ${pack_id}`);
+    winston.info(`Fetching manifest for pack ${pack_id} from Git database`);
     
-    const manifestsData = await fileManager.readJSON('manifests.json');
-    const manifestItems = manifestsData.manifests[pack_id];
-    const metadata = manifestsData.manifests[pack_id + '_metadata'];
+    const manifest = await gitDb.getManifest(pack_id);
     
-    if (!manifestItems) {
+    if (!manifest) {
       return res.status(404).json({
         success: false,
         error: 'Manifest not found for this pack'
@@ -151,11 +141,11 @@ router.get('/:pack_id', async (req, res) => {
       success: true,
       manifest: {
         pack_id,
-        items: manifestItems,
-        metadata: metadata || null,
-        total_items: manifestItems.length,
-        total_quantity: manifestItems.reduce((sum, item) => sum + item.quantity, 0),
-        total_estimated_value: manifestItems.reduce((sum, item) => sum + (item.estimated_value * item.quantity), 0)
+        items: manifest.items,
+        metadata: manifest.metadata || null,
+        total_items: manifest.items.length,
+        total_quantity: manifest.items.reduce((sum, item) => sum + item.quantity, 0),
+        total_estimated_value: manifest.items.reduce((sum, item) => sum + (item.estimated_value * item.quantity), 0)
       }
     });
     
@@ -163,7 +153,7 @@ router.get('/:pack_id', async (req, res) => {
     winston.error('Manifest fetch error:', error);
     res.status(500).json({
       success: false,
-      error: 'Failed to load manifest'
+      error: 'Failed to load manifest from Git database'
     });
   }
 });

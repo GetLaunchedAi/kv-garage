@@ -6,8 +6,11 @@
 const express = require('express');
 const router = express.Router();
 const { authenticateToken } = require('../middleware/auth');
-const fileManager = require('../utils/file-manager');
+const GitDatabase = require('../utils/git-database');
 const winston = require('winston');
+
+// Initialize Git database
+const gitDb = new GitDatabase();
 
 /**
  * GET /api/activity/recent
@@ -17,38 +20,37 @@ router.get('/recent', authenticateToken, async (req, res) => {
   try {
     const { limit = 20, type, days = 7 } = req.query;
     
-    winston.info('Fetching recent activities');
+    winston.info('Fetching recent activities from Git database');
     
-    const activityData = await fileManager.readJSON('activity.json');
-    let activities = activityData.activities || [];
+    const activities = await gitDb.getActivityLog(parseInt(limit));
     
     // Filter by type if specified
+    let filteredActivities = activities;
     if (type) {
-      activities = activities.filter(activity => activity.type === type);
+      filteredActivities = activities.filter(activity => 
+        activity.message.toLowerCase().includes(type.toLowerCase())
+      );
     }
     
     // Filter by date range
     const daysAgo = new Date(Date.now() - (parseInt(days) * 24 * 60 * 60 * 1000));
-    activities = activities.filter(activity => 
+    filteredActivities = filteredActivities.filter(activity => 
       new Date(activity.timestamp) >= daysAgo
     );
     
-    // Sort by timestamp (most recent first)
-    activities.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-    
     // Apply limit
-    activities = activities.slice(0, parseInt(limit));
+    filteredActivities = filteredActivities.slice(0, parseInt(limit));
     
     res.json({
       success: true,
-      activities,
-      total: activities.length
+      activities: filteredActivities,
+      total: filteredActivities.length
     });
   } catch (error) {
     winston.error('Activity fetch error:', error);
     res.status(500).json({
       success: false,
-      error: 'Failed to load recent activities'
+      error: 'Failed to load recent activities from Git database'
     });
   }
 });

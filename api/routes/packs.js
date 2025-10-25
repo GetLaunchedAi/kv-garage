@@ -6,9 +6,11 @@
 const express = require('express');
 const router = express.Router();
 const { authenticateToken, requirePermission } = require('../middleware/auth');
-const fileManager = require('../utils/file-manager');
-const ActivityLogger = require('../utils/activity-logger');
+const GitDatabase = require('../utils/git-database');
 const winston = require('winston');
+
+// Initialize Git database
+const gitDb = new GitDatabase();
 
 /**
  * GET /api/packs
@@ -18,28 +20,26 @@ router.get('/', async (req, res) => {
   try {
     const { page = 1, limit = 20, category, status } = req.query;
     
-    winston.info('Fetching packs');
+    winston.info('Fetching packs from Git database');
     
-    const packsData = await fileManager.readJSON('packs.json');
-    let packs = packsData.packs || [];
+    const packs = await gitDb.getPacks();
     
     // Apply filters
+    let filteredPacks = packs;
     if (category) {
-      packs = packs.filter(pack => 
+      filteredPacks = filteredPacks.filter(pack => 
         pack.category && pack.category.toLowerCase().includes(category.toLowerCase())
       );
     }
     
     if (status) {
-      packs = packs.filter(pack => 
-        pack.status === status
-      );
+      filteredPacks = filteredPacks.filter(pack => pack.status === status);
     }
     
     // Apply pagination
     const startIndex = (page - 1) * limit;
     const endIndex = startIndex + parseInt(limit);
-    const paginatedPacks = packs.slice(startIndex, endIndex);
+    const paginatedPacks = filteredPacks.slice(startIndex, endIndex);
     
     res.json({
       success: true,
@@ -47,15 +47,15 @@ router.get('/', async (req, res) => {
       pagination: {
         page: parseInt(page),
         limit: parseInt(limit),
-        total: packs.length,
-        pages: Math.ceil(packs.length / limit)
+        total: filteredPacks.length,
+        pages: Math.ceil(filteredPacks.length / limit)
       }
     });
   } catch (error) {
     winston.error('Packs fetch error:', error);
     res.status(500).json({
       success: false,
-      error: 'Failed to load packs'
+      error: 'Failed to load packs from Git database'
     });
   }
 });
@@ -68,10 +68,10 @@ router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
     
-    winston.info(`Fetching pack ${id}`);
+    winston.info(`Fetching pack ${id} from Git database`);
     
-    const packsData = await fileManager.readJSON('packs.json');
-    const pack = packsData.packs.find(p => p.id == id);
+    const packs = await gitDb.getPacks();
+    const pack = packs.find(p => p.id == id);
     
     if (!pack) {
       return res.status(404).json({
@@ -88,7 +88,7 @@ router.get('/:id', async (req, res) => {
     winston.error('Pack fetch error:', error);
     res.status(500).json({
       success: false,
-      error: 'Failed to load pack'
+      error: 'Failed to load pack from Git database'
     });
   }
 });
@@ -99,100 +99,33 @@ router.get('/:id', async (req, res) => {
  */
 router.post('/', authenticateToken, requirePermission('write'), async (req, res) => {
   try {
-    const { 
-      name, 
-      description, 
-      price, 
-      type,
-      deposit_price,
-      estimated_resale_value,
-      number_of_units,
-      available_quantity,
-      reserved_quantity,
-      short_description,
-      image_url,
-      status = 'available' 
-    } = req.body;
+    const packData = req.body;
+    const userEmail = req.user.email;
     
     // Validate required fields
-    if (!name || !description || !price || !type) {
+    if (!packData.name || !packData.description || !packData.price || !packData.type) {
       return res.status(400).json({
         success: false,
         error: 'Name, description, price, and type are required'
       });
     }
     
-    winston.info(`Creating new pack: ${name}`);
+    winston.info(`Creating new pack: ${packData.name} by ${userEmail}`);
     
-    const packsData = await fileManager.readJSON('packs.json');
-    
-    // Generate unique ID
-    const newPack = {
-      id: Date.now().toString(),
-      name: name.trim(),
-      type: type.trim(),
-      description: description.trim(),
-      short_description: short_description?.trim() || '',
-      price: parseFloat(price),
-      deposit_price: parseFloat(deposit_price) || 0,
-      estimated_resale_value: estimated_resale_value || '',
-      number_of_units: parseInt(number_of_units) || 0,
-      available_quantity: parseInt(available_quantity) || 0,
-      reserved_quantity: parseInt(reserved_quantity) || 0,
-      image_url: image_url?.trim() || '',
-      status: status,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      created_by: req.user.email
-    };
-    
-    // Validate pack data
-    if (isNaN(newPack.price) || newPack.price < 0) {
-      return res.status(400).json({
-        success: false,
-        error: 'Price must be a positive number'
-      });
-    }
-    
-    if (isNaN(newPack.deposit_price) || newPack.deposit_price < 0) {
-      return res.status(400).json({
-        success: false,
-        error: 'Deposit price must be a positive number'
-      });
-    }
-    
-    if (isNaN(newPack.number_of_units) || newPack.number_of_units < 0) {
-      return res.status(400).json({
-        success: false,
-        error: 'Number of units must be a positive number'
-      });
-    }
-    
-    if (isNaN(newPack.available_quantity) || newPack.available_quantity < 0) {
-      return res.status(400).json({
-        success: false,
-        error: 'Available quantity must be a positive number'
-      });
-    }
-    
-    packsData.packs.push(newPack);
-    await fileManager.writeJSON('packs.json', packsData);
-    
-    // Log activity
-    await ActivityLogger.logPackActivity(newPack, 'created', req.user.email);
+    const newPack = await gitDb.createPack(packData, userEmail);
     
     winston.info(`Pack created successfully: ${newPack.id}`);
     
     res.status(201).json({
       success: true,
       pack: newPack,
-      message: 'Pack created successfully'
+      message: 'Pack created and committed to Git repository'
     });
   } catch (error) {
     winston.error('Pack creation error:', error);
     res.status(500).json({
       success: false,
-      error: 'Failed to create pack'
+      error: 'Failed to create pack in Git database'
     });
   }
 });
@@ -205,56 +138,24 @@ router.put('/:id', authenticateToken, requirePermission('write'), async (req, re
   try {
     const { id } = req.params;
     const updates = req.body;
+    const userEmail = req.user.email;
     
-    winston.info(`Updating pack ${id}`);
+    winston.info(`Updating pack ${id} by ${userEmail}`);
     
-    const packsData = await fileManager.readJSON('packs.json');
-    const packIndex = packsData.packs.findIndex(pack => pack.id == id);
-    
-    if (packIndex === -1) {
-      return res.status(404).json({
-        success: false,
-        error: 'Pack not found'
-      });
-    }
-    
-    // Validate price if provided
-    if (updates.price !== undefined) {
-      const price = parseFloat(updates.price);
-      if (isNaN(price) || price < 0) {
-        return res.status(400).json({
-          success: false,
-          error: 'Price must be a positive number'
-        });
-      }
-      updates.price = price;
-    }
-    
-    // Update pack with new data
-    packsData.packs[packIndex] = {
-      ...packsData.packs[packIndex],
-      ...updates,
-      updated_at: new Date().toISOString(),
-      updated_by: req.user.email
-    };
-    
-    await fileManager.writeJSON('packs.json', packsData);
-    
-    // Log activity
-    await ActivityLogger.logPackActivity(packsData.packs[packIndex], 'updated', req.user.email);
+    const updatedPack = await gitDb.updatePack(id, updates, userEmail);
     
     winston.info(`Pack updated successfully: ${id}`);
     
     res.json({
       success: true,
-      pack: packsData.packs[packIndex],
-      message: 'Pack updated successfully'
+      pack: updatedPack,
+      message: 'Pack updated and committed to Git repository'
     });
   } catch (error) {
     winston.error('Pack update error:', error);
     res.status(500).json({
       success: false,
-      error: 'Failed to update pack'
+      error: 'Failed to update pack in Git database'
     });
   }
 });
@@ -266,29 +167,17 @@ router.put('/:id', authenticateToken, requirePermission('write'), async (req, re
 router.delete('/:id', authenticateToken, requirePermission('delete'), async (req, res) => {
   try {
     const { id } = req.params;
+    const userEmail = req.user.email;
     
-    winston.info(`Deleting pack ${id}`);
+    winston.info(`Deleting pack ${id} by ${userEmail}`);
     
-    const packsData = await fileManager.readJSON('packs.json');
-    const packIndex = packsData.packs.findIndex(pack => pack.id == id);
-    
-    if (packIndex === -1) {
-      return res.status(404).json({
-        success: false,
-        error: 'Pack not found'
-      });
-    }
-    
-    const deletedPack = packsData.packs[packIndex];
-    packsData.packs.splice(packIndex, 1);
-    
-    await fileManager.writeJSON('packs.json', packsData);
+    const deletedPack = await gitDb.deletePack(id, userEmail);
     
     winston.info(`Pack deleted successfully: ${id}`);
     
     res.json({
       success: true,
-      message: 'Pack deleted successfully',
+      message: 'Pack deleted and committed to Git repository',
       deleted_pack: {
         id: deletedPack.id,
         name: deletedPack.name
@@ -298,7 +187,7 @@ router.delete('/:id', authenticateToken, requirePermission('delete'), async (req
     winston.error('Pack deletion error:', error);
     res.status(500).json({
       success: false,
-      error: 'Failed to delete pack'
+      error: 'Failed to delete pack from Git database'
     });
   }
 });
@@ -309,8 +198,8 @@ router.delete('/:id', authenticateToken, requirePermission('delete'), async (req
  */
 router.get('/categories', async (req, res) => {
   try {
-    const packsData = await fileManager.readJSON('packs.json');
-    const categories = [...new Set(packsData.packs.map(pack => pack.category).filter(Boolean))];
+    const packs = await gitDb.getPacks();
+    const categories = [...new Set(packs.map(pack => pack.category).filter(Boolean))];
     
     res.json({
       success: true,
@@ -320,7 +209,7 @@ router.get('/categories', async (req, res) => {
     winston.error('Categories fetch error:', error);
     res.status(500).json({
       success: false,
-      error: 'Failed to load categories'
+      error: 'Failed to load categories from Git database'
     });
   }
 });

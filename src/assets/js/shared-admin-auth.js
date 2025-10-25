@@ -14,7 +14,7 @@ const isNetlify = window.location.hostname.includes('netlify.app');
 // API Configuration - Smart detection for all environments
 window.API_BASE_URL = isLocalhost 
   ? 'http://localhost:3001/api' 
-  : '/api';
+  : 'https://your-railway-app.railway.app/api'; // Update with your Railway URL
 const API_BASE_URL = window.API_BASE_URL;
 
 // Environment logging

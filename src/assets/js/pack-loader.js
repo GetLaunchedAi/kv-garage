@@ -7,7 +7,7 @@ class PackLoader {
     constructor() {
         this.apiBaseUrl = window.location.hostname === 'localhost' 
             ? 'http://localhost:3001/api' 
-            : '/api';
+            : 'https://your-railway-app.railway.app/api'; // Update with your Railway URL
         this.jsonDataUrl = '/data';
         this.packs = [];
         this.loading = false;
