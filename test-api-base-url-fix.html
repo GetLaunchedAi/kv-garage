@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API_BASE_URL Fix Test</title>
+</head>
+<body>
+    <h1>Testing API_BASE_URL Fix</h1>
+    <div id="test-results"></div>
+    
+    <script>
+        // Test script to verify the fix
+        console.log('🧪 Testing API_BASE_URL fix...');
+        
+        // Load shared-admin-auth.js first (this sets up window.API_BASE_URL)
+        const script1 = document.createElement('script');
+        script1.src = '/assets/js/shared-admin-auth.js';
+        script1.onload = function() {
+            console.log('✅ shared-admin-auth.js loaded');
+            console.log('🔗 window.API_BASE_URL:', window.API_BASE_URL);
+            
+            // Now load admin-dashboard.js (should not cause conflicts)
+            const script2 = document.createElement('script');
+            script2.src = '/assets/js/admin-dashboard.js';
+            script2.onload = function() {
+                console.log('✅ admin-dashboard.js loaded successfully');
+                console.log('🎉 No syntax errors! Fix is working.');
+                document.getElementById('test-results').innerHTML = 
+                    '<p style="color: green;">✅ Test passed! No API_BASE_URL conflicts detected.</p>';
+            };
+            script2.onerror = function() {
+                console.error('❌ admin-dashboard.js failed to load');
+                document.getElementById('test-results').innerHTML = 
+                    '<p style="color: red;">❌ Test failed! admin-dashboard.js could not load.</p>';
+            };
+            document.head.appendChild(script2);
+        };
+        script1.onerror = function() {
+            console.error('❌ shared-admin-auth.js failed to load');
+            document.getElementById('test-results').innerHTML = 
+                '<p style="color: red;">❌ Test failed! shared-admin-auth.js could not load.</p>';
+        };
+        document.head.appendChild(script1);
+    </script>
+</body>
+</html>

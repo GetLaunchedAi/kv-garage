@@ -190,8 +190,30 @@ permalink: "admin/packs/"
                     </div>
                     
                     <div class="form-group">
-                        <label for="pack-image">Image URL</label>
-                        <input type="url" id="pack-image" name="image_url">
+                        <label for="pack-image">Pack Image</label>
+                        <div class="image-upload-container">
+                            <div class="image-upload-area" id="image-upload-area">
+                                <input type="file" id="image-upload" name="image" accept="image/*" style="display: none;">
+                                <div class="upload-placeholder" id="upload-placeholder">
+                                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                        <polyline points="7,10 12,15 17,10"></polyline>
+                                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                                    </svg>
+                                    <p>Click to upload image</p>
+                                    <small>Max 5MB, JPG/PNG/GIF</small>
+                                </div>
+                                <div class="image-preview" id="image-preview" style="display: none;">
+                                    <img id="preview-img" src="" alt="Preview">
+                                    <button type="button" class="remove-image" id="remove-image">&times;</button>
+                                </div>
+                            </div>
+                            <div class="image-url-container" id="image-url-container" style="display: none;">
+                                <label for="pack-image">Or enter image URL:</label>
+                                <input type="url" id="pack-image" name="image_url" placeholder="https://example.com/image.jpg">
+                            </div>
+                            <button type="button" class="toggle-url-btn" id="toggle-url-btn">Use URL instead</button>
+                        </div>
                     </div>
                     
                     <div class="form-row">

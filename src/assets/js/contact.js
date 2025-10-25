@@ -3,7 +3,8 @@
  * Handles contact form submission and live chat integration
  */
 
-const API_BASE_URL = 'http://localhost:3001/api';
+// Use global API_BASE_URL from shared-admin-auth.js
+// const API_BASE_URL = window.API_BASE_URL || 'http://localhost:3001/api';
 
 class ContactManager {
     constructor() {
@@ -180,7 +181,7 @@ class ContactManager {
             const data = Object.fromEntries(formData.entries());
             
             // Send to backend (you'll need to implement this endpoint)
-            const response = await fetch(`${API_BASE_URL}/contact`, {
+            const response = await fetch(`${window.API_BASE_URL}/contact`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -231,7 +232,7 @@ class ContactManager {
             borderRadius: '8px',
             color: 'white',
             fontWeight: '600',
-            zIndex: '10000',
+            zIndex: '300001',
             transform: 'translateX(100%)',
             transition: 'transform 0.3s ease',
             maxWidth: '400px',

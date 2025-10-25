@@ -78,9 +78,18 @@ if (!fs.existsSync('uploads')) {
   fs.mkdirSync('uploads');
 }
 
+// Ensure images subdirectory exists
+if (!fs.existsSync('uploads/images')) {
+  fs.mkdirSync('uploads/images', { recursive: true });
+}
+
+// Serve uploaded images
+app.use('/api/uploads/images', express.static('uploads/images'));
+
 // Routes
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api/manifests', require('./routes/manifests'));
+app.use('/api/images', require('./routes/images'));
 app.use('/api/packs', require('./routes/packs'));
 app.use('/api/orders', require('./routes/orders'));
 app.use('/api/custom-requests', require('./routes/custom-requests'));

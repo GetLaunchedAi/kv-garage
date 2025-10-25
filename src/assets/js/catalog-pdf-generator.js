@@ -209,7 +209,7 @@ class CatalogPDFGenerator {
         `Price: $${pack.price.toFixed(2)}`,
         `Deposit: $${pack.deposit_price.toFixed(2)}`,
         `Units: ${pack.units}`,
-        `Resale Estimate: $${pack.resale_estimate.toFixed(2)}`,
+        `Resale Estimate: ${pack.resale_estimate}`,
         `Available: ${pack.available_quantity}`,
         `Status: ${pack.status.toUpperCase()}`
       ];

@@ -10,12 +10,16 @@ permalink: "payment-success.html"
 <style>
         .success-container {
             max-width: 600px;
-            margin: 4rem auto;
+            margin: 20rem auto 10rem;
             padding: 2rem;
             text-align: center;
             background: white;
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        body.dark-mode .success-container {
+            background: var(--medium);
+            border: 1px solid var(--border);
         }
         
         .success-icon {
@@ -23,7 +27,9 @@ permalink: "payment-success.html"
             color: #28a745;
             margin-bottom: 1rem;
         }
-        
+        body.dark-mode .success-icon {
+            color: #28a745;
+        }
         .success-title {
             font-size: 2rem;
             color: #28a745;
@@ -43,7 +49,10 @@ permalink: "payment-success.html"
             margin: 2rem 0;
             text-align: left;
         }
-        
+        body.dark-mode .order-details {
+            background: var(--medium);
+            border: 1px solid var(--border);
+        }
         .order-details h3 {
             margin-top: 0;
             color: #495057;

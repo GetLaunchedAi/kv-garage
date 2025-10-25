@@ -174,7 +174,7 @@
   }
 
   body.dark-mode .section-subtitle {
-    color: var(--accent);
+    color: var(--bodyTextColorWhite);
   }
 
   body.dark-mode .policy-section .cs-text {

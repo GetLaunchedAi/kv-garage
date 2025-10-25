@@ -182,7 +182,7 @@ class PackSystemUtils {
       borderRadius: '8px',
       color: 'white',
       fontWeight: '600',
-      zIndex: '10000',
+      zIndex: '300001',
       transform: 'translateX(100%)',
       transition: 'transform 0.3s ease',
       maxWidth: '300px',

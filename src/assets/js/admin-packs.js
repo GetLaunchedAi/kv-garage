@@ -3,20 +3,13 @@
  * Handles pack creation, editing, and management
  */
 
-// Smart Environment Detection
-const isLocalhost = window.location.hostname === 'localhost' || 
-                   window.location.hostname === '127.0.0.1' ||
-                   window.location.hostname === '0.0.0.0';
-
-// API Configuration - Smart detection for all environments
-const API_BASE_URL = window.API_BASE_URL || (isLocalhost 
-  ? 'http://localhost:3001/api' 
-  : '/api');
+// Use global environment detection from shared-admin-auth.js
+// API_BASE_URL is now available globally from shared-admin-auth.js
 const JSON_DATA_URL = '/data'; // Fallback for static data
 
 // Environment logging
-console.log(`🌍 Admin Packs - Environment: ${isLocalhost ? 'localhost' : 'production'}`);
-console.log(`🔗 API Base URL: ${API_BASE_URL}`);
+console.log(`🌍 Admin Packs - Using global environment detection`);
+console.log(`🔗 API Base URL: ${window.API_BASE_URL}`);
 
 class AdminPacks {
     constructor() {
@@ -762,7 +755,7 @@ class AdminPacks {
             borderRadius: '8px',
             color: 'white',
             fontWeight: '600',
-            zIndex: '10000',
+            zIndex: '300001',
             transform: 'translateX(100%)',
             transition: 'transform 0.3s ease',
             maxWidth: '400px',

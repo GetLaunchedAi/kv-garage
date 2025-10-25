@@ -194,6 +194,106 @@ eleventyNavigation:
   </div> <!-- End filter-container -->
 </div>
 
+<!-- ============================================ -->
+<!--                Lead Form Section             -->
+<!-- ============================================ -->
+
+<section id="lead-form" class="lead-form-section">
+  <div class="cs-container">
+    <div class="lead-form-header">
+      <h2 class="lead-form-title">Get Exclusive Shop Deals</h2>
+      <p class="lead-form-description">Be the first to know about new products, flash sales, and exclusive discounts. Join our community of smart shoppers.</p>
+    </div>
+    
+    <div class="lead-form-container">
+      <form id="shop-lead-form" class="lead-form lead-form-blue">
+        <div class="lead-form-row">
+          <div class="lead-form-field">
+            <label for="shop-first-name" class="lead-form-label">First Name *</label>
+            <input type="text" id="shop-first-name" name="first_name" required class="lead-form-input">
+          </div>
+          <div class="lead-form-field">
+            <label for="shop-last-name" class="lead-form-label">Last Name *</label>
+            <input type="text" id="shop-last-name" name="last_name" required class="lead-form-input">
+          </div>
+        </div>
+        
+        <div class="lead-form-field">
+          <label for="shop-email" class="lead-form-label">Email Address *</label>
+          <input type="email" id="shop-email" name="email" required class="lead-form-input">
+        </div>
+        
+        <div class="lead-form-field">
+          <label for="shop-phone" class="lead-form-label">Phone Number</label>
+          <input type="tel" id="shop-phone" name="phone" class="lead-form-input">
+        </div>
+        
+        <div class="lead-form-field">
+          <label for="shop-categories" class="lead-form-label">Product Categories of Interest</label>
+          <div class="lead-form-checkbox-grid">
+            <label class="lead-form-checkbox-item">
+              <input type="checkbox" name="categories" value="mobile-accessories" class="lead-form-checkbox">
+              Mobile Accessories
+            </label>
+            <label class="lead-form-checkbox-item">
+              <input type="checkbox" name="categories" value="cables-chargers" class="lead-form-checkbox">
+              Cables & Chargers
+            </label>
+            <label class="lead-form-checkbox-item">
+              <input type="checkbox" name="categories" value="screen-protectors" class="lead-form-checkbox">
+              Screen Protectors
+            </label>
+            <label class="lead-form-checkbox-item">
+              <input type="checkbox" name="categories" value="watch-accessories" class="lead-form-checkbox">
+              Watch Accessories
+            </label>
+            <label class="lead-form-checkbox-item">
+              <input type="checkbox" name="categories" value="phone-accessories" class="lead-form-checkbox">
+              Phone Accessories
+            </label>
+            <label class="lead-form-checkbox-item">
+              <input type="checkbox" name="categories" value="wholesale-deals" class="lead-form-checkbox">
+              Wholesale Deals
+            </label>
+          </div>
+        </div>
+        
+        <div class="lead-form-field">
+          <label for="shop-price-range" class="lead-form-label">Price Range Preference</label>
+          <select id="shop-price-range" name="price_range" class="lead-form-select">
+            <option value="">Select your preferred price range</option>
+            <option value="under-25">Under $25</option>
+            <option value="25-50">$25 - $50</option>
+            <option value="50-100">$50 - $100</option>
+            <option value="100-250">$100 - $250</option>
+            <option value="over-250">Over $250</option>
+          </select>
+        </div>
+        
+        <div class="lead-form-field">
+          <label for="shop-interests" class="lead-form-label">Shopping Goals</label>
+          <textarea id="shop-interests" name="interests" rows="3" placeholder="Tell us about your shopping goals, preferred brands, or any specific products you're looking for..." class="lead-form-textarea"></textarea>
+        </div>
+        
+        <div class="lead-form-newsletter">
+          <input type="checkbox" id="shop-deals" name="deals" checked class="lead-form-newsletter-checkbox">
+          <label for="shop-deals" class="lead-form-newsletter-label">
+            Send me exclusive deals, flash sales, and new product notifications
+          </label>
+        </div>
+        
+        <button type="submit" class="lead-form-submit">
+          Get Shop Updates
+        </button>
+        
+        <p class="lead-form-footer">
+          We'll send you personalized deals based on your interests. Unsubscribe anytime.
+        </p>
+      </form>
+    </div>
+  </div>
+</section>
+
 <script>
 (function () {
   const root = document.getElementById('catalog');

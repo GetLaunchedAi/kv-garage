@@ -217,6 +217,135 @@ router.post('/webhook', express.raw({type: 'application/json'}), async (req, res
 });
 
 /**
+ * POST /api/payments/create-cart-intent
+ * Create a payment intent for a cart purchase
+ */
+router.post('/create-cart-intent', async (req, res) => {
+  try {
+    const { cart_items, customer_email, customer_name, amount } = req.body;
+    
+    // Validate required fields
+    if (!cart_items || !Array.isArray(cart_items) || cart_items.length === 0 || !amount || !customer_email) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required fields: cart_items, amount, customer_email'
+      });
+    }
+    
+    winston.info(`Creating cart payment intent for ${cart_items.length} items, amount: ${amount}`);
+    
+    // Create payment intent with limited metadata (Stripe has 500 char limit per metadata value)
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: Math.round(amount * 100), // Convert to cents
+      currency: 'usd',
+      metadata: {
+        customer_email: customer_email,
+        customer_name: customer_name || 'Unknown',
+        purchase_type: 'cart',
+        item_count: cart_items.length.toString(),
+        total_amount: amount.toString()
+      },
+      automatic_payment_methods: {
+        enabled: true,
+      },
+    });
+    
+    winston.info(`Cart payment intent created: ${paymentIntent.id}`);
+    
+    res.json({
+      success: true,
+      client_secret: paymentIntent.client_secret,
+      payment_intent_id: paymentIntent.id
+    });
+    
+  } catch (error) {
+    winston.error('Cart payment intent creation error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to create cart payment intent'
+    });
+  }
+});
+
+/**
+ * POST /api/payments/confirm-cart
+ * Confirm a cart payment and create order
+ */
+router.post('/confirm-cart', async (req, res) => {
+  try {
+    const { payment_intent_id, cart_items, customer_email, customer_name } = req.body;
+    
+    winston.info(`Confirming cart payment: ${payment_intent_id}`);
+    
+    // Validate required fields
+    if (!payment_intent_id || !cart_items || !Array.isArray(cart_items) || cart_items.length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required fields: payment_intent_id, cart_items'
+      });
+    }
+    
+    // Retrieve payment intent from Stripe
+    const paymentIntent = await stripe.paymentIntents.retrieve(payment_intent_id);
+    
+    if (paymentIntent.status !== 'succeeded') {
+      return res.status(400).json({
+        success: false,
+        error: 'Payment not completed'
+      });
+    }
+    
+    // Calculate total amount
+    const totalAmount = cart_items.reduce((total, item) => total + (item.price * item.quantity), 0);
+    
+    // Create order with cart items
+    const order = {
+      id: `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      items: cart_items,
+      customer_email: customer_email,
+      customer_name: customer_name,
+      amount: totalAmount,
+      payment_intent_id: payment_intent_id,
+      payment_status: 'completed',
+      status: 'pending',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      status_history: [{
+        status: 'pending',
+        changed_at: new Date().toISOString(),
+        changed_by: 'system',
+        notes: 'Cart order created after successful payment'
+      }]
+    };
+    
+    // Save order to JSON file
+    const ordersData = await fileManager.readJSON('orders.json');
+    if (!ordersData.orders) {
+      ordersData.orders = [];
+    }
+    ordersData.orders.push(order);
+    await fileManager.writeJSON('orders.json', ordersData);
+    
+    // Log activity
+    await ActivityLogger.logOrderActivity(order, 'order_created', 'system');
+    
+    winston.info(`Cart order created: ${order.id}`);
+    
+    res.json({
+      success: true,
+      order: order
+    });
+    
+  } catch (error) {
+    winston.error('Cart payment confirmation error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to confirm cart payment'
+    });
+  }
+});
+
+/**
  * GET /api/payments/config
  * Get Stripe configuration for frontend
  */

@@ -229,30 +229,18 @@ class GlobalCart {
     };
   }
 
-  // Simple checkout function - redirects to contact page with cart data
+  // Cart checkout function - redirects to cart checkout page with Stripe integration
   checkout() {
     if (this.cart.length === 0) {
       alert('Your cart is empty!');
       return;
     }
 
-    // Create a simple checkout form data
-    const cartData = this.getCartData();
-    const checkoutData = {
-      items: cartData.items.map(item => ({
-        name: item.name,
-        price: item.price,
-        quantity: item.quantity
-      })),
-      total: cartData.totalPrice,
-      timestamp: new Date().toISOString()
-    };
+    // Store cart data in localStorage for the cart checkout page
+    localStorage.setItem('kv-garage-cart', JSON.stringify(this.cart));
 
-    // Store checkout data in localStorage for the contact page
-    localStorage.setItem('kv-garage-checkout', JSON.stringify(checkoutData));
-
-    // Redirect to contact page for order completion
-    window.location.href = '/contact/?checkout=true';
+    // Redirect to cart checkout page for payment processing
+    window.location.href = '/cart-checkout/';
   }
 }
 

@@ -3,19 +3,12 @@
  * Handles order viewing, status updates, and management
  */
 
-// Smart Environment Detection
-const isLocalhost = window.location.hostname === 'localhost' || 
-                   window.location.hostname === '127.0.0.1' ||
-                   window.location.hostname === '0.0.0.0';
-
-// API Configuration - Smart detection for all environments
-const API_BASE_URL = window.API_BASE_URL || (isLocalhost 
-  ? 'http://localhost:3001/api' 
-  : '/api');
+// Use global environment detection from shared-admin-auth.js
+// API_BASE_URL is now available globally from shared-admin-auth.js
 
 // Environment logging
-console.log(`🌍 Admin Orders - Environment: ${isLocalhost ? 'localhost' : 'production'}`);
-console.log(`🔗 API Base URL: ${API_BASE_URL}`);
+console.log(`🌍 Admin Orders - Using global environment detection`);
+console.log(`🔗 API Base URL: ${window.API_BASE_URL}`);
 
 class AdminOrderManager {
     constructor() {
@@ -679,7 +672,7 @@ class AdminOrderManager {
             border-radius: 4px;
             color: white;
             font-weight: 500;
-            z-index: 10000;
+            z-index: 300001;
             max-width: 300px;
             word-wrap: break-word;
         `;

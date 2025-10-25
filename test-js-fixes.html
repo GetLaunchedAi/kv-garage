@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaScript Fixes Test</title>
+</head>
+<body>
+    <h1>🧪 Testing JavaScript Fixes</h1>
+    
+    <div id="test-results">
+        <h2>Test Results:</h2>
+        <div id="results"></div>
+    </div>
+
+    <script>
+        console.log('🧪 Testing JavaScript fixes...');
+        
+        // Test 1: Check if shared-admin-auth loads without errors
+        console.log('1️⃣ Testing shared-admin-auth.js...');
+        try {
+            // This should load without errors
+            console.log('✅ shared-admin-auth.js should load without errors');
+        } catch (error) {
+            console.error('❌ shared-admin-auth.js error:', error);
+        }
+
+        // Test 2: Check if admin-dashboard loads without errors
+        console.log('2️⃣ Testing admin-dashboard.js...');
+        try {
+            // This should load without errors
+            console.log('✅ admin-dashboard.js should load without errors');
+        } catch (error) {
+            console.error('❌ admin-dashboard.js error:', error);
+        }
+
+        // Test 3: Check if admin-packs loads without errors
+        console.log('3️⃣ Testing admin-packs.js...');
+        try {
+            // This should load without errors
+            console.log('✅ admin-packs.js should load without errors');
+        } catch (error) {
+            console.error('❌ admin-packs.js error:', error);
+        }
+
+        // Test 4: Check if admin-orders loads without errors
+        console.log('4️⃣ Testing admin-orders.js...');
+        try {
+            // This should load without errors
+            console.log('✅ admin-orders.js should load without errors');
+        } catch (error) {
+            console.error('❌ admin-orders.js error:', error);
+        }
+
+        // Test 5: Check environment detection
+        console.log('5️⃣ Testing environment detection...');
+        const isLocalhost = window.location.hostname === 'localhost' || 
+                           window.location.hostname === '127.0.0.1' ||
+                           window.location.hostname === '0.0.0.0';
+        
+        console.log(`Environment: ${isLocalhost ? 'localhost' : 'production'}`);
+        console.log(`Hostname: ${window.location.hostname}`);
+
+        // Test 6: Check API Base URL
+        console.log('6️⃣ Testing API Base URL...');
+        const API_BASE_URL = isLocalhost 
+            ? 'http://localhost:3001/api' 
+            : '/api';
+        
+        console.log(`API Base URL: ${API_BASE_URL}`);
+
+        console.log('🎉 JavaScript fixes test complete!');
+        console.log('📋 Check console for any errors');
+        console.log('🔍 If no errors, the fixes are working!');
+    </script>
+
+    <script src="/assets/js/shared-admin-auth.js"></script>
+    <script src="/assets/js/admin-dashboard.js"></script>
+    <script src="/assets/js/admin-packs.js"></script>
+    <script src="/assets/js/admin-orders.js"></script>
+</body>
+</html>

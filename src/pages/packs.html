@@ -105,6 +105,98 @@ eleventyNavigation:
 </section>
 
 <!-- ============================================ -->
+<!--                Lead Form Section             -->
+<!-- ============================================ -->
+
+<section id="lead-form" class="lead-form-section">
+  <div class="cs-container">
+    <div class="lead-form-header">
+      <h2 class="lead-form-title">Get First Access to New Packs</h2>
+      <p class="lead-form-description">Be the first to know about new wholesale packs, exclusive deals, and limited-time offers. Join our reseller community today.</p>
+    </div>
+    
+    <div class="lead-form-container">
+      <form id="packs-lead-form" class="lead-form lead-form-blue">
+        <div class="lead-form-row">
+          <div class="lead-form-field">
+            <label for="packs-first-name" class="lead-form-label">First Name *</label>
+            <input type="text" id="packs-first-name" name="first_name" required class="lead-form-input">
+          </div>
+          <div class="lead-form-field">
+            <label for="packs-last-name" class="lead-form-label">Last Name *</label>
+            <input type="text" id="packs-last-name" name="last_name" required class="lead-form-input">
+          </div>
+        </div>
+        
+        <div class="lead-form-field">
+          <label for="packs-email" class="lead-form-label">Email Address *</label>
+          <input type="email" id="packs-email" name="email" required class="lead-form-input">
+        </div>
+        
+        <div class="lead-form-field">
+          <label for="packs-phone" class="lead-form-label">Phone Number</label>
+          <input type="tel" id="packs-phone" name="phone" class="lead-form-input">
+        </div>
+        
+        <div class="lead-form-field">
+          <label for="packs-budget" class="lead-form-label">Monthly Pack Budget</label>
+          <select id="packs-budget" name="budget" class="lead-form-select">
+            <option value="">Select your budget range</option>
+            <option value="under-500">Under $500</option>
+            <option value="500-1000">$500 - $1,000</option>
+            <option value="1000-2500">$1,000 - $2,500</option>
+            <option value="2500-5000">$2,500 - $5,000</option>
+            <option value="over-5000">Over $5,000</option>
+          </select>
+        </div>
+        
+        <div class="lead-form-field">
+          <label for="packs-preferences" class="lead-form-label">Pack Preferences</label>
+          <div class="lead-form-checkbox-grid">
+            <label class="lead-form-checkbox-item">
+              <input type="checkbox" name="pack_types" value="starter" class="lead-form-checkbox">
+              Starter Packs
+            </label>
+            <label class="lead-form-checkbox-item">
+              <input type="checkbox" name="pack_types" value="growth" class="lead-form-checkbox">
+              Growth Packs
+            </label>
+            <label class="lead-form-checkbox-item">
+              <input type="checkbox" name="pack_types" value="pro" class="lead-form-checkbox">
+              Pro Packs
+            </label>
+            <label class="lead-form-checkbox-item">
+              <input type="checkbox" name="pack_types" value="macbook" class="lead-form-checkbox">
+              MacBook Bundles
+            </label>
+          </div>
+        </div>
+        
+        <div class="lead-form-field">
+          <label for="packs-interests" class="lead-form-label">Additional Interests</label>
+          <textarea id="packs-interests" name="interests" rows="3" placeholder="Tell us about your reselling goals, preferred product categories, or any specific requirements..." class="lead-form-textarea"></textarea>
+        </div>
+        
+        <div class="lead-form-newsletter">
+          <input type="checkbox" id="packs-notifications" name="notifications" checked class="lead-form-newsletter-checkbox">
+          <label for="packs-notifications" class="lead-form-newsletter-label">
+            Send me notifications about new packs, price drops, and exclusive deals
+          </label>
+        </div>
+        
+        <button type="submit" class="lead-form-submit">
+          Get Pack Updates
+        </button>
+        
+        <p class="lead-form-footer">
+          We'll notify you about new packs that match your preferences. No spam, just great deals.
+        </p>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ -->
 <!--                PACK DETAIL MODAL             -->
 <!-- ============================================ -->
 
