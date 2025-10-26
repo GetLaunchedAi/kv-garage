@@ -64,7 +64,8 @@ class GlobalCart {
         price: packPrice,
         image: packImage,
         slug: packSlug,
-        quantity: 1
+        quantity: 1,
+        type: 'purchase'
       });
     }
 
@@ -193,11 +194,23 @@ class GlobalCart {
   removeFromCart(id) {
     // Handle both old format (just id) and new format (id-type)
     if (id.includes('-')) {
-      const [itemId, itemType] = id.split('-');
-      this.cart = this.cart.filter(item => !(item.id === itemId && (item.type || 'purchase') === itemType));
+      const lastDashIndex = id.lastIndexOf('-');
+      const itemId = id.substring(0, lastDashIndex);
+      const itemType = id.substring(lastDashIndex + 1);
+      
+      this.cart = this.cart.filter(item => {
+        const matchesId = item.id === itemId;
+        const matchesType = (item.type || 'purchase') === itemType;
+        return !(matchesId && matchesType);
+      });
     } else {
-      this.cart = this.cart.filter(item => item.id !== String(id));
+      // For backward compatibility with old items that might not have type
+      this.cart = this.cart.filter(item => {
+        const itemType = item.type || 'purchase';
+        return !(item.id === String(id) && itemType === 'purchase');
+      });
     }
+    
     this.saveCart();
     this.updateCartDisplay();
   }
@@ -235,7 +248,30 @@ class GlobalCart {
   loadCart() {
     try {
       const raw = localStorage.getItem('kv-garage-cart');
-      return raw ? JSON.parse(raw) : [];
+      const cart = raw ? JSON.parse(raw) : [];
+      
+      // Migration: Add type property to items that don't have it (backward compatibility)
+      const migratedCart = cart.map(item => {
+        if (!item.hasOwnProperty('type')) {
+          return {
+            ...item,
+            type: 'purchase'
+          };
+        }
+        return item;
+      });
+      
+      // Save migrated cart if changes were made
+      const hasChanges = migratedCart.some((item, index) => {
+        const originalItem = cart[index];
+        return !originalItem || item.type !== originalItem.type;
+      });
+      
+      if (hasChanges) {
+        localStorage.setItem('kv-garage-cart', JSON.stringify(migratedCart));
+      }
+      
+      return migratedCart;
     } catch {
       return [];
     }

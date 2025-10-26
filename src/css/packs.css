@@ -330,6 +330,13 @@ body.dark-mode .stat {
   background: var(--medium);
 }
 
+.modal-content .stat {
+  background: var(--dark);
+}
+body.dark-mode .modal-content .stat {
+  background: var(--dark);
+}
+
 .stat-label {
   font-size: 0.75rem;
   color: var(--text-muted);
