@@ -111,6 +111,7 @@
     margin: 0;
     font-size: 1rem;
     line-height: 1.6;
+    color: var(--bodyTextColorWhite);
   }
 
   .contact-info a {
@@ -174,7 +175,7 @@
   }
 
   body.dark-mode .section-subtitle {
-    color: var(--accent);
+    color: var(--bodyTextColorWhite);
   }
 
   body.dark-mode .policy-section .cs-text {
