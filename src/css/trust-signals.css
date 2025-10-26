@@ -107,10 +107,10 @@
     }
 }
 
-/* Desktop: 4 columns (skip 3 columns entirely) */
+/* Desktop: 3 columns (skip 4 columns entirely) */
 @media (min-width: 1024px) {
     .trust-grid {
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(3, 1fr);
     }
 }
 

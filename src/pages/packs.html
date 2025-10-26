@@ -604,10 +604,10 @@ eleventyNavigation:
           this.viewManifest(pack.id);
           break;
         case 'buy':
-          await this.initiatePurchase(pack, 'full');
+          this.addPackToCart(pack, 'buy');
           break;
         case 'reserve':
-          await this.initiatePurchase(pack, 'deposit');
+          this.addPackToCart(pack, 'reserve');
           break;
       }
     }
@@ -717,8 +717,8 @@ eleventyNavigation:
       });
 
       // Purchase buttons
-      document.getElementById('buy-now-btn').onclick = () => this.initiatePurchase(this.currentPack, 'full');
-      document.getElementById('reserve-btn').onclick = () => this.initiatePurchase(this.currentPack, 'deposit');
+      document.getElementById('buy-now-btn').onclick = () => this.addPackToCart(this.currentPack, 'buy');
+      document.getElementById('reserve-btn').onclick = () => this.addPackToCart(this.currentPack, 'reserve');
 
       // Manifest buttons
       document.getElementById('view-full-manifest').onclick = () => this.viewManifest(this.currentPack.id);
@@ -804,20 +804,13 @@ eleventyNavigation:
       }
     }
 
-    async initiatePurchase(pack, paymentType) {
-      try {
-        // Import checkout functionality
-        const { createCheckoutSession } = await import('/assets/js/checkout.js');
-
-        // Create checkout session
-        const sessionUrl = await createCheckoutSession(pack.id, paymentType);
-
-        // Redirect to Stripe checkout
-        window.location.href = sessionUrl;
-
-      } catch (error) {
-        console.error('Checkout error:', error);
-        alert(`Error: ${error.message}`);
+    addPackToCart(pack, actionType) {
+      // Access global cart instance
+      if (window.globalCart) {
+        window.globalCart.addPackToCart(pack, actionType);
+      } else {
+        console.error('Global cart not available');
+        alert('Cart system not available. Please refresh the page.');
       }
     }
 

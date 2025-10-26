@@ -31,12 +31,25 @@ try {
       $image = $img;
     }
 
+    // Extract metadata for reservations
+    $metadata = isset($item['metadata']) ? $item['metadata'] : [];
+    $itemType = $metadata['type'] ?? 'purchase';
+    $originalAction = $metadata['originalAction'] ?? 'buy';
+    $fullAmount = $metadata['fullAmount'] ?? $price;
+    $depositAmount = $metadata['depositAmount'] ?? 0;
+
     $line_items[] = [
       'price_data' => [
         'currency' => 'usd',
         'product_data' => [
           'name'   => $item['name'] ?? 'Untitled Item',
           'images' => $image ? [$image] : [],
+          'metadata' => [
+            'type' => $itemType,
+            'original_action' => $originalAction,
+            'full_amount' => $fullAmount,
+            'deposit_amount' => $depositAmount
+          ]
         ],
         'unit_amount' => round($price * 100),
       ],

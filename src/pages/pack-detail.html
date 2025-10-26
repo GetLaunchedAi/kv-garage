@@ -629,20 +629,12 @@ class PackDetailSystem {
 
   bindDetailEvents(pack) {
     // Bind purchase events
-    window.initiatePurchase = async (paymentType) => {
-      try {
-        // Import checkout functionality
-        const { createCheckoutSession } = await import('/assets/js/checkout.js');
-        
-        // Create checkout session
-        const sessionUrl = await createCheckoutSession(pack.id, paymentType);
-        
-        // Redirect to Stripe checkout
-        window.location.href = sessionUrl;
-        
-      } catch (error) {
-        console.error('Checkout error:', error);
-        alert(`Error: ${error.message}`);
+    window.initiatePurchase = (paymentType) => {
+      if (window.globalCart) {
+        window.globalCart.addPackToCart(pack, paymentType);
+      } else {
+        console.error('Global cart not available');
+        alert('Cart system not available. Please refresh the page.');
       }
     };
     

@@ -73,17 +73,65 @@ class GlobalCart {
     this.showAddToCartFeedback(button);
   }
 
-  showAddToCartFeedback(button) {
-    const original = button.textContent;
-    button.disabled = true;
-    button.textContent = 'Added!';
-    button.classList.add('added');
+  addPackToCart(pack, actionType) {
+    const cartItem = {
+      id: String(pack.id),
+      name: pack.name,
+      price: actionType === 'reserve' ? pack.deposit_price : pack.price,
+      image: pack.image_url || '/images/products/collage_1.png',
+      slug: pack.slug || pack.name.toLowerCase().replace(/\s+/g, '-'),
+      quantity: 1,
+      type: actionType === 'reserve' ? 'reservation' : 'purchase',
+      depositAmount: actionType === 'reserve' ? pack.deposit_price : 0,
+      fullAmount: pack.price,
+      originalAction: actionType
+    };
 
+    // Check if item already exists (same pack + same type)
+    const existing = this.cart.find(i => i.id === cartItem.id && i.type === cartItem.type);
+    
+    if (existing) {
+      existing.quantity += 1;
+    } else {
+      this.cart.push(cartItem);
+    }
+
+    this.saveCart();
+    this.updateCartDisplay();
+    this.showAddToCartFeedback();
+  }
+
+  showAddToCartFeedback(button) {
+    if (button) {
+      const original = button.textContent;
+      button.disabled = true;
+      button.textContent = 'Added!';
+      button.classList.add('added');
+
+      setTimeout(() => {
+        button.textContent = original;
+        button.classList.remove('added');
+        button.disabled = false;
+      }, 1200);
+    } else {
+      // Show toast notification for pack additions
+      this.showToast('Item added to cart!');
+    }
+  }
+
+  showToast(message) {
+    // Create toast notification
+    const toast = document.createElement('div');
+    toast.className = 'cart-toast';
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    
+    // Remove after 3 seconds
     setTimeout(() => {
-      button.textContent = original;
-      button.classList.remove('added');
-      button.disabled = false;
-    }, 1200);
+      if (toast.parentNode) {
+        toast.parentNode.removeChild(toast);
+      }
+    }, 3000);
   }
 
   updateCartDisplay() {
@@ -111,22 +159,69 @@ class GlobalCart {
       return;
     }
 
-    container.innerHTML = this.cart.map(item => `
-      <div class="cart-item" data-id="${item.id}">
+    container.innerHTML = this.cart.map(item => this.createCartItemHTML(item)).join('');
+  }
+
+  createCartItemHTML(item) {
+    const isReservation = item.type === 'reservation';
+    const itemId = `${item.id}-${item.type || 'purchase'}`;
+    
+    return `
+      <div class="cart-item ${item.type || ''}" data-id="${itemId}">
         <img src="${item.image}" alt="${item.name}" class="cart-item-image">
         <div class="cart-item-details">
-          <h4>${item.name}</h4>
-          <p>$${item.price.toFixed(2)} × ${item.quantity}</p>
+          <h4 class="cart-item-name">
+            ${isReservation ? `🔒 Reservation for ${item.name}` : item.name}
+          </h4>
+          <p class="cart-item-price">
+            ${isReservation 
+              ? `Deposit: $${item.price.toFixed(2)} (Full: $${item.fullAmount.toFixed(2)})`
+              : `$${item.price.toFixed(2)}`
+            }
+          </p>
+          <div class="quantity-controls">
+            <button onclick="window.globalCart.decreaseQuantity('${item.id}', '${item.type || 'purchase'}')">-</button>
+            <span class="quantity">${item.quantity}</span>
+            <button onclick="window.globalCart.increaseQuantity('${item.id}', '${item.type || 'purchase'}')">+</button>
+          </div>
         </div>
-        <button class="remove-item" data-id="${item.id}" title="Remove">×</button>
+        <button class="remove-item" data-id="${itemId}" title="Remove">×</button>
       </div>
-    `).join('');
+    `;
   }
 
   removeFromCart(id) {
-    this.cart = this.cart.filter(item => item.id !== String(id));
+    // Handle both old format (just id) and new format (id-type)
+    if (id.includes('-')) {
+      const [itemId, itemType] = id.split('-');
+      this.cart = this.cart.filter(item => !(item.id === itemId && (item.type || 'purchase') === itemType));
+    } else {
+      this.cart = this.cart.filter(item => item.id !== String(id));
+    }
     this.saveCart();
     this.updateCartDisplay();
+  }
+
+  increaseQuantity(itemId, itemType) {
+    const item = this.cart.find(i => i.id === itemId && (i.type || 'purchase') === itemType);
+    if (item) {
+      item.quantity += 1;
+      this.saveCart();
+      this.updateCartDisplay();
+    }
+  }
+
+  decreaseQuantity(itemId, itemType) {
+    const item = this.cart.find(i => i.id === itemId && (i.type || 'purchase') === itemType);
+    if (item) {
+      item.quantity -= 1;
+      if (item.quantity <= 0) {
+        this.removeFromCart(`${itemId}-${itemType}`);
+      } else {
+        this.saveCart();
+        this.updateCartDisplay();
+      }
+    }
   }
 
   getTotalItems() {
@@ -175,10 +270,25 @@ async checkout() {
   }
 
   try {
+    // Prepare cart items for Stripe with metadata
+    const cartItems = this.cart.map(item => ({
+      id: item.id,
+      name: item.type === 'reservation' ? `Reservation for ${item.name}` : item.name,
+      price: item.price,
+      quantity: item.quantity,
+      image: item.image,
+      metadata: {
+        type: item.type || 'purchase',
+        originalAction: item.originalAction || 'buy',
+        fullAmount: item.fullAmount || item.price,
+        depositAmount: item.depositAmount || 0
+      }
+    }));
+
     const res = await fetch('/api/create-checkout-session.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ items: this.cart }),
+      body: JSON.stringify({ items: cartItems }),
     });
 
     const text = await res.text();

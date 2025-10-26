@@ -868,15 +868,15 @@ function card(p) {
   // --- ✅ Return the completed card ---
   return `
   <article class="card ${isOutOfStock ? 'out-of-stock' : ''}">
-    <a href="${esc(href)}" class="card__link">
+    <div class="card__link">
       <picture class="card__img">
         <img src="${esc(img)}" alt="${esc(title)}" loading="lazy" decoding="async">
         ${statusBadge}
       </picture>
-    </a>
+    </div>
     <div class="card__content">
       <h3 class="card__title">
-        <a href="${esc(href)}" title="${esc(title)}">${title}</a>
+        ${title}
       </h3>
       <p class="card__price">${priceDisplay}</p>
       ${p.description ? `<p class="card__description">${esc(p.description)}</p>` : ''}

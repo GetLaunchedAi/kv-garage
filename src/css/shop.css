@@ -138,7 +138,7 @@ body.dark-mode .pagination-btn:disabled {
 }
 
 body.dark-mode .page-number {
-  background: var(--card-bg);
+  background: var(--medium);
   color: var(--text);
   border-color: var(--card-border);
 }
@@ -911,6 +911,11 @@ body.dark-mode .clear-filters-btn {
   transition: all 0.2s ease;
 }
 
+body.dark-mode .hide-filters-btn,
+body.dark-mode .show-filters-btn {
+  background: var(--medium);
+  color: var(--text);
+}
 .hide-filters-btn:hover,
 .show-filters-btn:hover {
   background: var(--light-bg, #f8f9fa);
@@ -937,6 +942,10 @@ body.dark-mode .clear-filters-btn {
   color: var(--text);
   font-size: 0.875rem;
   cursor: pointer;
+}
+body.dark-mode .sort-select {
+  background: var(--medium);
+  color: var(--text);
 }
 
 .sort-select:focus {

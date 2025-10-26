@@ -851,7 +851,7 @@ body.dark-mode #trust-signals .cs-text {
 
 @media (min-width: 1024px) {
     .trust-grid {
-        grid-template-columns: repeat(4, 1fr) !important; /* 4 columns on larger screens */
+        grid-template-columns: repeat(3, 1fr) !important; /* 3 columns on larger screens */
     }
 }
 
