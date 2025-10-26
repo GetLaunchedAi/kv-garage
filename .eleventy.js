@@ -64,6 +64,7 @@ ${Object.values(metadata)
   eleventyConfig.addPassthroughCopy({ 'src/_data/products.json': 'products.json' });
   eleventyConfig.addPassthroughCopy({ 'src/_data/packs.json': 'data/packs.json' });
   eleventyConfig.addPassthroughCopy({ 'src/_data/manifests.json': 'data/manifests.json' });
+  eleventyConfig.addPassthroughCopy('./api');
   eleventyConfig.addWatchTarget('src/_data/products.json');
   eleventyConfig.addWatchTarget('src/_data/packs.json');
   eleventyConfig.addWatchTarget('src/_data/manifests.json');
