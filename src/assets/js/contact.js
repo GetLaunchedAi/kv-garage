@@ -271,7 +271,7 @@ class ContactManager {
 function openLiveChat() {
     // This would integrate with your live chat service (e.g., Intercom, Zendesk, etc.)
     // For now, we'll show a placeholder
-    alert('Live chat will be available soon! In the meantime, please call us at (616) 228-2244 or email support@kvgarage.com');
+    alert('Live chat will be available soon! In the meantime, please call us at (616) 228-2244 or email kvgarage@kvgarage.com');
     
     // Example integration with Intercom:
     // if (window.Intercom) {
