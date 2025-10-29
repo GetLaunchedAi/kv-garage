@@ -21,8 +21,8 @@ packs: _data/packs.json
 
 <section id="hero">
   <div class="cs-overlay"></div>
-  <div class="cs-container">
-    <div class="cs-flex-group">
+  <div class="cs-container fx fade-in">
+    <div class="cs-flex-group fx slide-top staggered-m" style="--i:1">
       <span class="cs-topper">Wholesale. Resale. Ready to Flip.</span>
       <h1 class="cs-title">Wholesale Tech Packs for Resellers</h1>
       <p class="cs-text">
@@ -114,8 +114,8 @@ packs: _data/packs.json
 <!-- ============================================ -->
 
 <section id="catalog">
-  <div class="cs-container">
-    <div class="cs-flex-group">
+  <div class="cs-container fx fade-in">
+    <div class="cs-flex-group fx slide-top staggered-m" style="--i:1">
       <span class="cs-topper">Wholesale Packs</span>
       <h2 class="cs-title">KV Garage Catalog</h2>
       <p class="cs-text">
@@ -124,7 +124,7 @@ packs: _data/packs.json
       </p>
     </div>
     
-    <div class="catalog-table-wrapper">
+    <div class="catalog-table-wrapper fx slide-top staggered-m" style="--i:2">
       <table class="catalog-table">
         <thead>
           <tr>
@@ -139,7 +139,7 @@ packs: _data/packs.json
         </thead>
         <tbody>
           {% for pack in packs.packs %}
-          <tr class="catalog-row">
+          <tr class="catalog-row fx slide-top staggered-m" style="--i:{{ loop.index + 1 }}">
             <td class="pack-name">
               <strong>{{ pack.name }}</strong>
             </td>
@@ -182,7 +182,7 @@ packs: _data/packs.json
       </table>
     </div>
     
-    <div class="catalog-footer">
+    <div class="catalog-footer fx slide-top staggered-m" style="--i:2">
       <p class="catalog-note">
         <strong>Note:</strong> All packs include detailed manifests and ship within 3-5 business days. 
         Tracking information provided within 24 hours of shipment.
@@ -197,8 +197,8 @@ packs: _data/packs.json
 <!-- ============================================ -->
 
 <section id="trust-signals">
-  <div class="cs-container">
-    <div class="cs-flex-group">
+  <div class="cs-container fx fade-in">
+    <div class="cs-flex-group fx slide-top staggered-m" style="--i:1">
       <h2 class="cs-title">Trusted by Resellers Nationwide</h2>
       <p class="cs-text">
         Join thousands of successful resellers who trust KV Garage for their wholesale needs
@@ -215,8 +215,8 @@ packs: _data/packs.json
       </div>
     </div>
     
-    <div class="trust-grid">
-      <div class="trust-card">
+    <div class="trust-grid fx slide-top staggered-m" style="--i:2">
+      <div class="trust-card fx slide-top staggered-m" style="--i:2">
         <div class="trust-icon">
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M9 12l2 2 4-4"></path>
@@ -230,7 +230,7 @@ packs: _data/packs.json
         <p>All our suppliers are verified and vetted for quality and reliability</p>
       </div>
       
-      <div class="trust-card">
+      <div class="trust-card fx slide-top staggered-m" style="--i:3">
         <div class="trust-icon">
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
@@ -240,7 +240,7 @@ packs: _data/packs.json
         <p><a href="tel:+16162282244">(616) 228-2244</a><br>Mon-Fri 9AM-6PM EST</p>
       </div>
       
-      <div class="trust-card">
+      <div class="trust-card fx slide-top staggered-m" style="--i:4">
         <div class="trust-icon">
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
@@ -262,23 +262,23 @@ packs: _data/packs.json
       </div> -->
     </div>
     
-    <div class="success-metrics">
-      <div class="metric-item">
+    <div class="success-metrics fx slide-top staggered-m" style="--i:3">
+      <div class="metric-item fx slide-top staggered-m" style="--i:5">
         <div class="metric-number">2.5x</div>
         <div class="metric-label">Average ROI</div>
         <div class="metric-description">Resellers typically flip inventory 2.5x in 30-60 days</div>
       </div>
-      <div class="metric-item">
+      <div class="metric-item fx slide-top staggered-m" style="--i:6">
         <div class="metric-number">500+</div>
         <div class="metric-label">Happy Customers</div>
         <div class="metric-description">Successful resellers nationwide</div>
       </div>
-      <div class="metric-item">
+      <div class="metric-item fx slide-top staggered-m" style="--i:7">
         <div class="metric-number">24hr</div>
         <div class="metric-label">Fast Shipping</div>
         <div class="metric-description">Orders ship within 24 hours</div>
       </div>
-      <div class="metric-item">
+      <div class="metric-item fx slide-top staggered-m" style="--i:8">
         <div class="metric-number">100%</div>
         <div class="metric-label">Satisfaction</div>
         <div class="metric-description">Money-back guarantee on all packs</div>
@@ -292,14 +292,14 @@ packs: _data/packs.json
 <!-- ============================================ -->
 
 <section id="sbs">
-  <div class="cs-container">
+  <div class="cs-container fx fade-in">
     <!-- Left Image Section -->
-    <div class="cs-left">
+    <div class="cs-left fx slide-top staggered-m" style="--i:1">
       {% image './src/images/about_img_0.jpeg', 'flooring', 'cs-picture
       cs-picture1', 'lazy'%}
     </div>
     <!-- Right Content Section-->
-    <div class="cs-right">
+    <div class="cs-right fx slide-top staggered-m" style="--i:2">
       <span class="cs-topper">About Us</span>
       <h2 class="cs-title">About Kv Garage</h2>
       <p class="cs-text">
@@ -311,12 +311,12 @@ packs: _data/packs.json
       </p>
       <p class="cs-text">
         We focus on transparency, value, and education — giving you the deals
-        and the know‑how to turn inventory into income. Whether you’re just
+        and the know‑how to turn inventory into income. Whether you're just
         starting or scaling, Kv Garage is your partner in growth.
       </p>
       <div class="cs-flex-group">
         <p class="cs-flex-p">
-          I’m a 21‑year‑old entrepreneur running three ventures — liquidation
+          I'm a 21‑year‑old entrepreneur running three ventures — liquidation
           supply chain, index investing, and consulting/mentoring small business
           owners. Kv Garage is where those paths meet: smart buying, community,
           and execution.
@@ -343,14 +343,14 @@ packs: _data/packs.json
 <!-- ============================================ -->
 
 <section id="sbs-r">
-  <div class="cs-container">
+  <div class="cs-container fx fade-in">
     <!-- Left Image Section -->
-    <div class="cs-left">
+    <div class="cs-left fx slide-top staggered-m" style="--i:1">
       {% image './src/images/featured_img_0.jpeg', 'flooring', 'cs-picture
       cs-picture1', 'lazy'%}
     </div>
     <!-- Right Content Section-->
-    <div class="cs-right">
+    <div class="cs-right fx slide-top staggered-m" style="--i:2">
       <span class="cs-topper">For Resellers</span>
       <h2 class="cs-title">Why Shop Kv Garage?</h2>
       <p class="cs-text">
@@ -374,16 +374,16 @@ packs: _data/packs.json
 <!-- ============================================ -->
 
 <section id="reviews">
-  <div class="cs-container">
-    <span class="cs-topper">Our Reviews</span>
-    <h2 class="cs-title">Resellers Growing With Kv Garage</h2>
-    <p class="cs-text">
+  <div class="cs-container fx fade-in">
+    <span class="cs-topper fx slide-top staggered-m" style="--i:1">Our Reviews</span>
+    <h2 class="cs-title fx slide-top staggered-m" style="--i:2">Resellers Growing With Kv Garage</h2>
+    <p class="cs-text fx slide-top staggered-m" style="--i:3">
       From first flips to steady side income, our buyers trust the curation,
-      transparency, and support. Here’s what they’re saying.
+      transparency, and support. Here's what they're saying.
     </p>
     <ul class="cs-card-group">
       <!-- Review 1 -->
-      <li class="cs-item">
+      <li class="cs-item fx slide-top staggered-m" style="--i:4">
         <!-- <img class="cs-item-img" aria-hidden="true" loading="lazy" decoding="async"
           src="https://csimg.nyc3.digitaloceanspaces.com/Reviews/profile5.png" alt="profile picture" width="80"
           height="80" /> -->
@@ -407,7 +407,7 @@ packs: _data/packs.json
         />
       </li>
       <!-- Review 2 -->
-      <li class="cs-item">
+      <li class="cs-item fx slide-top staggered-m" style="--i:5">
         <!-- <img class="cs-item-img" aria-hidden="true" loading="lazy" decoding="async"
           src="https://csimg.nyc3.digitaloceanspaces.com/Reviews/profile-4.png" alt="profile picture" width="80"
           height="80" /> -->
@@ -440,16 +440,16 @@ packs: _data/packs.json
 <!-- ============================================ -->
 
 <section id="cta">
-  <div class="container">
-    <h2 class="title">
+  <div class="container fx fade-in">
+    <h2 class="title fx slide-top staggered-m" style="--i:1">
       Grow Your Side Hustle <br />
       With Kv Garage
     </h2>
-    <p>
-      Start with a single item or jump in with a pallet. We’ll help you pick
-      the right inventory and share what’s working now.
+    <p class="fx slide-top staggered-m" style="--i:2">
+      Start with a single item or jump in with a pallet. We'll help you pick
+      the right inventory and share what's working now.
     </p>
-    <a href="/shop/" class="button-solid">Shop Deals</a>
+    <a href="/shop/" class="button-solid fx slide-top staggered-m" style="--i:3">Shop Deals</a>
   </div>
   {% image './src/images/final_home_img.png', 'vinyl flooring', '', 'lazy',
   '(max-width: 400px) 400px, (max-width: 850px) 850px, 1920px'%}

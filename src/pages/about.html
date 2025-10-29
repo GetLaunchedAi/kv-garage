@@ -18,7 +18,7 @@ eleventyNavigation:
 <!-- ============================================ -->
 
 <section id="int-hero">
-  <h1 id="home-h">About Us</h1>
+  <h1 id="home-h" class="fx fade-in">About Us</h1>
   {% image './src/images/banner_img.png', 'vinyl floors', '', 'lazy',
   '(max-width: 850px) 850px, 1920px'%}
 </section>
@@ -28,14 +28,14 @@ eleventyNavigation:
 <!-- ============================================ -->
 
 <section id="sbs">
-  <div class="cs-container">
+  <div class="cs-container fx fade-in">
     <!-- Left Image Section -->
-    <div class="cs-left">
+    <div class="cs-left fx slide-top staggered-m" style="--i:1">
       {% image './src/images/about_img_0.jpeg', 'flooring', 'cs-picture
       cs-picture1', 'lazy'%}
     </div>
     <!-- Right Content Section-->
-    <div class="cs-right">
+    <div class="cs-right fx slide-top staggered-m" style="--i:2">
       <span class="cs-topper">About Us</span>
       <h2 class="cs-title">About Kv Garage</h2>
       <p class="cs-text">
@@ -82,13 +82,13 @@ eleventyNavigation:
 <!-- ============================================ -->
 
 <section id="faq-326">
-  <div class="cs-container">
-    <div class="cs-content">
+  <div class="cs-container fx fade-in">
+    <div class="cs-content fx slide-top staggered-m" style="--i:1">
       <span class="cs-topper">FAQs</span>
       <h2 class="cs-title">Frequently Asked Questions</h2>
     </div>
     <div class="cs-flex-group">
-      <ul class="cs-faq-group">
+      <ul class="cs-faq-group fx slide-top staggered-m" style="--i:2">
         <li class="cs-faq-item active">
           <button class="cs-button">
             <span class="cs-button-text">
@@ -170,16 +170,16 @@ eleventyNavigation:
 <!-- ============================================ -->
 
 <section id="cta">
-  <div class="container">
-    <h2 class="title">
+  <div class="container fx fade-in">
+    <h2 class="title fx slide-top staggered-m" style="--i:1">
       Start Your Reselling <br />
       Journey Today
     </h2>
-    <p>
+    <p class="fx slide-top staggered-m" style="--i:2">
       Ready to turn inventory into income? Join our community and start
       with a single item or jump in with a pallet.
     </p>
-    <a href="/shop/" class="button-solid">Shop Deals</a>
+    <a href="/shop/" class="button-solid fx slide-top staggered-m" style="--i:3">Shop Deals</a>
   </div>
   {% image './src/images/final_home_img.png', 'car engine', '', 'lazy',
   '(max-width: 400px) 400px, (max-width: 850px) 850px, 1920'%}

@@ -17,7 +17,7 @@ eleventyNavigation:
 <!-- ============================================ -->
 
 <section id="int-hero">
-  <h1 id="home-h">Tech Deals & Liquidation Pallets</h1>
+  <h1 id="home-h" class="fx fade-in">Tech Deals & Liquidation Pallets</h1>
   {% image './src/images/banner_img.png', 'vinyl floors', '', 'lazy',
   '(max-width: 850px) 850px, 1920px'%}
 </section>
@@ -135,9 +135,9 @@ eleventyNavigation:
 <!-- ============================================ -->
   <div class="main-content">
   <!-- Products Header -->
-  <div class="products-header scroll-animate">
-    <h2 id="products-title">All Products <span id="products-count">(0)</span></h2>
-    <div class="products-controls">
+  <div class="products-header scroll-animate fx fade-in">
+    <h2 id="products-title" class="fx slide-top staggered-m" style="--i:1">All Products <span id="products-count">(0)</span></h2>
+    <div class="products-controls fx slide-top staggered-m" style="--i:2">
       <button id="hide-filters" class="hide-filters-btn">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
@@ -165,22 +165,22 @@ eleventyNavigation:
   </div>
 
     <!-- Category Description -->
-    <div id="category-description" class="category-description scroll-animate" style="display: none;">
+    <div id="category-description" class="category-description scroll-animate fx fade-in" style="display: none;">
       <div class="category-info">
-        <button id="back-to-category" class="back-button" style="display: none;">← Back to Category</button>
-        <h3 id="category-title"></h3>
-        <p id="category-desc"></p>
-        <div id="subcategories" class="subcategories"></div>
+        <button id="back-to-category" class="back-button fx slide-top staggered-m" style="--i:1" style="display: none;">← Back to Category</button>
+        <h3 id="category-title" class="fx slide-top staggered-m" style="--i:2"></h3>
+        <p id="category-desc" class="fx slide-top staggered-m" style="--i:3"></p>
+        <div id="subcategories" class="subcategories fx slide-top staggered-m" style="--i:4"></div>
       </div>
     </div>
 
   <!-- Products Grid -->
-<section id="catalog" class="grid scroll-animate" data-src="/products.json">
+<section id="catalog" class="grid scroll-animate fx fade-in" data-src="/products.json">
   <!-- Products will be loaded here -->
 </section>
 
   <!-- Pagination -->
-  <div id="pagination" class="pagination">
+  <div id="pagination" class="pagination fx slide-top staggered-m" style="--i:1">
     <button id="prev-page" class="pagination-btn" disabled>
       <span>← Previous</span>
     </button>

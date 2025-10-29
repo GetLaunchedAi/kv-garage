@@ -134,6 +134,7 @@
 
     <!-- Loading in page specific CSS sheets from css block -->
     <link rel="stylesheet" href="/css/critical.css" />
+    <link rel="stylesheet" href="/css/animations.css">
     <link rel="stylesheet" href="{{ preloadCSS }}" />
     {% if additionalCSS %}
     <link rel="stylesheet" href="{{ additionalCSS }}" />
@@ -160,6 +161,7 @@
     <a class="skip" aria-label="skip to main content" href="#main"
       >Click To Skip To Main Content</a
     >
+    <script defer src="/assets/js/animations.js"></script>
 
     {% include "header.html" %}
     <main id="main">{{ content | safe }}</main>
