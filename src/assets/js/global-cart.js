@@ -99,40 +99,80 @@ class GlobalCart {
 
     this.saveCart();
     this.updateCartDisplay();
-    this.showAddToCartFeedback();
+    // Pass action type for appropriate feedback message
+    this.showAddToCartFeedback(null, actionType);
   }
 
-  showAddToCartFeedback(button) {
+  showAddToCartFeedback(button, actionType = 'add') {
+    // Handle button feedback (for Shop Page Add to Cart buttons)
     if (button) {
       const original = button.textContent;
       button.disabled = true;
       button.textContent = 'Added!';
       button.classList.add('added');
 
+      // Also show toast notification for consistency
+      this.showToast('✓ Added to cart!', 'success');
+
       setTimeout(() => {
         button.textContent = original;
         button.classList.remove('added');
         button.disabled = false;
-      }, 1200);
+      }, 1500);
     } else {
-      // Show toast notification for pack additions
-      this.showToast('Item added to cart!');
+      // Handle toast notifications based on action type
+      let message = 'Item added to cart!';
+      let toastType = 'success';
+      
+      switch (actionType) {
+        case 'buy':
+          message = '✓ Purchase initiated! Item added to cart.';
+          toastType = 'success';
+          break;
+        case 'reserve':
+          message = '✓ Reservation added to cart!';
+          toastType = 'success';
+          break;
+        case 'add':
+        default:
+          message = '✓ Added to cart!';
+          toastType = 'success';
+          break;
+      }
+      
+      this.showToast(message, toastType);
     }
   }
 
-  showToast(message) {
-    // Create toast notification
-    const toast = document.createElement('div');
-    toast.className = 'cart-toast';
-    toast.textContent = message;
-    document.body.appendChild(toast);
-    
-    // Remove after 3 seconds
-    setTimeout(() => {
+  showToast(message, type = 'success') {
+    // Remove any existing toasts to prevent stacking
+    const existingToasts = document.querySelectorAll('.cart-toast');
+    existingToasts.forEach(toast => {
       if (toast.parentNode) {
         toast.parentNode.removeChild(toast);
       }
-    }, 3000);
+    });
+
+    // Create toast notification
+    const toast = document.createElement('div');
+    toast.className = `cart-toast cart-toast-${type}`;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    
+    // Trigger animation
+    requestAnimationFrame(() => {
+      toast.classList.add('show');
+    });
+    
+    // Remove after 3.5 seconds (with fade out animation)
+    setTimeout(() => {
+      toast.classList.remove('show');
+      setTimeout(() => {
+        if (toast.parentNode) {
+          toast.parentNode.removeChild(toast);
+        }
+      }, 300); // Wait for fade out animation
+    }, 3500);
   }
 
   updateCartDisplay() {

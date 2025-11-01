@@ -587,14 +587,37 @@ eleventyNavigation:
           btn.addEventListener('click', (e) => {
             e.stopPropagation();
             const action = btn.dataset.action;
-            this.handlePackAction(action, pack);
+            // Pass the button element for visual feedback
+            this.handlePackAction(action, pack, btn);
           });
         });
       });
     }
 
-    async handlePackAction(action, pack) {
+    async handlePackAction(action, pack, buttonElement = null) {
       console.log('handlePackAction called with action:', action, 'pack:', pack);
+      
+      // Show button feedback if button element is provided
+      if (buttonElement && (action === 'buy' || action === 'reserve')) {
+        const originalText = buttonElement.textContent;
+        buttonElement.disabled = true;
+        buttonElement.classList.add('added');
+        
+        // Temporarily change button text
+        if (action === 'buy') {
+          buttonElement.textContent = 'Added!';
+        } else if (action === 'reserve') {
+          buttonElement.textContent = 'Reserved!';
+        }
+        
+        // Reset button after animation
+        setTimeout(() => {
+          buttonElement.textContent = originalText;
+          buttonElement.classList.remove('added');
+          buttonElement.disabled = false;
+        }, 1500);
+      }
+      
       switch (action) {
         case 'view':
           await this.openPackModal(pack);
@@ -716,9 +739,39 @@ eleventyNavigation:
         });
       });
 
-      // Purchase buttons
-      document.getElementById('buy-now-btn').onclick = () => this.addPackToCart(this.currentPack, 'buy');
-      document.getElementById('reserve-btn').onclick = () => this.addPackToCart(this.currentPack, 'reserve');
+      // Purchase buttons with visual feedback
+      const buyNowBtn = document.getElementById('buy-now-btn');
+      const reserveBtn = document.getElementById('reserve-btn');
+      
+      buyNowBtn.onclick = () => {
+        const originalText = buyNowBtn.textContent;
+        buyNowBtn.disabled = true;
+        buyNowBtn.classList.add('added');
+        buyNowBtn.textContent = 'Added!';
+        
+        this.addPackToCart(this.currentPack, 'buy');
+        
+        setTimeout(() => {
+          buyNowBtn.textContent = originalText;
+          buyNowBtn.classList.remove('added');
+          buyNowBtn.disabled = false;
+        }, 1500);
+      };
+      
+      reserveBtn.onclick = () => {
+        const originalText = reserveBtn.textContent;
+        reserveBtn.disabled = true;
+        reserveBtn.classList.add('added');
+        reserveBtn.textContent = 'Reserved!';
+        
+        this.addPackToCart(this.currentPack, 'reserve');
+        
+        setTimeout(() => {
+          reserveBtn.textContent = originalText;
+          reserveBtn.classList.remove('added');
+          reserveBtn.disabled = false;
+        }, 1500);
+      };
 
       // Manifest buttons
       document.getElementById('view-full-manifest').onclick = () => this.viewManifest(this.currentPack.id);

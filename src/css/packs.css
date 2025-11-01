@@ -1402,3 +1402,78 @@ body.dark-mode .form-group label {
         grid-template-columns: 1fr;
     }
 }
+
+/* ============================================ */
+/*              TOAST NOTIFICATIONS             */
+/* ============================================ */
+
+.cart-toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #10b981;
+  color: white;
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  font-weight: 600;
+  font-size: 0.9375rem;
+  z-index: 10000;
+  transform: translateX(400px);
+  opacity: 0;
+  transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55), 
+              opacity 0.3s ease;
+  max-width: 350px;
+  word-wrap: break-word;
+}
+
+.cart-toast.show {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.cart-toast-success {
+  background: #10b981;
+}
+
+.cart-toast-error {
+  background: #ef4444;
+}
+
+.cart-toast-info {
+  background: #3b82f6;
+}
+
+/* Button feedback animations */
+.pack-btn.added,
+.buy-btn.added {
+  animation: pulseSuccess 0.5s ease;
+  background: #10b981 !important;
+}
+
+@keyframes pulseSuccess {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .cart-toast {
+    bottom: 80px;
+    right: 10px;
+    left: 10px;
+    max-width: none;
+    transform: translateY(100px);
+  }
+  
+  .cart-toast.show {
+    transform: translateY(0);
+  }
+}
