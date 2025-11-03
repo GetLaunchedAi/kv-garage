@@ -39,6 +39,7 @@
     width: 100%;
     /* makes image act like a background image */
     object-fit: cover;
+    object-position: bottom;
   }
   #sbs .cs-picture1 {
     width: 100%;
