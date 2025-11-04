@@ -192,7 +192,43 @@
     <script defer src="/assets/js/nav.js"></script>
     <script defer src="/assets/js/dark.js"></script>
     <script defer src="/assets/js/global-cart.js"></script>
+    <script defer src="/assets/js/footer.js"></script>
     <script src="https://js.stripe.com/v3/"></script>
+    
+    <!-- Rewardful Affiliate Tracking -->
+    <!-- TODO: Replace with actual Rewardful API key when available -->
+    <script>
+      (function(r,a,w,d){r[rw]=r[rw]||function(){(r[rw].q=r[rw].q||[]).push(arguments)};
+      r._rw=a;r[a]=r[a]||function(){(r[a].q=r[a].q||[]).push(arguments)};
+      var s=document.createElement('script');s.async=1;s.src=w;
+      var scr=document.getElementsByTagName('script')[0];scr.parentNode.insertBefore(s,scr);
+      })(window,'rewardful','https://r.wdfl.co/rw.js');
+    </script>
+    <script>
+      // Initialize Rewardful when API key is available
+      // Rewardful.init('YOUR_REWARDFUL_API_KEY');
+      
+      // Track affiliate from URL parameter
+      (function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const ref = urlParams.get('ref');
+        if (ref) {
+          // Set cookie for 30 days
+          const expiry = new Date();
+          expiry.setTime(expiry.getTime() + (30 * 24 * 60 * 60 * 1000));
+          document.cookie = `affiliate_ref=${ref}; expires=${expiry.toUTCString()}; path=/; SameSite=Lax`;
+          
+          // Store in localStorage as backup
+          localStorage.setItem('affiliate_ref', ref);
+          localStorage.setItem('affiliate_ref_expiry', expiry.getTime().toString());
+          
+          // Track with Rewardful if available
+          if (window.Rewardful) {
+            Rewardful.convert(ref);
+          }
+        }
+      })();
+    </script>
 
     <!--
         This script adds a class to the body after scrolling 100px

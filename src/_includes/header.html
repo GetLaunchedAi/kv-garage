@@ -20,21 +20,42 @@
         <!-- Main Nav -->
         <nav id="navbar-menu" aria-label="main navigation">
             <ul>
-                {%- for entry in navPages %}
-                <li class="{% if entry.title == 'Services' %}dropdown{% endif %}" id="{{ entry.title }}">
-                    {% if entry.title == 'Services' %}
-                    <a class="dropdown-toggle" role="button" tabindex="0">{{ entry.title }}</a>
-                    <ul class="dropdown-menu">
-                        <li><a href="/service/">Service 1</a></li>
-                        <li><a href="/service/">Service 2</a></li>
-                        <li><a href="/service/">Service 3</a></li>
-                    </ul>
-                    {% else %}
-                    <a {% if entry.url==page.url %} class="active" {% endif %} href="{{ entry.url }}">{{ entry.title
-                        }}</a>
-                    {% endif %}
+                <!-- Home -->
+                <li id="Home">
+                    <a {% if page.url == '/' %} class="active" {% endif %} href="/">Home</a>
                 </li>
-                {%- endfor %}
+                
+                <!-- Shop -->
+                <li id="Shop">
+                    <a {% if page.url == '/shop/' %} class="active" {% endif %} href="/shop/">Shop</a>
+                </li>
+                
+                <!-- Packs -->
+                <li id="Packs">
+                    <a {% if page.url == '/packs/' %} class="active" {% endif %} href="/packs/">Packs</a>
+                </li>
+                
+                <!-- Services Dropdown -->
+                <li class="dropdown" id="Services">
+                    <a class="dropdown-toggle" role="button" tabindex="0" aria-haspopup="true" aria-expanded="false">Services</a>
+                    <ul class="dropdown-menu">
+                        <li><a href="/resell-hub/">Resell Hub</a></li>
+                        <li><a href="/mentorship-consulting/">Mentorship & Consulting</a></li>
+                        <li><a href="/trading-investing/">Trading & Investing</a></li>
+                        <li><a href="/partner-invest/">Partner & Invest</a></li>
+                        <li><a href="/affiliate-program/">Affiliate Program</a></li>
+                    </ul>
+                </li>
+                
+                <!-- About Us -->
+                <li id="About Us">
+                    <a {% if page.url == '/about/' %} class="active" {% endif %} href="/about/">About Us</a>
+                </li>
+                
+                <!-- Contact -->
+                <li id="Contact">
+                    <a {% if page.url == '/contact/' %} class="active" {% endif %} href="/contact/">Contact</a>
+                </li>
             </ul>
         </nav>
 

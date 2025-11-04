@@ -23,6 +23,7 @@
     width: 39.4375em;
     height: 39.75em;
     position: relative;
+    margin-inline: auto;
   }
   #sbs .cs-picture {
     border-radius: 1.5em;

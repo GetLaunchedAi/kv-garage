@@ -37,23 +37,45 @@ hamburgerMenu.addEventListener('click', function () {
 
 // Only add service menu functionality if serviceMenu exists
 if (serviceMenu) {
-    serviceMenu.addEventListener('click', function () {
-        const isServiceOpen = serviceMenu.classList.contains("open");
-        if (!isServiceOpen) {
-            serviceMenu.setAttribute("aria-expanded", true);
-            serviceMenu.classList.add("open");
-            if (screenWidth < 770) {
-                if (about) about.style.display = 'none';
-                if (contact) contact.style.display = 'none';
-            }
-        } else {
-            serviceMenu.setAttribute("aria-expanded", false);
-            serviceMenu.classList.remove("open");
-            if (screenWidth < 770) {
-                if (about) about.style.display = 'block';
-                if (contact) contact.style.display = 'block';
-            }
+    const dropdownToggle = serviceMenu.querySelector('.dropdown-toggle');
+    
+    // Check if current page is a services page to mark dropdown as active
+    const currentPath = window.location.pathname;
+    const servicesPaths = ['/resell-hub/', '/mentorship-consulting/', '/trading-investing/', '/partner-invest/'];
+    if (servicesPaths.includes(currentPath)) {
+        // Mark the Services dropdown toggle as active
+        if (dropdownToggle) {
+            dropdownToggle.classList.add('active');
         }
-    });
+        // Mark the specific dropdown item as active
+        const activeLink = serviceMenu.querySelector(`a[href="${currentPath}"]`);
+        if (activeLink) {
+            activeLink.classList.add('active');
+        }
+    }
+    
+    if (dropdownToggle) {
+        dropdownToggle.addEventListener('click', function (e) {
+            e.preventDefault();
+            const isServiceOpen = serviceMenu.classList.contains("open");
+            if (!isServiceOpen) {
+                serviceMenu.setAttribute("aria-expanded", true);
+                serviceMenu.classList.add("open");
+                dropdownToggle.setAttribute("aria-expanded", "true");
+                if (screenWidth < 770) {
+                    if (about) about.style.display = 'none';
+                    if (contact) contact.style.display = 'none';
+                }
+            } else {
+                serviceMenu.setAttribute("aria-expanded", false);
+                serviceMenu.classList.remove("open");
+                dropdownToggle.setAttribute("aria-expanded", "false");
+                if (screenWidth < 770) {
+                    if (about) about.style.display = 'block';
+                    if (contact) contact.style.display = 'block';
+                }
+            }
+        });
+    }
 }
 }); // End of DOMContentLoaded

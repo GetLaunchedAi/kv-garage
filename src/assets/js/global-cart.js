@@ -346,6 +346,20 @@ async checkout() {
   }
 
   try {
+    // Get affiliate reference from cookie or localStorage
+    let affiliateRef = null;
+    const cookies = document.cookie.split(';');
+    for (let cookie of cookies) {
+      const [name, value] = cookie.trim().split('=');
+      if (name === 'affiliate_ref') {
+        affiliateRef = value;
+        break;
+      }
+    }
+    if (!affiliateRef) {
+      affiliateRef = localStorage.getItem('affiliate_ref');
+    }
+
     // Prepare cart items for Stripe with metadata
     const cartItems = this.cart.map(item => ({
       id: item.id,
@@ -357,14 +371,21 @@ async checkout() {
         type: item.type || 'purchase',
         originalAction: item.originalAction || 'buy',
         fullAmount: item.fullAmount || item.price,
-        depositAmount: item.depositAmount || 0
+        depositAmount: item.depositAmount || 0,
+        affiliateRef: affiliateRef || null // Add affiliate reference
       }
     }));
+
+    // Include affiliate reference in checkout payload
+    const checkoutPayload = { 
+      items: cartItems,
+      affiliateRef: affiliateRef || null
+    };
 
     const res = await fetch('/api/create-checkout-session.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ items: cartItems }),
+      body: JSON.stringify(checkoutPayload),
     });
 
     const text = await res.text();

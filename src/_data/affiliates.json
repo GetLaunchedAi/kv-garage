@@ -1,0 +1,22 @@
+{
+  "affiliates": [],
+  "applications": [],
+  "commissions": [],
+  "payouts": [],
+  "settings": {
+    "commissionRates": {
+      "packs": 0.10,
+      "mentorship": 0.20,
+      "bonusPercent": 0.05,
+      "topPerformerThreshold": 0.10
+    },
+    "payout": {
+      "minimum": 100,
+      "frequency": "monthly",
+      "method": "stripe_connect"
+    },
+    "cookieDuration": 30,
+    "currency": "USD"
+  }
+}
+

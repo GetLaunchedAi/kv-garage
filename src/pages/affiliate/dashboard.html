@@ -1,0 +1,336 @@
+---
+layout: "base.html"
+description: "Affiliate Dashboard - Track your referrals, earnings, and performance."
+metaTitle: "Affiliate Dashboard | KV Garage"
+tagTitle: "Affiliate Dashboard"
+title: "Affiliate Dashboard"
+preloadCSS: "/css/affiliate-dashboard.css"
+permalink: "affiliate/dashboard/"
+---
+
+<section id="int-hero">
+    <h1 id="home-h">Affiliate Dashboard</h1>
+    {% image './src/images/banner_img.png', 'affiliate dashboard', '', 'lazy',
+    '(max-width: 850px) 850px, 1920px'%}
+</section>
+
+<div class="affiliate-dashboard-container">
+    <!-- Login Section (shown when not authenticated) -->
+    <div id="login-section" class="login-section">
+        <div class="login-container">
+            <h2>Affiliate Login</h2>
+            <p class="login-subtitle">Access your affiliate dashboard to track earnings and manage your links</p>
+            <form id="affiliate-login-form" class="login-form">
+                <div class="form-group">
+                    <label for="affiliate-email">Email Address</label>
+                    <input type="email" id="affiliate-email" name="email" required placeholder="your@email.com">
+                </div>
+                <div class="form-group">
+                    <label for="affiliate-password">Password</label>
+                    <input type="password" id="affiliate-password" name="password" required placeholder="Enter your password">
+                </div>
+                <button type="submit" class="login-btn">Login</button>
+                <p class="login-footer">
+                    Don't have an account? <a href="/affiliate-program/#apply">Apply to become an affiliate</a>
+                </p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Dashboard Section (shown when authenticated) -->
+    <div id="dashboard-section" class="dashboard-section" style="display: none;">
+        <div class="dashboard-header">
+            <div class="header-content">
+                <h2>Affiliate Dashboard</h2>
+                <p class="affiliate-id">Affiliate ID: <span id="affiliate-id-display">-</span></p>
+            </div>
+            <div class="dashboard-actions">
+                <button id="refresh-dashboard" class="btn btn-secondary">Refresh</button>
+                <button id="logout-btn" class="btn btn-danger">Logout</button>
+            </div>
+        </div>
+
+        <!-- Overview Stats -->
+        <div class="dashboard-stats">
+            <div class="stat-card">
+                <div class="stat-icon">💰</div>
+                <div class="stat-content">
+                    <h3>Total Earnings</h3>
+                    <span id="total-earnings">$0.00</span>
+                    <small>Pending: <span id="pending-earnings">$0.00</span></small>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">👥</div>
+                <div class="stat-content">
+                    <h3>Total Referrals</h3>
+                    <span id="total-referrals">0</span>
+                    <small>Conversions: <span id="conversions">0</span></small>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">📊</div>
+                <div class="stat-content">
+                    <h3>Conversion Rate</h3>
+                    <span id="conversion-rate">0%</span>
+                    <small>This Month: <span id="month-conversion-rate">0%</span></small>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🔗</div>
+                <div class="stat-content">
+                    <h3>Total Clicks</h3>
+                    <span id="total-clicks">0</span>
+                    <small>This Month: <span id="month-clicks">0</span></small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Tabs -->
+        <div class="dashboard-tabs">
+            <button class="tab-btn active" data-tab="overview">Overview</button>
+            <button class="tab-btn" data-tab="links">Affiliate Links</button>
+            <button class="tab-btn" data-tab="earnings">Earnings</button>
+            <button class="tab-btn" data-tab="marketing">Marketing Materials</button>
+            <button class="tab-btn" data-tab="settings">Settings</button>
+        </div>
+
+        <!-- Overview Tab -->
+        <div class="tab-content active" id="overview-tab">
+            <div class="dashboard-grid">
+                <!-- Recent Activity -->
+                <div class="dashboard-card">
+                    <h3>Recent Activity</h3>
+                    <div id="recent-activity" class="activity-list">
+                        <p class="empty-state">No activity yet. Start sharing your links!</p>
+                    </div>
+                </div>
+
+                <!-- Top Performing Links -->
+                <div class="dashboard-card">
+                    <h3>Top Performing Links</h3>
+                    <div id="top-links" class="links-list">
+                        <p class="empty-state">No links generated yet. Create your first link!</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Performance Chart -->
+            <div class="dashboard-card">
+                <h3>Performance Overview (Last 30 Days)</h3>
+                <div id="performance-chart" class="chart-placeholder">
+                    <p class="empty-state">Performance data will appear here</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Links Tab -->
+        <div class="tab-content" id="links-tab">
+            <div class="links-header">
+                <h3>Your Affiliate Links</h3>
+                <button id="generate-link-btn" class="btn btn-primary">Generate New Link</button>
+            </div>
+
+            <div class="link-generator-card">
+                <h4>Quick Link Generator</h4>
+                <div class="link-generator-form">
+                    <div class="form-group">
+                        <label for="link-type">Link Type</label>
+                        <select id="link-type">
+                            <option value="homepage">Homepage</option>
+                            <option value="packs">Packs Page</option>
+                            <option value="mentorship">Mentorship & Consulting</option>
+                            <option value="shop">Shop</option>
+                            <option value="custom">Custom URL</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="custom-url-group" style="display: none;">
+                        <label for="custom-url">Custom URL</label>
+                        <input type="text" id="custom-url" placeholder="/packs/">
+                    </div>
+                    <button id="generate-link" class="btn btn-primary">Generate Link</button>
+                </div>
+                <div id="generated-link-display" class="generated-link" style="display: none;">
+                    <label>Your Affiliate Link:</label>
+                    <div class="link-display">
+                        <input type="text" id="affiliate-link-output" readonly>
+                        <button id="copy-link-btn" class="btn btn-secondary">Copy</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="links-list-card">
+                <h4>All Your Links</h4>
+                <div id="all-links-list" class="links-list">
+                    <p class="empty-state">No links generated yet. Create your first link above!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Earnings Tab -->
+        <div class="tab-content" id="earnings-tab">
+            <div class="earnings-summary">
+                <div class="earnings-card">
+                    <h4>Available Balance</h4>
+                    <div class="earnings-amount">$<span id="available-balance">0.00</span></div>
+                    <p class="earnings-note">Minimum payout: $100</p>
+                    <button id="request-payout-btn" class="btn btn-primary" disabled>Request Payout</button>
+                </div>
+                <div class="earnings-card">
+                    <h4>Total Paid</h4>
+                    <div class="earnings-amount">$<span id="total-paid">0.00</span></div>
+                    <p class="earnings-note">All time payouts</p>
+                </div>
+                <div class="earnings-card">
+                    <h4>Pending Commissions</h4>
+                    <div class="earnings-amount">$<span id="pending-commissions">0.00</span></div>
+                    <p class="earnings-note">Awaiting approval</p>
+                </div>
+            </div>
+
+            <div class="earnings-table-card">
+                <h4>Earnings History</h4>
+                <div class="table-controls">
+                    <select id="earnings-filter">
+                        <option value="all">All Time</option>
+                        <option value="month">This Month</option>
+                        <option value="quarter">This Quarter</option>
+                        <option value="year">This Year</option>
+                    </select>
+                </div>
+                <div id="earnings-table" class="earnings-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Type</th>
+                                <th>Product</th>
+                                <th>Sale Amount</th>
+                                <th>Commission Rate</th>
+                                <th>Commission</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="earnings-table-body">
+                            <tr>
+                                <td colspan="7" class="empty-state">No earnings yet. Start referring customers!</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Marketing Materials Tab -->
+        <div class="tab-content" id="marketing-tab">
+            <h3>Marketing Materials</h3>
+            <p class="section-description">Download banners, graphics, and copy to help promote KV Garage</p>
+            
+            <div class="marketing-materials-grid">
+                <div class="material-card">
+                    <h4>Banner Images</h4>
+                    <p>Download banner images in various sizes</p>
+                    <div class="material-sizes">
+                        <button class="btn btn-secondary">728x90</button>
+                        <button class="btn btn-secondary">300x250</button>
+                        <button class="btn btn-secondary">468x60</button>
+                    </div>
+                </div>
+                <div class="material-card">
+                    <h4>Social Media Graphics</h4>
+                    <p>Square and rectangle formats for social platforms</p>
+                    <div class="material-sizes">
+                        <button class="btn btn-secondary">1200x1200</button>
+                        <button class="btn btn-secondary">1200x628</button>
+                    </div>
+                </div>
+                <div class="material-card">
+                    <h4>Email Templates</h4>
+                    <p>Ready-to-use email copy and HTML templates</p>
+                    <button class="btn btn-secondary">Download</button>
+                </div>
+                <div class="material-card">
+                    <h4>Promotional Copy</h4>
+                    <p>Pre-written promotional text and descriptions</p>
+                    <button class="btn btn-secondary">View Copy</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Tab -->
+        <div class="tab-content" id="settings-tab">
+            <h3>Account Settings</h3>
+            
+            <div class="settings-card">
+                <h4>Profile Information</h4>
+                <form id="profile-form">
+                    <div class="form-group">
+                        <label for="settings-name">Full Name</label>
+                        <input type="text" id="settings-name" name="name">
+                    </div>
+                    <div class="form-group">
+                        <label for="settings-email">Email Address</label>
+                        <input type="email" id="settings-email" name="email">
+                    </div>
+                    <div class="form-group">
+                        <label for="settings-phone">Phone Number</label>
+                        <input type="tel" id="settings-phone" name="phone">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </form>
+            </div>
+
+            <div class="settings-card">
+                <h4>Payout Settings</h4>
+                <p class="settings-note">Configure how you receive your payouts</p>
+                <form id="payout-form">
+                    <div class="form-group">
+                        <label for="payout-method">Payout Method</label>
+                        <select id="payout-method" name="payoutMethod">
+                            <option value="stripe">Stripe Connect</option>
+                            <option value="paypal">PayPal</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="payout-email">Payout Email</label>
+                        <input type="email" id="payout-email" name="payoutEmail" placeholder="payout@email.com">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save Payout Settings</button>
+                </form>
+            </div>
+
+            <div class="settings-card">
+                <h4>Commission Information</h4>
+                <div class="commission-info">
+                    <div class="info-item">
+                        <span class="info-label">Packs Commission:</span>
+                        <span class="info-value">10%</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Mentorship Commission:</span>
+                        <span class="info-value">20%</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Top Performer Bonus:</span>
+                        <span class="info-value">+5% (Top 10%)</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Cookie Duration:</span>
+                        <span class="info-value">30 days</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Minimum Payout:</span>
+                        <span class="info-value">$100</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Payout Frequency:</span>
+                        <span class="info-value">Monthly</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/assets/js/affiliate-dashboard.js"></script>
+

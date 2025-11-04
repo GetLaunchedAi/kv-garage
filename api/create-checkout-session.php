@@ -61,12 +61,22 @@ try {
     throw new Exception('No valid line items found.');
   }
 
+  // Get affiliate reference from request
+  $affiliateRef = isset($json['affiliateRef']) ? $json['affiliateRef'] : null;
+  
+  // Build session metadata
+  $sessionMetadata = [];
+  if ($affiliateRef) {
+    $sessionMetadata['affiliate_ref'] = $affiliateRef;
+  }
+
   // ✅ Use absolute HTTPS URLs for redirect pages
   $session = \Stripe\Checkout\Session::create([
     'mode' => 'payment',
     'line_items' => $line_items,
     'success_url' => $baseUrl . '/success.html?session_id={CHECKOUT_SESSION_ID}',
     'cancel_url'  => $baseUrl . '/cancel.html',
+    'metadata' => $sessionMetadata, // Store affiliate reference in session metadata
   ]);
 
   echo json_encode(['ok' => true, 'url' => $session->url]);

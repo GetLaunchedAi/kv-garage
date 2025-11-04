@@ -198,7 +198,7 @@
 .dropdown-menu {
   position: absolute;
   position-anchor: --dropdown;
-  top: 2.5rem;
+  top: 6.75rem;
   min-width: 200px;
   background-color: var(--primary);
   border: 1px solid #ddd;
@@ -221,6 +221,11 @@
 
 .dropdown-menu li a:hover {
   background-color: #f2f2f2;
+}
+
+.dropdown-menu li a.active {
+  background-color: rgba(0, 0, 0, 0.1);
+  font-weight: 700;
 }
 
 /* Show dropdown on hover (desktop only) */
@@ -259,7 +264,7 @@
     justify-content: flex-end;
     gap: .5rem;
     padding: .8125rem 0;
-    width: 96%;
+    /* width: 96%; */
   }
 
   #navigation .logo {
@@ -500,6 +505,11 @@
     background-color: var(--primaryDark);
   }
 
+  .dropdown-menu li a.active {
+    background-color: var(--primaryDark);
+    font-weight: 900;
+  }
+
   /* Leave space so actions don't collide with hamburger */
   #navigation .container {
     padding-right: 3.75rem;
@@ -569,7 +579,7 @@
   }
 
   #navigation .container {
-    max-width: 75rem;
+    max-width: 82.5rem;
     display: flex;
     justify-content: flex-end;
     align-items: center;
@@ -1006,13 +1016,19 @@ body.dark-mode #dark-mode-toggle .sun {
 @media only screen and (min-width: 0em) {
   #footer {
     background: #1c1c1c;
-    padding: 5.25rem 0 1.25rem;
+    /* padding: 0 0 1rem; */
     font-size: min(4vw, 1.2em);
   }
 
+  /* Footer container padding controlled by user */
+  /* #footer .container {
+    padding: 3rem 0;
+  } */
+
   #footer .left-section {
     margin: auto;
-    margin-bottom: 3.125rem;
+    /* margin-bottom: 2rem; */
+    padding: 2rem 0;
     text-align: center;
   }
 
@@ -1021,8 +1037,95 @@ body.dark-mode #dark-mode-toggle .sun {
     margin: auto;
     width: auto;
     height: 12rem !important;
-    margin-bottom: 1.875em;
+    /* margin-bottom: 1.5rem; */
     text-align: center;
+  }
+
+  /* Newsletter Form in Left Section */
+  #footer .left-section .newsletter-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem;
+    align-items: center;
+    text-align: center;
+    /* margin-top: 1.5rem; */
+    width: 100%;
+    max-width: 28rem;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  #footer .left-section .newsletter-content h3 {
+    color: #fff;
+    font-size: 1.125rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+  }
+
+  #footer .left-section .newsletter-content p {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.8125rem;
+    margin: 0;
+  }
+
+  #footer .left-section .newsletter-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    width: 100%;
+  }
+
+  #footer .left-section .newsletter-input-group input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-size: 0.9375rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border-radius: 4px;
+    transition: all 0.3s;
+  }
+
+  #footer .left-section .newsletter-input-group input::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+  }
+
+  #footer .left-section .newsletter-input-group input:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: rgba(255, 255, 255, 0.15);
+  }
+
+  #footer .left-section .newsletter-submit {
+    padding: 0.75rem 1.75rem;
+    font-size: 0.9375rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    background-color: var(--primary);
+    color: #000;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s;
+    white-space: nowrap;
+    width: 100%;
+  }
+
+  #footer .left-section .newsletter-submit:hover {
+    background-color: var(--primaryDark);
+    color: #fff;
+    transform: translateY(-2px);
+  }
+
+  #footer .left-section .newsletter-submit:active {
+    transform: translateY(0);
+  }
+
+  #footer .left-section .newsletter-privacy {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.7rem;
+    margin: 0;
+    line-height: 1.4;
   }
 
   #footer .left-section .logo img {
@@ -1046,6 +1149,9 @@ body.dark-mode #dark-mode-toggle .sun {
     width: 96%;
     max-width: 25.4375rem;
     margin: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 
   #footer .right-section .lists {
@@ -1055,6 +1161,7 @@ body.dark-mode #dark-mode-toggle .sun {
     width: 96%;
     max-width: 19.1875rem;
     margin: auto;
+    padding: 2rem 0;
   }
 
   #footer .right-section .lists ul {
@@ -1064,14 +1171,14 @@ body.dark-mode #dark-mode-toggle .sun {
   }
 
   #footer .right-section .lists ul:nth-of-type(3) {
-    margin-top: 3.125rem;
+    margin-top: 2rem;
   }
 
   #footer .right-section .lists ul:nth-of-type(3) li {
     display: flex;
     justify-content: flex-start;
     align-items: center;
-    margin-bottom: 1rem;
+    margin-bottom: 0.75rem;
   }
 
   #footer .right-section .lists ul:nth-of-type(3) li:last-of-type {
@@ -1080,7 +1187,7 @@ body.dark-mode #dark-mode-toggle .sun {
 
   #footer .right-section .lists ul li {
     list-style: none;
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.5rem;
     color: #fff;
     font-size: 1.125rem;
     opacity: 0.9;
@@ -1101,7 +1208,7 @@ body.dark-mode #dark-mode-toggle .sun {
     color: #fff;
     font-size: 1.125rem;
     line-height: 1.16666667em;
-    margin-bottom: 2.3125rem;
+    margin-bottom: 1.25rem;
     text-transform: uppercase;
     font-weight: bold;
     position: relative;
@@ -1115,7 +1222,7 @@ body.dark-mode #dark-mode-toggle .sun {
     width: 6.0625rem;
     background: var(--primary);
     opacity: 1;
-    bottom: -1rem;
+    bottom: -0.75rem;
     left: 0;
   }
 
@@ -1136,8 +1243,8 @@ body.dark-mode #dark-mode-toggle .sun {
     width: 96%;
     margin: auto;
     text-align: center;
-    margin-top: 6.25rem;
-    line-height: 2.25rem;
+    margin-top: 2.5rem;
+    line-height: 1.75rem;
     font-size: 1rem;
   }
 
@@ -1168,22 +1275,54 @@ body.dark-mode #dark-mode-toggle .sun {
     flex-direction: row;
     flex-wrap: nowrap;
     justify-content: space-between;
-    width: 96%;
+    /* width: 96%; */
     max-width: 82.5rem;
     margin: auto;
-    padding: 0;
+    /* padding-top: 3rem; */
   }
 
   #footer .left-section {
     width: 25.5625rem;
     margin: 0;
     text-align: left;
+    /* margin-bottom: 1.5rem; */
   }
 
   #footer .left-section .logo {
     text-align: left;
     margin-left: 0;
-    height: 4.375rem;
+    height: 4rem;
+    margin-bottom: 1.25rem;
+  }
+
+  #footer .left-section .newsletter-form {
+    align-items: flex-start;
+    text-align: left;
+    margin-left: 0;
+    margin-right: 0;
+    max-width: 100%;
+  }
+
+  #footer .left-section .newsletter-content h3 {
+    font-size: 1.25rem;
+  }
+
+  #footer .left-section .newsletter-content p {
+    font-size: 0.875rem;
+  }
+
+  #footer .left-section .newsletter-input-group {
+    flex-direction: row;
+    gap: 0.75rem;
+  }
+
+  #footer .left-section .newsletter-input-group input {
+    flex: 1;
+  }
+
+  #footer .left-section .newsletter-submit {
+    width: auto;
+    padding: 0.75rem 2rem;
   }
 
   #footer .left-section p {
@@ -1242,10 +1381,177 @@ body.dark-mode #dark-mode-toggle .sun {
   }
 }
 
+/* Newsletter Message Styles */
+@media only screen and (min-width: 0em) {
+  #footer .newsletter-message {
+    margin-top: 0.75rem;
+    padding: 0.625rem 0.875rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    text-align: center;
+    animation: slideDown 0.3s ease-out;
+  }
+
+  #footer .newsletter-message-success {
+    background: rgba(16, 185, 129, 0.2);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+  }
+
+  #footer .newsletter-message-error {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+  }
+
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+/* Quick Links Section */
+@media only screen and (min-width: 0em) {
+  #footer .quick-links-section {
+    padding: 1.25rem 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 1.25rem;
+  }
+
+  #footer .quick-links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem 1rem;
+  }
+
+  #footer .quick-links a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 1rem;
+    transition: color 0.3s;
+    position: relative;
+  }
+
+  #footer .quick-links a:hover {
+    color: var(--primary);
+  }
+
+  #footer .quick-links a:before {
+    content: "";
+    position: absolute;
+    display: block;
+    height: 0.125rem;
+    width: 0%;
+    background: var(--primary);
+    opacity: 1;
+    bottom: -0.25rem;
+    left: 0;
+    transition: width 0.3s;
+  }
+
+  #footer .quick-links a:hover:before {
+    width: 100%;
+  }
+
+  #footer .quick-links .separator {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 1rem;
+    user-select: none;
+  }
+}
+
+/* Social Media Icons */
+@media only screen and (min-width: 0em) {
+  /* Social section padding controlled by user */
+  /* #footer .social-section {
+    padding: 1.25rem 0;
+    margin-bottom: 1.25rem;
+  } */
+
+  #footer .social-icons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+  }
+
+  #footer .social-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    color: #fff;
+    transition: all 0.3s;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  #footer .social-icon:hover {
+    color: var(--primary);
+    background: rgba(96, 165, 250, 0.2);
+    transform: translateY(-2px);
+  }
+
+  #footer .social-icon svg {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+}
+
+/* Desktop Styles for Newsletter and Quick Links */
+@media only screen and (min-width: 64em) {
+  #footer .quick-links {
+    gap: 0.75rem 1.5rem;
+  }
+
+  #footer .quick-links a {
+    font-size: 1.125rem;
+  }
+
+  #footer .social-icons {
+    gap: 1.5rem;
+  }
+
+  #footer .social-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  #footer .social-icon svg {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+}
+
 /* Dark Mode */
 @media only screen and (min-width: 0em) {
   body.dark-mode #footer {
     background: #061623;
+  }
+
+  body.dark-mode #footer .left-section .newsletter-input-group input {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.15);
+  }
+
+  body.dark-mode #footer .quick-links-section {
+    border-top-color: rgba(255, 255, 255, 0.08);
+    border-bottom-color: rgba(255, 255, 255, 0.08);
+  }
+
+  body.dark-mode #footer .social-icon {
+    background: rgba(255, 255, 255, 0.08);
   }
 }
 
