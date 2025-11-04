@@ -463,6 +463,11 @@
 
   .dropdown-menu {
     overflow: visible;
+    top: 0;
+  }
+
+  .dropdown-link {
+    margin-bottom: 0 !important;
   }
 
   .nav-list {
