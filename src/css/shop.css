@@ -385,7 +385,7 @@ body.dark-mode .add-to-cart:hover {
   transition: all 0.2s ease;
   margin-bottom: 16px;
   position: relative;
-  z-index: 200001 !important;
+  z-index: 9999;
 }
 
 .filter-toggle:hover {
@@ -407,7 +407,7 @@ body.dark-mode .add-to-cart:hover {
   height: 100vh;
   background: var(--bg);
   border-right: 1px solid var(--border);
-  z-index: 200002 !important; /* Higher than filter toggle (200001) and mobile navbar (10000) */
+  z-index: 10001; /* Above navigation when open, but toggle button stays below */
   transform: translateX(-100%);
   transition: transform 0.3s ease;
   overflow-y: auto;
@@ -781,7 +781,7 @@ body.dark-mode .clear-filters-btn {
   width: 100%;
   height: 100%;
   background: rgba(0, 0, 0, 0.5);
-  z-index: 200001 !important; /* Same as filter toggle, but overlay should be behind sidebar */
+  z-index: 9998; /* Below filter toggle and navigation */
   opacity: 0;
   visibility: hidden;
   transition: all 0.3s ease;
@@ -1048,7 +1048,7 @@ body.dark-mode .sort-select {
     display: flex;
     margin: 12px;
     position: relative;
-    z-index: 200001 !important;
+    z-index: 9999;
     pointer-events: auto !important;
   }
 
@@ -1056,7 +1056,7 @@ body.dark-mode .sort-select {
     position: fixed;
     width: 77.5%;
     transform: translateX(-100%);
-    z-index: 200002 !important; /* Higher than filter toggle (200001) and mobile navbar (10000) */
+    z-index: 10001; /* Above navigation when open, but toggle button stays below */
   }
 
   .filter-sidebar.open {

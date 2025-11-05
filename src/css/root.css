@@ -265,6 +265,8 @@
     gap: .5rem;
     padding: .8125rem 0;
     /* width: 96%; */
+    position: relative;
+    z-index: 10;
   }
 
   #navigation .logo {
@@ -377,6 +379,7 @@
   #navigation #navbar-menu ul {
     padding: 0;
     perspective: 700px;
+    display: none;
   }
 
   #navigation #navbar-menu ul li {
@@ -454,6 +457,11 @@
   #navigation #navbar-menu.open ul li {
     opacity: 1;
     transform: translateY(0) rotateX(0);
+  }
+
+  /* Show nav list only when menu is open (mobile/tablet) */
+  #navigation #navbar-menu.open ul {
+    display: block;
   }
 
   /* Dropdown open state on mobile */
@@ -589,6 +597,8 @@
     justify-content: flex-end;
     align-items: center;
     gap: .75rem;
+    position: relative;
+    z-index: 10;
   }
 
   #navigation .logo {
@@ -1604,7 +1614,7 @@ body.dark-mode.scroll #navigation .icon-btn:hover {
   position: fixed;
   top: 0;
   right: -400px;
-  width: 400px;
+  max-width: 400px;
   height: 100vh;
   background: #fff;
   box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
