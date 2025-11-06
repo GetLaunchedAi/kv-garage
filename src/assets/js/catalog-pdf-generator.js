@@ -19,7 +19,6 @@ class CatalogPDFGenerator {
       await this.loadData();
       this.bindEvents();
     } catch (error) {
-      console.error("Failed to initialize PDF generator:", error);
     }
   }
 
@@ -43,13 +42,7 @@ class CatalogPDFGenerator {
       const manifestsData = await manifestsResponse.json();
       this.manifests = manifestsData.manifests || {};
 
-      console.log("Data loaded:", {
-        products: this.products.length,
-        packs: this.packs.length,
-        manifests: Object.keys(this.manifests).length,
-      });
     } catch (error) {
-      console.error("Error loading data:", error);
       throw error;
     }
   }
@@ -73,7 +66,6 @@ class CatalogPDFGenerator {
    */
   async generateCatalogPDF() {
     if (this.isGenerating) {
-      console.log("PDF generation already in progress...");
       return;
     }
 
@@ -92,9 +84,7 @@ class CatalogPDFGenerator {
       // Download the PDF
       pdf.save("KV_Garage_Complete_Catalog.pdf");
 
-      console.log("PDF generated successfully");
     } catch (error) {
-      console.error("Error generating PDF:", error);
       this.showErrorState(error.message);
     } finally {
       this.isGenerating = false;
@@ -115,7 +105,6 @@ class CatalogPDFGenerator {
       script.src =
         "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js";
       script.onload = () => {
-        console.log("jsPDF loaded successfully");
         resolve();
       };
       script.onerror = () => {
@@ -180,7 +169,7 @@ class CatalogPDFGenerator {
 
     // Company Info
     pdf.setFontSize(10);
-    pdf.text("Phone: (616) 228-2244", margin, yPosition);
+    pdf.text("Phone: 616-383-4422", margin, yPosition);
     yPosition += 5;
     pdf.text("Email: kvgarage@kvgarage.com", margin, yPosition);
     yPosition += 5;
@@ -343,7 +332,7 @@ class CatalogPDFGenerator {
       "KV Garage",
       "Wholesale Tech Packs & Products",
       "",
-      "Phone: (616) 228-2244",
+      "Phone: 616-383-4422",
       "Email: kvgarage@kvgarage.com",
       "Website: www.kvgarage.com",
       "",

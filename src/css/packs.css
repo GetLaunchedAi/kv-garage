@@ -1418,7 +1418,7 @@ body.dark-mode .form-group label {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   font-weight: 600;
   font-size: 0.9375rem;
-  z-index: 10000;
+  z-index: 99999999 !important;
   transform: translateX(400px);
   opacity: 0;
   transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55), 
@@ -1466,14 +1466,14 @@ body.dark-mode .form-group label {
 /* Mobile responsiveness */
 @media (max-width: 768px) {
   .cart-toast {
-    bottom: 80px;
-    right: 10px;
-    left: 10px;
-    max-width: none;
-    transform: translateY(100px);
+    bottom: 20px;
+    right: 20px;
+    left: auto;
+    max-width: calc(100% - 40px);
+    transform: translateX(400px);
   }
   
   .cart-toast.show {
-    transform: translateY(0);
+    transform: translateX(0);
   }
 }

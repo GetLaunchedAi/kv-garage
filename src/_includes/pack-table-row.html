@@ -1,0 +1,55 @@
+{# 
+  Pack Table Row Template for Homepage Catalog
+  Usage: {% include "pack-table-row.html" %}
+  Note: The 'pack' variable must be in scope (e.g., from a loop)
+#}
+
+{% set packId = pack.id or pack.slug %}
+{% set packName = pack.name or "Pack" %}
+{% set packSlug = pack.slug or packId %}
+{% set packImage = pack.image_url or pack.image or "/images/products/collage_1.png" %}
+{% set packPrice = pack.price or 0 %}
+{% set units = pack.units or pack.number_of_units or 0 %}
+{% set packDescription = pack.short_description or pack.description or "" %}
+{% set resaleValue = pack.estimated_resale_value or "$0" %}
+{% set availableQty = pack.available_quantity or 0 %}
+{% set isOutOfStock = availableQty == 0 %}
+
+<tr class="catalog-row fx slide-top">
+  <td class="pack-name">
+    <strong>{{ packName }}</strong>
+  </td>
+  <td class="pack-price">
+    <span class="price">${{ packPrice | default(0) }}</span>
+  </td>
+  <td class="pack-units">
+    ~{{ units }}
+  </td>
+  <td class="pack-contents">
+    {{ packDescription }}
+  </td>
+  <td class="pack-resale">
+    <span class="resale-value">{{ resaleValue }}</span>
+  </td>
+  <td class="pack-image">
+    <img 
+      src="{{ packImage }}" 
+      alt="{{ packName }}"
+      loading="lazy"
+      decoding="async"
+      class="catalog-image">
+  </td>
+  <td class="pack-action">
+    <button 
+      class="add-to-cart cs-button-solid catalog-btn {% if isOutOfStock %}disabled{% endif %}"
+      {% if isOutOfStock %}disabled{% endif %}
+      data-pack-id="{{ packId }}"
+      data-pack-name="{{ packName }}"
+      data-pack-price="{{ packPrice }}"
+      data-pack-image="{{ packImage }}"
+      data-pack-slug="{{ packSlug }}">
+      {% if isOutOfStock %}Sold Out{% else %}Add to Cart{% endif %}
+    </button>
+  </td>
+</tr>
+

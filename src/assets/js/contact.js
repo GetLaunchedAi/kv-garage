@@ -197,7 +197,6 @@ class ContactManager {
             }
 
         } catch (error) {
-            console.error('Error sending message:', error);
             this.showNotification('Failed to send message. Please try again or contact us directly.', 'error');
         } finally {
             // Remove loading state
@@ -231,7 +230,7 @@ class ContactManager {
             borderRadius: '8px',
             color: 'white',
             fontWeight: '600',
-            zIndex: '10000',
+            zIndex: '99999999',
             transform: 'translateX(100%)',
             transition: 'transform 0.3s ease',
             maxWidth: '400px',
@@ -271,7 +270,7 @@ class ContactManager {
 function openLiveChat() {
     // This would integrate with your live chat service (e.g., Intercom, Zendesk, etc.)
     // For now, we'll show a placeholder
-    alert('Live chat will be available soon! In the meantime, please call us at (616) 228-2244 or email kvgarage@kvgarage.com');
+    alert('Live chat will be available soon! In the meantime, please call us at 616-383-4422 or email kvgarage@kvgarage.com');
     
     // Example integration with Intercom:
     // if (window.Intercom) {

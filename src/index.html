@@ -139,44 +139,7 @@ packs: _data/packs.json
         </thead>
         <tbody>
           {% for pack in packs.packs %}
-          <tr class="catalog-row fx slide-top">
-            <td class="pack-name">
-              <strong>{{ pack.name }}</strong>
-            </td>
-            <td class="pack-price">
-              <span class="price">${{ pack.price.toFixed(2) }}</span>
-            </td>
-            <td class="pack-units">
-              ~{{ pack.units }}
-            </td>
-            <td class="pack-contents">
-              {{ pack.short_description }}
-            </td>
-            <td class="pack-resale">
-              <span class="resale-value">{{ pack.estimated_resale_value }}</span>
-            </td>
-            <td class="pack-image">
-              <img 
-                src="{{ pack.image_url }}" 
-                alt="{{ pack.name }}"
-                loading="lazy"
-                decoding="async"
-                class="catalog-image"
-              />
-            </td>
-            <td class="pack-action">
-              <button 
-                class="add-to-cart cs-button-solid catalog-btn"
-                data-pack-id="{{ pack.id }}"
-                data-pack-name="{{ pack.name }}"
-                data-pack-price="{{ pack.price }}"
-                data-pack-image="{{ pack.image_url }}"
-                data-pack-slug="{{ pack.slug }}"
-              >
-                Add to Cart
-              </button>
-            </td>
-          </tr>
+            {% include "pack-table-row.html" %}
           {% endfor %}
         </tbody>
       </table>
@@ -204,13 +167,20 @@ packs: _data/packs.json
         Join thousands of successful resellers who trust KV Garage for their wholesale needs
       </p>
       <div class="catalog-download">
-        <a href="/api/catalogs/hero" class="cs-button-solid" target="_blank">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px;">
+        <a href="/assets/pdf/kv-resell-playbook.pdf" class="cs-button-solid" target="_blank">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>
+          View Catalog
+        </a>
+        <a href="/assets/pdf/kv-resell-playbook.pdf" class="cs-button-solid" download="kv-resell-playbook.pdf">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
             <polyline points="7,10 12,15 17,10"></polyline>
             <line x1="12" y1="15" x2="12" y2="3"></line>
           </svg>
-          Download Catalog (PDF)
+          Download Catalog
         </a>
       </div>
     </div>
@@ -237,7 +207,7 @@ packs: _data/packs.json
           </svg>
         </div>
         <h3>Phone Support</h3>
-        <p><a href="tel:+16162282244">(616) 228-2244</a><br>Mon-Fri 9AM-6PM EST</p>
+        <p><a href="tel:+16163834422">616-383-4422</a><br>Mon-Fri 9AM-6PM EST</p>
       </div>
       
       <div class="trust-card fx slide-top staggered-m" style="--i:4">
@@ -448,7 +418,6 @@ packs: _data/packs.json
 
 
 <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
-<script src="/assets/js/catalog-pdf-generator.js"></script>
 <script>
   if (window.netlifyIdentity) {
     window.netlifyIdentity.on("init", (user) => {

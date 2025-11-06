@@ -18,17 +18,49 @@ permalink: "product/"
 <!--                  Product PDP                 -->
 <!-- ============================================ -->
 <section class="pdp" id="pdp">
-  <div class="pdp__media"><img id="pdpImg" alt="" loading="lazy" /></div>
+  <div class="pdp__media">
+    <div class="pdp-carousel" id="pdpCarousel">
+      <div class="pdp-carousel__main">
+        <img id="pdpImg" alt="" loading="lazy" />
+        <button class="pdp-carousel__nav pdp-carousel__nav--prev" id="carouselPrev" aria-label="Previous image" style="display: none;">‹</button>
+        <button class="pdp-carousel__nav pdp-carousel__nav--next" id="carouselNext" aria-label="Next image" style="display: none;">›</button>
+        <div class="pdp-carousel__dots" id="carouselDots" style="display: none;"></div>
+      </div>
+      <div class="pdp-carousel__thumbnails" id="carouselThumbnails" style="display: none;"></div>
+    </div>
+  </div>
   <div class="pdp__meta">
-    <nav class="crumbs"><a href="/shop/">Shop</a> / <span id="pdpCrumb"></span></nav>
-    <h1 id="pdpTitle"></h1>
-    <p id="pdpPrice" class="pdp__price"></p>
-    <p id="pdpDesc" class="pdp__desc"></p>
+    <div class="pdp__meta-inner">
+      <nav class="crumbs"><a href="/shop/">Shop</a> / <span id="pdpCrumb"></span></nav>
+      
+      <div class="pdp__header">
+        <h1 id="pdpTitle" class="pdp__title"></h1>
+        <div id="pdpStatus" class="pdp__status"></div>
+      </div>
+      
+      <div class="pdp__price-wrapper">
+        <p id="pdpPrice" class="pdp__price"></p>
+      </div>
+      
+      <div class="pdp__description-wrapper">
+        <p id="pdpDesc" class="pdp__desc"></p>
+      </div>
 
-    <form id="pdpOptions" class="pdp__options"></form>
+      <div class="pdp__options-wrapper">
+        <form id="pdpOptions" class="pdp__options"></form>
+      </div>
 
-    <!-- Real Snipcart button; attributes filled-in by JS -->
-    <button id="snipBtn" class="snipcart-add-item cta">Add to cart</button>
+      <div class="pdp__actions">
+        <button id="snipBtn" class="add-to-cart cta pdp__cta">
+          <span class="cta-text">Add to cart</span>
+          <svg class="cta-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <path d="M16 10a4 4 0 0 1-8 0"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -36,10 +68,10 @@ permalink: "product/"
 <!--                Phone Case Add-ons            -->
 <!-- ============================================ -->
 <section id="phone-case-addons" class="addons" data-src="/products.json" aria-label="Phone case add-ons" style="display: none;">
-  <div class="addons-head">
+  <!-- <div class="addons-head">
     <h2>Complete Your Setup</h2>
     <p>Protect your device with these recommended phone cases</p>
-  </div>
+  </div> -->
 
   <div class="addons-grid" id="addonsGrid">
     <!-- Phone case add-ons will be loaded here -->
@@ -65,4 +97,5 @@ permalink: "product/"
 
 <!-- Page assets -->
 <link rel="stylesheet" href="/css/product.css">
+<script src="/assets/js/templates/product-templates.js"></script>
 <script src="/assets/js/product.js" defer></script>

@@ -104,7 +104,6 @@
 
         // TODO: Send to backend API endpoint when available
         // For now, we'll just log the data and show success
-        console.log('Affiliate application received:', applicationData);
 
         // Simulate API call delay (remove when real API is connected)
         await new Promise(resolve => setTimeout(resolve, 1500));
@@ -121,7 +120,6 @@
         }
 
       } catch (error) {
-        console.error('Error submitting application:', error);
         alert('Something went wrong. Please try again.');
         
         // Reset button state

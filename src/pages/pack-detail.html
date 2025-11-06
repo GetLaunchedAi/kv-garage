@@ -178,7 +178,6 @@ class PackDetailSystem {
       this.showManifestActions();
       this.hideLoading();
     } catch (error) {
-      console.error('Error loading pack details:', error);
       this.showError();
     }
   }
@@ -214,7 +213,6 @@ class PackDetailSystem {
       this.renderManifest(manifest);
       this.openManifestModal();
     } catch (error) {
-      console.error('Error loading manifest:', error);
       alert('Failed to load manifest. Please try again.');
     }
   }
@@ -444,7 +442,7 @@ class PackDetailSystem {
               <div class="trust-icon">📞</div>
               <div class="trust-content">
                 <h4>Phone Support</h4>
-                <p><a href="tel:+16162282244">(616) 228-2244</a> • Mon-Fri 9AM-6PM EST</p>
+                <p><a href="tel:+16163834422">616-383-4422</a> • Mon-Fri 9AM-6PM EST</p>
               </div>
             </div>
             <div class="trust-element">
@@ -500,7 +498,6 @@ class PackDetailSystem {
       const manifestItems = data.manifests[packId];
       
       if (!manifestItems) {
-        console.error('Manifest not found for pack:', packId);
         return;
       }
       
@@ -516,7 +513,6 @@ class PackDetailSystem {
       
       this.renderManifestContent(manifestData);
     } catch (error) {
-      console.error('Error loading manifest:', error);
     }
   }
 
@@ -594,37 +590,42 @@ class PackDetailSystem {
         this.relatedPacks.style.display = 'block';
       }
     } catch (error) {
-      console.error('Error loading related packs:', error);
     }
   }
 
   renderRelatedPacks(packs) {
-    this.relatedPacksGrid.innerHTML = packs.map(pack => `
-      <div class="pack-card">
-        <div class="pack-image">
-          <img src="${pack.image || '/images/products/collage_1.png'}" alt="${pack.name}" loading="lazy">
-        </div>
-        <div class="pack-content">
-          <div class="pack-header">
-            <h3 class="pack-name">${pack.name}</h3>
-            <span class="pack-type ${pack.type}">${pack.type.toUpperCase()}</span>
+    // Use PackTemplates.relatedCard if available, otherwise fallback to inline template
+    if (window.PackTemplates) {
+      this.relatedPacksGrid.innerHTML = packs.map(pack => window.PackTemplates.relatedCard(pack)).join('');
+    } else {
+      // Fallback template
+      this.relatedPacksGrid.innerHTML = packs.map(pack => `
+        <div class="pack-card">
+          <div class="pack-image">
+            <img src="${pack.image || '/images/products/collage_1.png'}" alt="${pack.name}" loading="lazy">
           </div>
-          <div class="pack-pricing">
-            <div class="price-row">
-              <span class="price-label">Your Cost:</span>
-              <span class="price-value">$${pack.price.toFixed(2)}</span>
+          <div class="pack-content">
+            <div class="pack-header">
+              <h3 class="pack-name">${pack.name}</h3>
+              <span class="pack-type ${pack.type}">${pack.type.toUpperCase()}</span>
             </div>
-            <div class="price-row">
-              <span class="price-label">Est. Profit:</span>
-              <span class="price-value profit">$${(pack.resale_estimate - pack.price).toFixed(2)}</span>
+            <div class="pack-pricing">
+              <div class="price-row">
+                <span class="price-label">Your Cost:</span>
+                <span class="price-value">$${pack.price.toFixed(2)}</span>
+              </div>
+              <div class="price-row">
+                <span class="price-label">Est. Profit:</span>
+                <span class="price-value profit">$${(pack.resale_estimate - pack.price).toFixed(2)}</span>
+              </div>
+            </div>
+            <div class="pack-actions">
+              <a href="/pack/${pack.slug}/" class="pack-btn primary">View Details</a>
             </div>
           </div>
-          <div class="pack-actions">
-            <a href="/pack/${pack.slug}/" class="pack-btn primary">View Details</a>
-          </div>
         </div>
-      </div>
-    `).join('');
+      `).join('');
+    }
   }
 
   bindDetailEvents(pack) {
@@ -633,7 +634,6 @@ class PackDetailSystem {
       if (window.globalCart) {
         window.globalCart.addPackToCart(pack, paymentType);
       } else {
-        console.error('Global cart not available');
         alert('Cart system not available. Please refresh the page.');
       }
     };
@@ -665,7 +665,6 @@ class PackDetailSystem {
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
     } catch (error) {
-      console.error('Error downloading manifest:', error);
       alert('Failed to download manifest. Please try again.');
     }
   }
@@ -676,6 +675,9 @@ document.addEventListener('DOMContentLoaded', () => {
   new PackDetailSystem();
 });
 </script>
+
+<!-- Load Pack Templates -->
+<script src="/assets/js/templates/pack-templates.js"></script>
 
 <style>
 /* Pack Detail Page Specific Styles */

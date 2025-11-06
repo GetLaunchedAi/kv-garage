@@ -162,7 +162,6 @@
         
       } catch (error) {
         alert(error.message || 'Login failed. Please try again.');
-        console.error('Login error:', error);
       } finally {
         loginBtn.disabled = false;
         loginBtn.textContent = 'Login';
@@ -236,7 +235,6 @@
           }
         };
       } catch (error) {
-        console.error('Error loading affiliates data:', error);
         return { affiliates: [], commissions: [], payouts: [] };
       }
     }

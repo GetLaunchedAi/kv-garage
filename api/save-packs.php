@@ -1,5 +1,51 @@
 <?php
 // save-packs.php (no auth required)
+
+// Turn off error display to prevent breaking JSON responses
+ini_set('display_errors', 0);
+error_reporting(E_ALL);
+
+// Handle CORS for local development and production
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+$allowedOrigins = [
+    // Local development
+    'http://localhost:8080',
+    'http://127.0.0.1:8080',
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    // Production - Add your Cloudways domain here
+    'https://www.kvgarage.com',
+    'https://kvgarage.com',
+    // Add any other domains you need (staging, etc.)
+];
+
+if (in_array($origin, $allowedOrigins)) {
+    header("Access-Control-Allow-Origin: $origin");
+} else {
+    // Fallback: only allow * in development, restrict in production
+    // For production, you should add your domain above instead of using *
+    $isProduction = !in_array($_SERVER['HTTP_HOST'] ?? '', ['localhost', '127.0.0.1', 'localhost:8000']);
+    if (!$isProduction) {
+        header('Access-Control-Allow-Origin: *');
+    } else {
+        // In production, reject unknown origins
+        http_response_code(403);
+        echo json_encode(['ok' => false, 'error' => 'Origin not allowed']);
+        exit;
+    }
+}
+
+header('Access-Control-Allow-Methods: POST, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type, Authorization');
+header('Access-Control-Allow-Credentials: true');
+header('Access-Control-Max-Age: 86400'); // 24 hours
+
+// Handle preflight OPTIONS request
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit;
+}
+
 header('Content-Type: application/json');
 header('X-Content-Type-Options: nosniff');
 header('Referrer-Policy: no-referrer');
@@ -11,8 +57,17 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
   exit;
 }
 
-$packsFile = __DIR__ . '/../data/packs.json';
-$uploadDir = __DIR__ . '/../images/products/';
+// Check if packs.json exists in data directory, otherwise use public/data/packs.json
+$packsFileData = __DIR__ . '/../data/packs.json';
+$packsFilePublic = __DIR__ . '/../public/data/packs.json';
+$packsFile = file_exists($packsFileData) ? $packsFileData : $packsFilePublic;
+$uploadDir = __DIR__ . '/../public/images/products/';
+
+// Ensure the directory exists
+$packsDir = dirname($packsFile);
+if (!is_dir($packsDir)) {
+  mkdir($packsDir, 0755, true);
+}
 
 if (!file_exists($packsFile)) {
   file_put_contents($packsFile, json_encode(['packs' => []], JSON_PRETTY_PRINT));

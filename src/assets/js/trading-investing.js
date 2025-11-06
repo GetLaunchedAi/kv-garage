@@ -63,16 +63,6 @@
 
       try {
         // TODO: Add email service integration here
-        // For now, we'll just log the data and show success
-        console.log('Mentorship request received:', {
-          name: name,
-          email: email,
-          phone: phone || 'N/A',
-          experience: experience || 'N/A',
-          message: message || 'N/A',
-          timestamp: new Date().toISOString()
-        });
-
         // Simulate API call delay (remove when real API is connected)
         await new Promise(resolve => setTimeout(resolve, 1500));
 
@@ -88,7 +78,6 @@
         }
 
       } catch (error) {
-        console.error('Error submitting form:', error);
         alert('Something went wrong. Please try again.');
         
         // Reset button state

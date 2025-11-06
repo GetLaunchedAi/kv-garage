@@ -33,7 +33,6 @@ class AdminOrderManager {
                     this.isAuthenticated = true;
                     this.showOrders();
                     this.loadOrders();
-                    console.log('Admin orders: Auto-login successful');
                     return;
                 }
             }
@@ -41,7 +40,6 @@ class AdminOrderManager {
             // No valid stored token, show login form
             this.showLogin();
         } catch (error) {
-            console.error('Authentication check error:', error);
             this.showLogin();
         }
     }
@@ -143,7 +141,6 @@ class AdminOrderManager {
             this.renderPagination();
             
         } catch (error) {
-            console.error('Error loading orders:', error);
             if (error.message.includes('401') || error.message.includes('403')) {
                 this.showError('Authentication failed. Please log in again.');
                 // Clear token and show login
@@ -359,7 +356,6 @@ class AdminOrderManager {
             this.renderOrderModal(order);
             
         } catch (error) {
-            console.error('Error loading order details:', error);
             alert('Failed to load order details. Please try again.');
         }
     }
@@ -496,7 +492,6 @@ class AdminOrderManager {
             alert('Order status updated successfully!');
             
         } catch (error) {
-            console.error('Error updating order status:', error);
             alert('Failed to update order status. Please try again.');
         }
     }
@@ -534,7 +529,6 @@ class AdminOrderManager {
             }
 
         } catch (error) {
-            console.error('Login error:', error);
             this.showNotification(`Login failed: ${error.message}`, 'error');
         } finally {
             loginBtn.disabled = false;
@@ -565,7 +559,7 @@ class AdminOrderManager {
             border-radius: 4px;
             color: white;
             font-weight: 500;
-            z-index: 10000;
+            z-index: 99999999;
             max-width: 300px;
             word-wrap: break-word;
         `;

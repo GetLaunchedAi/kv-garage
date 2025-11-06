@@ -67,7 +67,6 @@
           throw new Error('Form action not configured');
         }
       } catch (error) {
-        console.error('Newsletter subscription error:', error);
         showMessage('Something went wrong. Please try again later.', 'error');
       } finally {
         // Re-enable form

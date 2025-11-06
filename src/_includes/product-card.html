@@ -1,0 +1,68 @@
+{% comment %}
+  Reusable Product Card Template
+  Usage: {% include "product-card.html", product: productObject %}
+  
+  Required product fields:
+  - title (or name)
+  - price
+  - image (or images array)
+  - slug (or id)
+  
+  Optional fields:
+  - description
+  - status
+  - category
+  - inStock
+  - quantity
+  - currency
+{% endcomment %}
+
+{% assign product = include.product %}
+{% assign productId = product.id | default: product.slug | default: product.title | slugify %}
+{% assign productName = product.title | default: product.name | default: "Product" %}
+{% assign productSlug = product.slug | default: productId %}
+{% assign productPrice = product.price | default: 0 %}
+{% assign productImage = product.image | default: product.images[0] | default: "/images/placeholder.png" %}
+{% assign productDescription = product.description | default: "" %}
+{% assign productStatus = product.status | default: "" %}
+{% assign isOutOfStock = product.inStock == false or productPrice == 0 %}
+{% assign productUrl = "/product/?slug=" | append: productSlug %}
+
+<article class="card {% if isOutOfStock %}out-of-stock{% endif %}">
+  <a href="{{ productUrl }}" class="card__link" data-product-link>
+    <picture class="card__img">
+      <img src="{{ productImage }}" alt="{{ productName }}" loading="lazy" decoding="async" data-no-lightbox>
+      {% if productStatus != "" %}
+        <span class="status-badge status-{{ productStatus | downcase | replace: ' ', '-' }}">{{ productStatus }}</span>
+      {% endif %}
+    </picture>
+  </a>
+  <div class="card__content">
+    <h3 class="card__title">
+      <a href="{{ productUrl }}" data-product-link>{{ productName }}</a>
+    </h3>
+    <p class="card__price">
+      {% if isOutOfStock %}
+        Out of Stock
+      {% elsif product.quantity and productStatus == "Wholesale Deal" %}
+        ${{ productPrice | default: 0 }} {{ product.currency | default: "USD" }} ({{ product.quantity }})
+      {% else %}
+        ${{ productPrice | default: 0 }} {{ product.currency | default: "USD" }}
+      {% endif %}
+    </p>
+    {% if productDescription != "" %}
+      <p class="card__description">{{ productDescription }}</p>
+    {% endif %}
+    <button 
+      class="add-to-cart {% if isOutOfStock %}disabled{% endif %}" 
+      {% if isOutOfStock %}disabled{% endif %}
+      data-pack-id="{{ productId }}"
+      data-pack-name="{{ productName }}"
+      data-pack-price="{{ productPrice }}"
+      data-pack-image="{{ productImage }}"
+      data-pack-slug="{{ productSlug }}">
+      {% if isOutOfStock %}Out of Stock{% else %}Add to Cart{% endif %}
+    </button>
+  </div>
+</article>
+

@@ -258,49 +258,46 @@ document.addEventListener('DOMContentLoaded', () => {
   });
    async function handleCustomPackSubmit(e) {
   e.preventDefault();
-  console.log('Submitting custom pack form...');
-
   const form = e.currentTarget;
   const formData = new FormData(form);
 
-  // Log to verify what’s being sent
-  console.log("Raw FormData entries:");
-  for (let [key, value] of formData.entries()) {
-    console.log(key, value);
-  }
 
   // --- Do NOT JSON.stringify here ---
   // Send as multipart/form-data (PHP can read $_POST + $_FILES)
+  // Detect if we're in development (localhost) and use PHP server, otherwise use relative path
+  const PACKS_API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+      ? 'http://localhost:8000/api/save-packs.php'
+      : '/api/save-packs.php';
+  
   try {
-    const response = await fetch(`/api/save-packs.php`, {
+    const response = await fetch(PACKS_API_URL, {
       method: 'POST',
       body: formData, // <-- send directly
     });
 
     // Always read as text first (helps debug)
     const text = await response.text();
-    console.log("Raw Response:", text);
 
     let result;
     try {
       result = JSON.parse(text);
     } catch (err) {
-      console.error("JSON Parse Error:", err);
-      alert("❌ Invalid server response (check console).");
+      alert("❌ Invalid server response.");
       return;
     }
 
-    if (!response.ok || !result.success) {
+    if (!response.ok || !result.ok) {
       throw new Error(result.error || 'Failed to save pack');
     }
 
     alert(`✅ Pack ${result.message?.includes('updated') ? 'updated' : 'created'} successfully!`);
-    console.log("Saved pack:", result.pack);
 
-    // Optional: refresh the UI or close modal
+    // Refresh packs list and close modal
     closePackModal?.();
+    if (window.adminPacks) {
+      await window.adminPacks.loadPacks();
+    }
   } catch (err) {
-    console.error("Error saving pack:", err);
     alert("❌ Failed to save pack. Please try again.");
   }
 }

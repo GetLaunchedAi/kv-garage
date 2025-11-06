@@ -74,8 +74,14 @@ class PerformanceOptimizer {
                 this.imageCache.set(src, true);
             };
             image.onerror = () => {
-                img.src = '/images/placeholder.jpg';
+                // Prevent infinite loop - don't try to load placeholder if it's already the placeholder
+                if (!img.src || !img.src.includes('placeholder')) {
+                    // Use a simple 1x1 transparent pixel as fallback instead of non-existent placeholder.jpg
+                    img.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="1" height="1"%3E%3C/svg%3E';
+                }
                 img.classList.add('error');
+                // Remove the error handler to prevent infinite loop
+                img.onerror = null;
             };
             image.src = src;
         } else if (this.imageCache.has(src)) {
@@ -135,11 +141,18 @@ class PerformanceOptimizer {
         // Set optimized flag
         img.dataset.optimized = 'true';
 
-        // Add error handling
+        // Add error handling - prevent infinite loop
+        const originalSrc = img.src;
         img.onerror = () => {
+            // Prevent infinite loop - don't try to load placeholder if we're already trying to load it
+            if (!img.src.includes('placeholder') && !img.src.startsWith('data:')) {
+                // Use a simple 1x1 transparent pixel as fallback instead of non-existent placeholder.jpg
+                img.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="1" height="1"%3E%3C/svg%3E';
+            }
             img.classList.remove('loading');
             img.classList.add('error');
-            img.src = '/images/placeholder.jpg';
+            // Remove the error handler to prevent infinite loop
+            img.onerror = null;
         };
 
         img.onload = () => {
@@ -182,7 +195,6 @@ class PerformanceOptimizer {
 
                 return response;
             } catch (error) {
-                console.error('API request failed:', error);
                 throw error;
             }
         };
@@ -240,7 +252,6 @@ class PerformanceOptimizer {
                 const entries = list.getEntries();
                 entries.forEach(entry => {
                     if (entry.duration > 1000) { // Log slow resources
-                        console.warn('Slow resource:', entry.name, entry.duration + 'ms');
                     }
                 });
             });
@@ -266,7 +277,6 @@ class PerformanceOptimizer {
 
     reportMetric(name, value) {
         // In production, send to analytics service
-        console.log(`Performance Metric - ${name}:`, value);
         
         // Store locally for debugging
         const metrics = JSON.parse(localStorage.getItem('performance_metrics') || '{}');

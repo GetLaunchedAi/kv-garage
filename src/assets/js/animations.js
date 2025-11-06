@@ -39,11 +39,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }, { passive: true });
   
     update();
-  
-    // tiny debug so you can see it’s running
-    console.log('[animations.js] ready, observed:',
-      document.querySelectorAll('.reveal, .fx').length,
-      'parallax:', !!sec);
   });
   /*-- -------------------------- -->
   <---       Confetti On Submit    -->

@@ -38,7 +38,7 @@ eleventyNavigation:
       <div class="trust-item">
         <div class="trust-icon">📞</div>
         <h3>Phone Support</h3>
-        <p>Call (616) 228-2244 for immediate assistance</p>
+        <p>Call 616-383-4422 for immediate assistance</p>
       </div>
       <div class="trust-item">
         <div class="trust-icon">📧</div>
@@ -279,6 +279,9 @@ eleventyNavigation:
   </div>
 </div>
 
+<!-- Load Pack Templates -->
+<script src="/assets/js/templates/pack-templates.js"></script>
+
 <script>
   // Pack Catalog System
   class PackCatalogSystem {
@@ -361,7 +364,6 @@ eleventyNavigation:
 
     async loadPacks() {
       try {
-        console.log('Loading packs from JSON data');
         this.showLoading();
 
         // Load packs from JSON file
@@ -372,17 +374,15 @@ eleventyNavigation:
         }
 
         const data = await response.json();
-        console.log('Packs data received:', data);
         
         if (!data || !data.packs) {
           throw new Error('No packs data found in JSON file');
         }
         
         this.packs = data.packs;
-        console.log('Processed packs:', this.packs);
 
         if (this.packs.length === 0) {
-          console.warn('No packs received');
+          // No packs available
         }
 
         this.renderPacks();
@@ -391,7 +391,6 @@ eleventyNavigation:
         // Note: Real-time inventory updates disabled when using JSON data
         // this.startInventoryUpdates();
       } catch (error) {
-        console.error('Error loading packs:', error);
         this.showError();
       }
     }
@@ -420,7 +419,7 @@ eleventyNavigation:
           }
         }
       } catch (error) {
-        console.error('Error updating inventory:', error);
+        // Error updating inventory
       }
     }
 
@@ -512,12 +511,106 @@ eleventyNavigation:
         return;
       }
 
-      this.packGrid.innerHTML = this.packs.map(pack => this.createPackCard(pack)).join('');
+      // Use PackTemplates.card() for consistent rendering
+      if (window.PackTemplates) {
+        this.packGrid.innerHTML = this.packs.map(pack => {
+          // Get base card HTML from template
+          let cardHtml = window.PackTemplates.card(pack, { showStats: true });
+          
+          // Add additional buttons that are specific to the packs page
+          const packId = pack.id || pack.slug;
+          const isOutOfStock = (pack.available_quantity || 0) === 0;
+          const packPrice = pack.price || 0;
+          const depositPrice = pack.deposit_price || (packPrice * 0.7);
+          
+          // Convert "View Details" link to button with data-action
+            cardHtml = cardHtml.replace(
+            /<a href="\/pack\/[^"]*" class="pack-btn primary">View Details<\/a>/,
+            '<button class="pack-btn primary" data-action="view">View Details</button>'
+          );
+          
+          // Update "Buy Now" button to have data-action attribute and remove add-to-cart class
+          // Handle multiline button tags
+          cardHtml = cardHtml.replace(
+            /<button class="pack-btn buy add-to-cart"([\s\S]*?)>([\s\S]*?)<\/button>/,
+            '<button class="pack-btn buy" data-action="buy"$1>$2</button>'
+          );
+          
+          // Add "View Manifest" button and "Reserve" button before closing pack-actions div
+          const manifestBtn = '<button class="pack-btn secondary" data-action="manifest">View Manifest</button>';
+          const reserveBtn = !isOutOfStock 
+            ? `<button class="pack-btn reserve" data-action="reserve">Reserve with 70% Deposit ($${depositPrice.toFixed(2)})</button>`
+            : '';
+          
+          // Insert buttons before the closing </div> of pack-actions
+          // Since the closing divs pattern isn't matching, use a simpler approach:
+          // Find the last </button> tag and insert after it
+          const buttonsToAdd = manifestBtn + reserveBtn;
+          
+          // Method 1: Find the last </button> tag in the entire HTML and insert after it
+          // This should work regardless of the closing div structure
+          const lastButtonIndex = cardHtml.lastIndexOf('</button>');
+          
+          if (lastButtonIndex !== -1) {
+            // Insert buttons right after the last </button>
+            const insertPos = lastButtonIndex + 9; // 9 = length of '</button>'
+            cardHtml = cardHtml.slice(0, insertPos) + buttonsToAdd + cardHtml.slice(insertPos);
+          } else {
+            // Fallback: try to find </a> tag
+            const lastLinkIndex = cardHtml.lastIndexOf('</a>');
+            if (lastLinkIndex !== -1) {
+              const insertPos = lastLinkIndex + 4; // 4 = length of '</a>'
+              cardHtml = cardHtml.slice(0, insertPos) + buttonsToAdd + cardHtml.slice(insertPos);
+            }
+          }
+          
+          // Fallback 1: Try regex to match pack-actions div and insert before it closes
+          if (!cardHtml.includes('data-action="manifest"')) {
+            // Match pack-actions div with any content, then find where it closes
+            cardHtml = cardHtml.replace(
+              /(<div class="pack-actions">[\s\S]*?)(<\/div>)/,
+              (match, p1, p2) => {
+                // Check if this is likely the pack-actions closing div
+                // (it should be followed by pack-content and pack-card closing)
+                const afterMatch = cardHtml.substring(cardHtml.indexOf(match) + match.length);
+                // If there are more closing divs after, this is pack-actions closing
+                if (afterMatch.trim().startsWith('</div>')) {
+                  return p1 + buttonsToAdd + p2;
+                }
+                return match;
+              }
+            );
+          }
+          
+          // Fallback 2: Try to find pack-actions and insert before any closing div after buttons
+          if (!cardHtml.includes('data-action="manifest"')) {
+            const packActionsIndex = cardHtml.indexOf('<div class="pack-actions">');
+            if (packActionsIndex !== -1) {
+              // Find the area after pack-actions
+              const afterPackActions = cardHtml.substring(packActionsIndex);
+              // Find the first </div> after the last button
+              const lastButtonInArea = afterPackActions.lastIndexOf('</button>');
+              if (lastButtonInArea !== -1) {
+                const relativeInsertPos = lastButtonInArea + 9;
+                const absoluteInsertPos = packActionsIndex + relativeInsertPos;
+                cardHtml = cardHtml.slice(0, absoluteInsertPos) + buttonsToAdd + cardHtml.slice(absoluteInsertPos);
+              }
+            }
+          }
+          
+          
+          return cardHtml;
+        }).join('');
+      } else {
+        // Fallback if templates not loaded
+        this.packGrid.innerHTML = this.packs.map(pack => this.createPackCard(pack)).join('');
+      }
 
       // Bind pack card events
       this.bindPackCardEvents();
     }
 
+    // Legacy createPackCard method - kept as fallback
     createPackCard(pack) {
       const isLowStock = pack.available_quantity <= 5;
       const isOutOfStock = pack.available_quantity === 0;
@@ -595,8 +688,6 @@ eleventyNavigation:
     }
 
     async handlePackAction(action, pack, buttonElement = null) {
-      console.log('handlePackAction called with action:', action, 'pack:', pack);
-      
       // Show button feedback if button element is provided
       if (buttonElement && (action === 'buy' || action === 'reserve')) {
         const originalText = buttonElement.textContent;
@@ -623,7 +714,6 @@ eleventyNavigation:
           await this.openPackModal(pack);
           break;
         case 'manifest':
-          console.log('Manifest action triggered for pack:', pack.id);
           this.viewManifest(pack.id);
           break;
         case 'buy':
@@ -652,7 +742,6 @@ eleventyNavigation:
         setTimeout(() => this.packModal.classList.add('show'), 10);
         document.body.style.overflow = 'hidden';
       } catch (error) {
-        console.error('Error loading pack details:', error);
         alert('Failed to load pack details. Please try again.');
       }
     }
@@ -852,7 +941,6 @@ eleventyNavigation:
         window.URL.revokeObjectURL(url);
         document.body.removeChild(a);
       } catch (error) {
-        console.error('Error downloading manifest:', error);
         alert('Failed to download manifest. Please try again.');
       }
     }
@@ -862,7 +950,6 @@ eleventyNavigation:
       if (window.globalCart) {
         window.globalCart.addPackToCart(pack, actionType);
       } else {
-        console.error('Global cart not available');
         alert('Cart system not available. Please refresh the page.');
       }
     }
@@ -919,25 +1006,19 @@ eleventyNavigation:
         this.customPackForm.reset();
         this.closeCustomPackModal();
       } catch (error) {
-        console.error('Error submitting custom pack request:', error);
         alert('Failed to submit request. Please try again.');
       }
     }
 
     async viewManifest(packId) {
       try {
-        console.log('viewManifest called with packId:', packId);
-        console.log('Loading manifest for pack:', packId);
-        
         // Load manifest from JSON file
         const response = await fetch('/data/manifests.json');
         if (!response.ok) {
-          console.error('Manifest response not ok:', response.status, response.statusText);
           throw new Error('Failed to load manifest');
         }
         
         const data = await response.json();
-        console.log('Manifest data received:', data);
         const manifestItems = data.manifests[packId];
         
         if (!manifestItems) {
@@ -954,11 +1035,9 @@ eleventyNavigation:
           items: manifestItems
         };
         
-        console.log('Rendering manifest and opening modal');
         this.renderManifest(manifest);
         this.openManifestModal();
       } catch (error) {
-        console.error('Error loading manifest:', error);
         alert(`Failed to load manifest: ${error.message}`);
       }
     }
@@ -1013,15 +1092,12 @@ eleventyNavigation:
     }
 
     openManifestModal() {
-      console.log('Opening manifest modal, element:', this.manifestModal);
       if (!this.manifestModal) {
-        console.error('Manifest modal element not found!');
         return;
       }
       this.manifestModal.style.display = 'flex';
       this.manifestModal.classList.add('show');
       document.body.style.overflow = 'hidden';
-      console.log('Manifest modal opened');
     }
 
     closeManifestModal() {
@@ -1178,14 +1254,13 @@ eleventyNavigation:
         pdf.setFont(undefined, 'italic');
         pdf.text('Generated by KV Garage - www.kvgarage.com', margin, yPosition);
         yPosition += 5;
-        pdf.text('Phone: (616) 228-2244 | Email: kvgarage@kvgarage.com', margin, yPosition);
+        pdf.text('Phone: 616-383-4422 | Email: kvgarage@kvgarage.com', margin, yPosition);
         
         // Download the PDF
         const fileName = `${packName.replace(/\s+/g, '_')}_manifest.pdf`;
         pdf.save(fileName);
         
       } catch (error) {
-        console.error('Error generating PDF:', error);
         alert('Failed to generate PDF. Please try again.');
       }
     }
@@ -1199,7 +1274,6 @@ eleventyNavigation:
         const script = document.createElement('script');
         script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
         script.onload = () => {
-          console.log('jsPDF loaded successfully');
           resolve();
         };
         script.onerror = () => {

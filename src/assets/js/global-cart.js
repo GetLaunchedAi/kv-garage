@@ -389,14 +389,12 @@ async checkout() {
     });
 
     const text = await res.text();
-    console.log("Raw Stripe response:", text);
 
     const data = JSON.parse(text);
     if (!data.ok || !data.url) throw new Error(data.error || 'Invalid Stripe response.');
 
     window.location.href = data.url; // ✅ safe redirect
   } catch (err) {
-    console.error("Stripe Checkout Error:", err);
     alert("❌ Failed to start Stripe checkout. See console for details.");
   }
 }

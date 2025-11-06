@@ -7,7 +7,6 @@
 const JSON_DATA_URL = '/data';
 const API_BASE_URL = '/api'; // Fallback for API calls
 
-console.log('Admin Dashboard script loading...');
 
 try {
 class AdminDashboard {
@@ -65,7 +64,6 @@ class AdminDashboard {
                 }
             });
         } catch (error) {
-            console.error('Error binding events:', error);
         }
     }
 
@@ -81,7 +79,6 @@ class AdminDashboard {
                     this.authToken = window.sharedAdminAuth.getToken();
                     this.showDashboard();
                     await this.loadDashboardData();
-                    console.log('Admin dashboard: Auto-login successful');
                     return;
                 }
             }
@@ -89,7 +86,6 @@ class AdminDashboard {
             // No valid stored token, show login form
             this.showLogin();
         } catch (error) {
-            console.error('Authentication check error:', error);
             this.showLogin();
         }
     }
@@ -123,7 +119,6 @@ class AdminDashboard {
             }
 
         } catch (error) {
-            console.error('Login error:', error);
             this.showNotification(`Login failed: ${error.message}`, 'error');
         } finally {
             loginBtn.disabled = false;
@@ -185,7 +180,6 @@ class AdminDashboard {
             await this.loadRecentActivity();
 
         } catch (error) {
-            console.error('Error loading dashboard data:', error);
             this.showNotification('Failed to load dashboard data', 'error');
         }
     }
@@ -218,7 +212,6 @@ class AdminDashboard {
                 this.renderRecentActivity(mockActivity);
             }
         } catch (error) {
-            console.error('Error loading recent activity:', error);
             // Show fallback message
             const activityList = document.getElementById('activity-list');
             if (activityList) {
@@ -292,7 +285,6 @@ class AdminDashboard {
             document.body.style.overflow = 'hidden';
 
         } catch (error) {
-            console.error('Error loading packs:', error);
             this.showNotification('Failed to load packs', 'error');
         }
     }
@@ -357,7 +349,6 @@ class AdminDashboard {
             }
 
         } catch (error) {
-            console.error('Manifest upload error:', error);
             this.showNotification(`Upload failed: ${error.message}`, 'error');
         } finally {
             submitBtn.disabled = false;
@@ -403,7 +394,6 @@ class AdminDashboard {
             }
 
         } catch (error) {
-            console.error('Error loading custom requests:', error);
             requestsList.innerHTML = '<p class="error-message">Failed to load custom requests</p>';
         }
     }
@@ -478,7 +468,6 @@ class AdminDashboard {
             }
 
         } catch (error) {
-            console.error('Error updating request status:', error);
             this.showNotification('Failed to update request status', 'error');
         }
     }
@@ -502,7 +491,7 @@ class AdminDashboard {
             borderRadius: '8px',
             color: 'white',
             fontWeight: '600',
-            zIndex: '10000',
+            zIndex: '99999999',
             transform: 'translateX(100%)',
             transition: 'transform 0.3s ease',
             maxWidth: '400px',
@@ -569,11 +558,9 @@ window.updateRequestStatus = function(requestId, status) {
     }
 };
 
-console.log('AdminDashboard class defined:', typeof AdminDashboard);
 
 // Make AdminDashboard globally available
 window.AdminDashboard = AdminDashboard;
 
 } catch (error) {
-    console.error('Error defining AdminDashboard class:', error);
 }

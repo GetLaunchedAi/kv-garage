@@ -1,0 +1,229 @@
+---
+layout: "base.html"
+description: "Admin product management - Create, edit, and manage shop products."
+metaTitle: "Admin Product Management | KV Garage"
+tagTitle: "Admin Products"
+title: "Admin Product Management"
+preloadImg: "/images/about_banner_img.png"
+preloadCSS: "/css/admin.css"
+permalink: "admin/products/"
+# eleventyNavigation:
+#   key: Admin Products
+#   order: 999
+---
+
+<section id="int-hero">
+    <h1 id="home-h">Product Management</h1>
+    {% image './src/images/banner_img.png', 'vinyl floors', '', 'lazy',
+    '(max-width: 850px) 850px, 1920px'%}
+  </section>
+
+<div class="admin-products-container">
+    <!-- Login Section (shown when not authenticated) -->
+    <div id="login-section" class="login-section">
+        <div class="login-container">
+            <h2>Admin Login</h2>
+            <form id="admin-login-form" class="login-form">
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <button type="submit" class="login-btn">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Product Management Section (shown when authenticated) -->
+    <div id="products-section" class="products-section" style="display: none;">
+        <div class="products-header">
+            <h2>Product Management</h2>
+            <div class="admin-actions">
+                <button id="create-product-btn" class="btn btn-primary">Create New Product</button>
+                <button id="refresh-products" class="btn btn-secondary">Refresh</button>
+                <button id="logout-btn" class="btn btn-danger">Logout</button>
+            </div>
+        </div>
+
+        <!-- Product Stats -->
+        <div class="product-stats">
+            <div class="stat-card">
+                <div class="stat-icon">🛍️</div>
+                <div class="stat-content">
+                    <h3>Total Products</h3>
+                    <span id="total-products">0</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">✅</div>
+                <div class="stat-content">
+                    <h3>In Stock</h3>
+                    <span id="in-stock-products">0</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">❌</div>
+                <div class="stat-content">
+                    <h3>Out of Stock</h3>
+                    <span id="out-of-stock-products">0</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">💰</div>
+                <div class="stat-content">
+                    <h3>Total Value</h3>
+                    <span id="total-value">$0.00</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Products Table -->
+        <div class="products-table-container">
+            <div class="table-header">
+                <h3>All Products</h3>
+                <div class="table-controls">
+                    <input type="text" id="search-products" placeholder="Search products...">
+                    <select id="filter-category">
+                        <option value="">All Categories</option>
+                    </select>
+                    <select id="filter-status">
+                        <option value="">All Status</option>
+                        <option value="New Arrival">New Arrival</option>
+                        <option value="In Stock">In Stock</option>
+                        <option value="Out of Stock">Out of Stock</option>
+                        <option value="Limited Stock">Limited Stock</option>
+                        <option value="Wholesale Deal">Wholesale Deal</option>
+                        <option value="in_stock">In Stock (Filter)</option>
+                        <option value="out_of_stock">Out of Stock (Filter)</option>
+                    </select>
+                </div>
+            </div>
+            
+            <table id="products-table">
+                <thead>
+                    <tr>
+                        <th>Image</th>
+                        <th>Title</th>
+                        <th>Category</th>
+                        <th>Price</th>
+                        <th>Status</th>
+                        <th>SKU</th>
+                        <th>Stock</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td colspan="9" class="loading-message">Loading products...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Create/Edit Product Modal -->
+<div id="product-modal" class="modal">
+    <div class="modal-overlay">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h3 id="modal-title">Create New Product</h3>
+                <button class="modal-close" onclick="closeProductModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="product-form" class="product-form" action="/api/save-products.php" method="POST" enctype="multipart/form-data">
+                    <input type="hidden" id="product-id" name="id">
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="product-title">Product Title *</label>
+                            <input type="text" id="product-title" name="title" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="product-category">Category *</label>
+                            <select id="product-category" name="category" required>
+                                <option value="">Select category...</option>
+                                <option value="Mobile Accessories">Mobile Accessories</option>
+                                <option value="Cables & Chargers">Cables & Chargers</option>
+                                <option value="Screen Protectors">Screen Protectors</option>
+                                <option value="Watch Accessories">Watch Accessories</option>
+                                <option value="Phone Accessories">Phone Accessories</option>
+                                <option value="Wholesale Deals">Wholesale Deals</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="product-price">Price *</label>
+                            <input type="number" id="product-price" name="price" step="0.01" min="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="product-currency">Currency</label>
+                            <select id="product-currency" name="currency">
+                                <option value="USD">USD</option>
+                                <option value="EUR">EUR</option>
+                                <option value="GBP">GBP</option>
+                                <option value="CAD">CAD</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="product-sku">SKU</label>
+                            <input type="text" id="product-sku" name="sku" placeholder="Auto-generated from title">
+                        </div>
+                        <div class="form-group">
+                            <label for="product-status">Status</label>
+                            <select id="product-status" name="status">
+                                <option value="New Arrival">New Arrival</option>
+                                <option value="In Stock">In Stock</option>
+                                <option value="Out of Stock">Out of Stock</option>
+                                <option value="Limited Stock">Limited Stock</option>
+                                <option value="Wholesale Deal">Wholesale Deal</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="product-quantity">Quantity (Optional)</label>
+                            <input type="text" id="product-quantity" name="quantity" placeholder="e.g., '6 for $2,000'">
+                            <small>For wholesale deals or special pricing</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="product-in-stock">In Stock</label>
+                            <input type="hidden" name="inStock" value="0">
+                            <input type="checkbox" id="product-in-stock" name="inStock" value="1" checked>
+                            <small>Uncheck if product is out of stock</small>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="product-description">Description</label>
+                        <textarea id="product-description" name="description" rows="4" placeholder="Product description..."></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="product-images">Images</label>
+                        <input type="file" id="product-images" name="images[]" accept="image/*" multiple>
+                        <small>Upload multiple product images (JPEG, PNG, or WebP, max 8MB each). First image will be used as primary/thumbnail.</small>
+                        <div id="images-preview-container" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 12px; margin-top: 16px;"></div>
+                        <div id="existing-images-container" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 12px; margin-top: 16px;"></div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeProductModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Product</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/assets/js/shared-admin-auth.js"></script>
+<script src="/assets/js/admin-products.js"></script>

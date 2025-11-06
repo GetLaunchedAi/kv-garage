@@ -20,7 +20,6 @@ class SharedAdminAuth {
     }
 
     init() {
-        console.log('SharedAdminAuth initializing...');
         // On initialization, we only check if *a* token exists and is valid.
         // We do NOT clear the token here, even if expired.
         this.readAndValidateToken();
@@ -45,16 +44,13 @@ class SharedAdminAuth {
             if (now < expiry) {
                 this.authToken = token;
                 this.isAuthenticated = true;
-                console.log('✅ Auth state established from valid stored token.');
                 return true;
             } else {
                 // Token is expired, but we keep it in storage for now.
-                console.log('⚠️ Stored token is expired, but not cleared yet.');
                 // We could set this.authToken here if we wanted the expired token for a refresh call.
                 return false; 
             }
         }
-        console.log('ℹ️ No token found or expiry data missing.');
         return false;
     }
 
@@ -74,10 +70,8 @@ class SharedAdminAuth {
             
             this.authToken = mockToken;
             this.isAuthenticated = true;
-            console.log('✅ Admin login successful.');
             return { success: true, token: mockToken };
         } else {
-            console.log('❌ Login failed: Invalid credentials');
             return { success: false, error: 'Invalid credentials. Use admin@kvgarage.com / admin123' };
         }
     }
@@ -89,7 +83,6 @@ class SharedAdminAuth {
         this.isAuthenticated = false;
         this.authToken = null;
         this.clearStoredAuth();
-        console.log('✅ Admin logout successful and data cleared.');
     }
 
     /**
@@ -124,7 +117,6 @@ class SharedAdminAuth {
 if (!window.sharedAdminAuth) {
     window.sharedAdminAuth = new SharedAdminAuth();
 } else {
-    console.log('SharedAdminAuth instance already exists, re-validating...');
     window.sharedAdminAuth.readAndValidateToken();
 }
 

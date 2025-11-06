@@ -88,6 +88,11 @@ permalink: "admin/dashboard/"
                     <h4>Manage Packs</h4>
                     <p>Create, edit, and manage wholesale packs</p>
                 </a>
+                <a href="/admin/products/" class="action-card">
+                    <div class="action-icon">🛍️</div>
+                    <h4>Manage Products</h4>
+                    <p>Create, edit, and manage shop products</p>
+                </a>
                 <a href="/admin/orders/" class="action-card">
                     <div class="action-icon">📋</div>
                     <h4>View Orders</h4>
@@ -171,32 +176,18 @@ permalink: "admin/dashboard/"
 </div>
 
 <script src="/assets/js/shared-admin-auth.js"></script>
-<script>
-    console.log('shared-admin-auth.js loaded');
-    console.log('sharedAdminAuth available:', typeof window.sharedAdminAuth);
-</script>
-<script src="/assets/js/admin-dashboard.js" onerror="console.error('Failed to load admin-dashboard.js')"></script>
-<script>
-    console.log('admin-dashboard.js loaded');
-    console.log('AdminDashboard available after script load:', typeof AdminDashboard);
-</script>
+<script src="/assets/js/admin-dashboard.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        console.log('DOM loaded, creating AdminDashboard...');
-        console.log('AdminDashboard available:', typeof AdminDashboard);
-        
         // Wait for both AdminDashboard class and shared authentication system to be ready
         function waitForReady() {
             if (typeof AdminDashboard !== 'undefined' && window.sharedAdminAuth) {
-                console.log('Both AdminDashboard and SharedAdminAuth are ready, initializing...');
                 try {
                     window.adminDashboard = new AdminDashboard();
-                    console.log('AdminDashboard instance created:', window.adminDashboard);
                 } catch (error) {
-                    console.error('AdminDashboard initialization error:', error);
+                    // Error initializing AdminDashboard
                 }
             } else {
-                console.log('Waiting for AdminDashboard and SharedAdminAuth to be ready...');
                 setTimeout(waitForReady, 100);
             }
         }

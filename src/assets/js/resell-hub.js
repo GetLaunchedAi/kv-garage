@@ -61,14 +61,6 @@
 
       try {
         // TODO: Add email service integration here
-        // For now, we'll just log the data and proceed with download
-        console.log('Lead captured:', {
-          name: name,
-          email: email,
-          phone: phone || 'N/A',
-          timestamp: new Date().toISOString()
-        });
-
         // Simulate API call delay (remove when real API is connected)
         await new Promise(resolve => setTimeout(resolve, 1000));
 
@@ -80,7 +72,6 @@
         downloadPDF();
 
       } catch (error) {
-        console.error('Error submitting form:', error);
         alert('Something went wrong. Please try again.');
         
         // Reset button state

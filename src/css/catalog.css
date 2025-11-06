@@ -361,7 +361,7 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   font-weight: 600;
   font-size: 0.9375rem;
-  z-index: 10000;
+  z-index: 99999999 !important;
   transform: translateX(400px);
   opacity: 0;
   transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55), 
@@ -413,16 +413,244 @@ body.dark-mode .cart-toast {
 /* Mobile responsiveness for toast */
 @media (max-width: 768px) {
   .cart-toast {
-    bottom: 80px;
-    right: 10px;
-    left: 10px;
-    max-width: none;
-    transform: translateY(100px);
+    bottom: 20px;
+    right: 20px;
+    left: auto;
+    max-width: calc(100% - 40px);
+    transform: translateX(400px);
   }
   
   .cart-toast.show {
-    transform: translateY(0);
+    transform: translateX(0);
   }
+}
+
+/* ============================================ */
+/*          ENHANCED BUTTON STYLING             */
+/*          For Homepage Buttons                */
+/* ============================================ */
+
+/* Catalog Table Buttons - Enhanced */
+.catalog-btn {
+  font-size: 0.875rem !important;
+  font-weight: 600 !important;
+  padding: 0.625rem 1.25rem !important;
+  border-radius: 0.5rem !important;
+  border: none !important;
+  cursor: pointer !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  position: relative !important;
+  overflow: hidden !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+  min-width: 110px !important;
+}
+
+.catalog-btn:not(.disabled):hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+.catalog-btn:not(.disabled):active {
+  transform: translateY(0) !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+}
+
+.catalog-btn.disabled {
+  opacity: 0.6 !important;
+  cursor: not-allowed !important;
+  background-color: #9ca3af !important;
+  color: #fff !important;
+}
+
+/* Trust Signals Buttons - Enhanced */
+#trust-signals .cs-button-solid {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.5rem !important;
+  padding: 0.875rem 1.5rem !important;
+  border-radius: 0.5rem !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+  letter-spacing: 0.025em !important;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  border: 2px solid transparent !important;
+}
+
+#trust-signals .cs-button-solid svg {
+  transition: transform 0.3s ease !important;
+  flex-shrink: 0 !important;
+}
+
+#trust-signals .cs-button-solid:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.3) !important;
+}
+
+#trust-signals .cs-button-solid:hover svg {
+  transform: scale(1.1) !important;
+}
+
+#trust-signals .cs-button-solid:active {
+  transform: translateY(0) !important;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2) !important;
+}
+
+/* Catalog Download Buttons Container */
+.catalog-download {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  justify-content: center !important;
+  align-items: center !important;
+  gap: 1rem !important;
+  margin-top: 1.5rem !important;
+}
+
+.catalog-download .cs-button-solid {
+  margin: 0 !important;
+}
+
+/* Hero Section Buttons - Enhanced */
+#hero .cs-button-solid,
+#hero .cs-button-transparent {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  border-radius: 0.5rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.025em !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+}
+
+#hero .cs-button-solid:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15) !important;
+}
+
+#hero .cs-button-transparent:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.2) !important;
+}
+
+#hero .cs-button-solid:active,
+#hero .cs-button-transparent:active {
+  transform: translateY(0) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Side-by-Side Section Buttons - Enhanced */
+#sbs .button-solid,
+#sbs-r .button-solid {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  border-radius: 0.5rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.025em !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+}
+
+#sbs .button-solid:hover,
+#sbs-r .button-solid:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15) !important;
+}
+
+#sbs .button-solid:active,
+#sbs-r .button-solid:active {
+  transform: translateY(0) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* CTA Section Buttons - Enhanced */
+#cta .button-solid {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  border-radius: 0.5rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.025em !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+}
+
+#cta .button-solid:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15) !important;
+}
+
+#cta .button-solid:active {
+  transform: translateY(0) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Catalog Footer Button - Enhanced */
+.catalog-footer .cs-button-transparent {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  border-radius: 0.5rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.025em !important;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1) !important;
+}
+
+.catalog-footer .cs-button-transparent:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.2) !important;
+}
+
+.catalog-footer .cs-button-transparent:active {
+  transform: translateY(0) !important;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.1) !important;
+}
+
+/* Dark Mode Button Enhancements */
+body.dark-mode .catalog-btn:not(.disabled) {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+}
+
+body.dark-mode .catalog-btn:not(.disabled):hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+}
+
+body.dark-mode #trust-signals .cs-button-solid {
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3) !important;
+}
+
+body.dark-mode #trust-signals .cs-button-solid:hover {
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4) !important;
+}
+
+/* Mobile Responsive Button Adjustments */
+@media (max-width: 768px) {
+  .catalog-btn {
+    font-size: 0.75rem !important;
+    padding: 0.5rem 1rem !important;
+    min-width: 90px !important;
+  }
+
+  #trust-signals .cs-button-solid {
+    padding: 0.75rem 1.25rem !important;
+    font-size: 0.9rem !important;
+  }
+
+  .catalog-download {
+    flex-direction: column !important;
+    gap: 0.75rem !important;
+  }
+
+  .catalog-download .cs-button-solid {
+    width: 100% !important;
+    max-width: 280px !important;
+  }
+}
+
+/* Focus States for Accessibility */
+.catalog-btn:focus-visible,
+#trust-signals .cs-button-solid:focus-visible,
+#hero .cs-button-solid:focus-visible,
+#hero .cs-button-transparent:focus-visible,
+#sbs .button-solid:focus-visible,
+#sbs-r .button-solid:focus-visible,
+#cta .button-solid:focus-visible,
+.catalog-footer .cs-button-transparent:focus-visible {
+  outline: 2px solid var(--primary) !important;
+  outline-offset: 2px !important;
 }
 
 

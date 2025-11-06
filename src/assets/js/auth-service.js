@@ -31,7 +31,6 @@ class AuthService {
     
     // Mark as initialized
     this.initialized = true;
-    console.log('AuthService initialized');
   }
 
   checkExistingSession() {
@@ -98,7 +97,6 @@ class AuthService {
       
       return { success: true, user };
     } catch (error) {
-      console.error('Login error:', error);
       return { success: false, error: error.message };
     }
   }

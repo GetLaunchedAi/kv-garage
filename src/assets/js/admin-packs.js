@@ -20,15 +20,11 @@ class AdminPacks {
     }
 
     bindEvents() {
-        console.log('Binding events...');
         // Login form
         const loginForm = document.getElementById('admin-login-form');
-        console.log('Login form element:', loginForm);
         if (loginForm) {
             loginForm.addEventListener('submit', (e) => this.handleLogin(e));
-            console.log('Login form event listener added');
         } else {
-            console.error('Login form not found!');
         }
 
         // Logout button
@@ -113,7 +109,6 @@ class AdminPacks {
                     this.authToken = window.sharedAdminAuth.getToken();
                     this.showPacksSection();
                     await this.loadPacks();
-                    console.log('Admin packs: Auto-login successful');
                     return;
                 }
             }
@@ -121,7 +116,6 @@ class AdminPacks {
             // No valid stored token, show login form
             this.showLogin();
         } catch (error) {
-            console.error('Authentication check error:', error);
             this.showLogin();
         }
     }
@@ -155,7 +149,6 @@ class AdminPacks {
             }
 
         } catch (error) {
-            console.error('Login error:', error);
             this.showNotification(`Login failed: ${error.message}`, 'error');
         } finally {
             loginBtn.disabled = false;
@@ -210,7 +203,6 @@ class AdminPacks {
             }
 
         } catch (error) {
-            console.error('Error loading packs:', error);
             this.showNotification('Failed to load packs', 'error');
         }
     }
@@ -337,7 +329,6 @@ class AdminPacks {
             this.loadPacks();
 
         } catch (error) {
-            console.error('Delete pack error:', error);
             this.showNotification('Failed to delete pack', 'error');
         }
     }
@@ -400,11 +391,13 @@ class AdminPacks {
             const uploadData = new FormData();
             uploadData.append('pack_id', packId);
             uploadData.append('manifest', file);
-            console.log("uploadData", uploadData);
-            console.log("packId", packId);
-            console.log("file", file);
 
-            const response = await fetch(`/api/save-manifests.php`, {
+            // Detect if we're in development (localhost) and use PHP server, otherwise use relative path
+            const MANIFESTS_API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+                ? 'http://localhost:8000/api/save-manifests.php'
+                : '/api/save-manifests.php';
+
+            const response = await fetch(MANIFESTS_API_URL, {
                 method: 'POST',
                 body: uploadData
             });
@@ -419,7 +412,6 @@ class AdminPacks {
             }
 
         } catch (error) {
-            console.error('Manifest upload error:', error);
             this.showNotification(`Upload failed: ${error.message}`, 'error');
         } finally {
             submitBtn.disabled = false;
@@ -492,7 +484,7 @@ class AdminPacks {
             borderRadius: '8px',
             color: 'white',
             fontWeight: '600',
-            zIndex: '10000',
+            zIndex: '99999999',
             transform: 'translateX(100%)',
             transition: 'transform 0.3s ease',
             maxWidth: '400px',
@@ -548,20 +540,15 @@ window.openManifestUpload = function() {
 };
 // Make sure the instance is available globally
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('Admin script loading...');
     
     // Wait for shared authentication system to be ready
     function waitForSharedAuth() {
         if (window.sharedAdminAuth) {
-            console.log('SharedAdminAuth is ready, initializing AdminPacks...');
             try {
                 window.adminPacks = new AdminPacks();
-                console.log('Admin initialized successfully');
             } catch (error) {
-                console.error('Admin initialization error:', error);
             }
         } else {
-            console.log('Waiting for SharedAdminAuth to be ready...');
             setTimeout(waitForSharedAuth, 100);
         }
     }

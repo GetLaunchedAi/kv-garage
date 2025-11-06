@@ -1,0 +1,100 @@
+{% comment %}
+  Reusable Pack Card Template
+  Usage: {% include "pack-card.html", pack: packObject %}
+  
+  Required pack fields:
+  - name
+  - price
+  - image_url (or image)
+  - slug
+  - id
+  
+  Optional fields:
+  - description
+  - short_description
+  - type
+  - status
+  - available_quantity
+  - estimated_resale_value
+  - number_of_units
+  - deposit_price
+{% endcomment %}
+
+{% assign pack = include.pack %}
+{% assign packId = pack.id | default: pack.slug %}
+{% assign packName = pack.name | default: "Pack" %}
+{% assign packSlug = pack.slug | default: packId %}
+{% assign packImage = pack.image_url | default: pack.image | default: "/images/products/collage_1.png" %}
+{% assign packPrice = pack.price | default: 0 %}
+{% assign packType = pack.type | default: "standard" %}
+{% assign packStatus = pack.status | default: "available" %}
+{% assign availableQty = pack.available_quantity | default: 0 %}
+{% assign isLowStock = availableQty <= 5 %}
+{% assign isOutOfStock = availableQty == 0 %}
+{% assign isLimited = packStatus == "limited" and availableQty > 0 %}
+{% assign packDescription = pack.short_description | default: pack.description | default: "" %}
+{% assign resaleValue = pack.estimated_resale_value | default: "$0" %}
+{% assign units = pack.number_of_units | default: pack.units | default: 0 %}
+{% assign depositPrice = pack.deposit_price | default: 0 %}
+
+<div class="pack-card {% if isOutOfStock %}out-of-stock{% endif %}" data-pack-id="{{ packId }}">
+  <div class="pack-image">
+    <img src="{{ packImage }}" alt="{{ packName }}" loading="lazy">
+    {% if isLimited %}
+      <div class="stock-badge limited">Limited — {{ availableQty }} left</div>
+    {% endif %}
+    {% if isOutOfStock %}
+      <div class="stock-badge out-of-stock">Sold Out</div>
+    {% endif %}
+  </div>
+  
+  <div class="pack-content">
+    <div class="pack-header">
+      <h3 class="pack-name">{{ packName }}</h3>
+      <span class="pack-type">{{ packType | upcase }}</span>
+    </div>
+    
+    <div class="pack-pricing">
+      <div class="price-row">
+        <span class="price-label">Your Cost:</span>
+        <span class="price-value">${{ packPrice | default: 0 }}</span>
+      </div>
+      <div class="price-row">
+        <span class="price-label">Est. Resale:</span>
+        <span class="price-value profit">{{ resaleValue }}</span>
+      </div>
+    </div>
+    
+    {% if include.showStats != false %}
+    <div class="pack-stats">
+      <div class="stat">
+        <span class="stat-label">Units in Pack:</span>
+        <span class="stat-value">{{ units }}</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Available Now:</span>
+        <span class="stat-value available-count">{{ availableQty }}</span>
+      </div>
+    </div>
+    {% endif %}
+    
+    {% if packDescription != "" %}
+      <p class="pack-description">{{ packDescription }}</p>
+    {% endif %}
+    
+    <div class="pack-actions">
+      <a href="/pack/{{ packSlug }}/" class="pack-btn primary">View Details</a>
+      {% unless isOutOfStock %}
+        <button class="pack-btn buy add-to-cart" 
+                data-pack-id="{{ packId }}"
+                data-pack-name="{{ packName }}"
+                data-pack-price="{{ packPrice }}"
+                data-pack-image="{{ packImage }}"
+                data-pack-slug="{{ packSlug }}">
+          Buy Now (${{ packPrice | default: 0 }})
+        </button>
+      {% endunless %}
+    </div>
+  </div>
+</div>
+

@@ -5,7 +5,8 @@
 (function () {
   // ====== Config ======
   const DATA_URL = '/products.json'; // serve via Eleventy passthrough or your dev server
-  const PLACEHOLDER = '/images/placeholder.jpg';
+  // Use a transparent 1x1 pixel as placeholder instead of non-existent file
+  const PLACEHOLDER = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="1" height="1"%3E%3C/svg%3E';
 
   // ====== Helpers ======
   const $ = (sel, el = document) => el.querySelector(sel);
@@ -70,8 +71,58 @@
   if (crumbEl) crumbEl.textContent = title;
   if (descEl)  descEl.textContent  = p.description || '';
 
-  imgEl.src = p.image || PLACEHOLDER;
+  // Add status badge if available
+  const statusContainer = document.getElementById('pdpStatus');
+  if (statusContainer) {
+    statusContainer.innerHTML = '';
+    if (p.status) {
+      const statusClass = p.status.toLowerCase().replace(/\s+/g, '-');
+      const statusBadge = document.createElement('span');
+      statusBadge.className = `pdp__status-badge ${statusClass}`;
+      statusBadge.textContent = p.status;
+      statusContainer.appendChild(statusBadge);
+    }
+    // Add stock status badge
+    const isOutOfStock = p.inStock === false || p.price === 0;
+    if (!isOutOfStock && p.status !== 'In Stock') {
+      const stockBadge = document.createElement('span');
+      stockBadge.className = 'pdp__status-badge in-stock';
+      stockBadge.textContent = 'In Stock';
+      statusContainer.appendChild(stockBadge);
+    } else if (isOutOfStock) {
+      const stockBadge = document.createElement('span');
+      stockBadge.className = 'pdp__status-badge out-of-stock';
+      stockBadge.textContent = 'Out of Stock';
+      statusContainer.appendChild(stockBadge);
+    }
+  }
+
+  // Handle multiple images or single image
+  const images = Array.isArray(p.images) && p.images.length > 0 
+    ? p.images 
+    : (p.image ? [p.image] : [PLACEHOLDER]);
+  
+  // Set first image
+  imgEl.src = images[0];
   imgEl.alt = p.imageAlt || title;
+
+  // Initialize carousel if multiple images
+  if (images.length > 1) {
+    initImageCarousel(images, title);
+  } else {
+    // Single image - hide carousel controls
+    const carousel = $('#pdpCarousel');
+    if (carousel) {
+      const prevBtn = $('#carouselPrev');
+      const nextBtn = $('#carouselNext');
+      const dots = $('#carouselDots');
+      const thumbnails = $('#carouselThumbnails');
+      if (prevBtn) prevBtn.style.display = 'none';
+      if (nextBtn) nextBtn.style.display = 'none';
+      if (dots) dots.style.display = 'none';
+      if (thumbnails) thumbnails.style.display = 'none';
+    }
+  }
 
   // Mirror into banner if present
   const bt = document.getElementById('pdpBannerTitle');
@@ -140,20 +191,51 @@
 }
 
 
-  // Prepare the real Snipcart button: base price + deltas via custom fields
+  // Wire up the Add to Cart button for GlobalCart system
   function wireSnipcart(p) {
     const btn = $('#snipBtn');
+    if (!btn) return;
+
+    // Change button class from snipcart-add-item to add-to-cart for GlobalCart
+    btn.classList.remove('snipcart-add-item');
+    btn.classList.add('add-to-cart');
 
     // Build custom field definitions (with [+delta] so Snipcart computes price)
     const opts = Array.isArray(p.options) ? p.options : [];
     function syncButtonAttrs() {
-      btn.setAttribute('data-item-id', p.id || p.slug);
-      btn.setAttribute('data-item-name', p.title || p.name || p.slug);
-      btn.setAttribute('data-item-url', `/products/${encodeURIComponent(p.slug)}/`);
-      btn.setAttribute('data-item-image', p.image || '');
-      btn.setAttribute('data-item-description', p.description || '');
-      btn.setAttribute('data-item-price', Number(p.price ?? p.base_price ?? 0)); // base only
+      // Get primary image (first from images array or fallback to image field)
+      const primaryImage = (Array.isArray(p.images) && p.images.length > 0) 
+        ? p.images[0] 
+        : (p.image || '');
+      
+      // Calculate current price with selected options
+      let currentPrice = Number(p.price ?? p.base_price ?? 0);
+      const selects = document.querySelectorAll('#pdpOptions select');
+      selects.forEach(sel => {
+        const d = Number(sel.selectedOptions[0]?.dataset.delta || 0);
+        currentPrice += d;
+      });
 
+      // Set GlobalCart data attributes
+      const productId = p.id || p.slug || p.title?.toLowerCase().replace(/\s+/g, '-');
+      const productName = p.title || p.name || 'Product';
+      const productSlug = p.slug || productId;
+
+      btn.setAttribute('data-pack-id', productId);
+      btn.setAttribute('data-pack-name', productName);
+      btn.setAttribute('data-pack-price', currentPrice.toFixed(2));
+      btn.setAttribute('data-pack-image', primaryImage);
+      btn.setAttribute('data-pack-slug', productSlug);
+
+      // Keep Snipcart attributes for backward compatibility (if needed)
+      btn.setAttribute('data-item-id', productId);
+      btn.setAttribute('data-item-name', productName);
+      btn.setAttribute('data-item-url', `/products/${encodeURIComponent(productSlug)}/`);
+      btn.setAttribute('data-item-image', primaryImage);
+      btn.setAttribute('data-item-description', p.description || '');
+      btn.setAttribute('data-item-price', currentPrice.toFixed(2));
+
+      // Handle product options (if any)
       opts.forEach((opt, i) => {
         const idx = i + 1;
         const select = document.querySelector(`[data-opt-index="${i}"]`);
@@ -174,8 +256,175 @@
       });
     }
     // Keep attributes in sync with current selections
-    $('#pdpOptions').addEventListener('change', syncButtonAttrs);
+    const optionsForm = $('#pdpOptions');
+    if (optionsForm) {
+      optionsForm.addEventListener('change', syncButtonAttrs);
+    }
     syncButtonAttrs();
+  }
+
+  // Image carousel functionality
+  function initImageCarousel(images, title) {
+    const $ = (sel, el = document) => el.querySelector(sel);
+    const imgEl = $('#pdpImg');
+    const prevBtn = $('#carouselPrev');
+    const nextBtn = $('#carouselNext');
+    const dotsContainer = $('#carouselDots');
+    const thumbnailsContainer = $('#carouselThumbnails');
+    
+    if (!imgEl) return;
+    
+    let currentIndex = 0;
+    const htmlEsc = s => String(s ?? '').replace(/[&<>"']/g, c => (
+      ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c] || c)
+    ));
+    
+    // Show carousel controls
+    if (prevBtn) prevBtn.style.display = 'flex';
+    if (nextBtn) nextBtn.style.display = 'flex';
+    if (dotsContainer) dotsContainer.style.display = 'flex';
+    if (thumbnailsContainer) thumbnailsContainer.style.display = 'flex';
+    
+    // Create dots
+    if (dotsContainer) {
+      dotsContainer.innerHTML = images.map((_, i) => 
+        `<button class="pdp-carousel__dot ${i === 0 ? 'active' : ''}" 
+                 data-index="${i}" 
+                 aria-label="Go to image ${i + 1}"></button>`
+      ).join('');
+    }
+    
+    // Create thumbnails
+    if (thumbnailsContainer) {
+      thumbnailsContainer.innerHTML = images.map((img, i) => 
+        `<button class="pdp-carousel__thumbnail ${i === 0 ? 'active' : ''}" 
+                 data-index="${i}" 
+                 aria-label="View image ${i + 1}">
+          <img src="${htmlEsc(img)}" alt="${htmlEsc(title)} - Image ${i + 1}" loading="lazy">
+        </button>`
+      ).join('');
+    }
+    
+    function updateCarousel(index) {
+      if (index < 0 || index >= images.length) return;
+      currentIndex = index;
+      
+      // Update main image
+      imgEl.src = images[index];
+      imgEl.alt = `${title} - Image ${index + 1}`;
+      
+      // Update dots
+      if (dotsContainer) {
+        dotsContainer.querySelectorAll('.pdp-carousel__dot').forEach((dot, i) => {
+          dot.classList.toggle('active', i === index);
+        });
+      }
+      
+      // Update thumbnails
+      if (thumbnailsContainer) {
+        thumbnailsContainer.querySelectorAll('.pdp-carousel__thumbnail').forEach((thumb, i) => {
+          thumb.classList.toggle('active', i === index);
+        });
+      }
+      
+      // Update button states
+      if (prevBtn) prevBtn.disabled = index === 0;
+      if (nextBtn) nextBtn.disabled = index === images.length - 1;
+    }
+    
+    // Navigation handlers
+    if (prevBtn) {
+      prevBtn.addEventListener('click', () => {
+        if (currentIndex > 0) updateCarousel(currentIndex - 1);
+      });
+    }
+    
+    if (nextBtn) {
+      nextBtn.addEventListener('click', () => {
+        if (currentIndex < images.length - 1) updateCarousel(currentIndex + 1);
+      });
+    }
+    
+    // Dot navigation
+    if (dotsContainer) {
+      dotsContainer.addEventListener('click', (e) => {
+        const dot = e.target.closest('.pdp-carousel__dot');
+        if (dot) {
+          const index = parseInt(dot.dataset.index);
+          updateCarousel(index);
+        }
+      });
+    }
+    
+    // Thumbnail navigation
+    if (thumbnailsContainer) {
+      thumbnailsContainer.addEventListener('click', (e) => {
+        const thumb = e.target.closest('.pdp-carousel__thumbnail');
+        if (thumb) {
+          const index = parseInt(thumb.dataset.index);
+          updateCarousel(index);
+        }
+      });
+    }
+    
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      const carousel = $('#pdpCarousel');
+      if (!carousel || !carousel.offsetParent) return; // Not visible
+      
+      if (e.key === 'ArrowLeft' && currentIndex > 0) {
+        e.preventDefault();
+        updateCarousel(currentIndex - 1);
+      } else if (e.key === 'ArrowRight' && currentIndex < images.length - 1) {
+        e.preventDefault();
+        updateCarousel(currentIndex + 1);
+      }
+    });
+    
+    // Touch/swipe support for mobile
+    let touchStartX = 0;
+    let touchEndX = 0;
+    
+    imgEl.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+    
+    imgEl.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      handleSwipe();
+    }, { passive: true });
+    
+    function handleSwipe() {
+      const swipeThreshold = 50;
+      const diff = touchStartX - touchEndX;
+      
+      if (Math.abs(diff) > swipeThreshold) {
+        if (diff > 0 && currentIndex < images.length - 1) {
+          // Swipe left - next image
+          updateCarousel(currentIndex + 1);
+        } else if (diff < 0 && currentIndex > 0) {
+          // Swipe right - previous image
+          updateCarousel(currentIndex - 1);
+        }
+      }
+    }
+    
+    // Make main image clickable to open lightbox if available
+    if (window.ImageLightbox) {
+      imgEl.style.cursor = 'pointer';
+      imgEl.addEventListener('click', () => {
+        // Format images array for lightbox (array of {src, alt} objects)
+        const lightboxImages = images.map((img, idx) => ({
+          src: img,
+          alt: `${title} - Image ${idx + 1}`
+        }));
+        const lightbox = new window.ImageLightbox();
+        lightbox.open(images[currentIndex], `${title} - Image ${currentIndex + 1}`, lightboxImages);
+      });
+    }
+    
+    // Initialize button states
+    updateCarousel(0);
   }
 
   load();
@@ -255,7 +504,7 @@ function createAddonCard(caseProduct) {
   return `
     <div class="addon-card">
       <div class="addon-card__image">
-        <img src="${esc(caseProduct.image || '/images/placeholder.jpg')}" 
+        <img src="${esc(caseProduct.image || PLACEHOLDER)}" 
              alt="${esc(caseProduct.title || 'Phone case')}" 
              loading="lazy">
       </div>
@@ -288,6 +537,7 @@ function createAddonCard(caseProduct) {
   const btnPrev = root.querySelector('.rp-btn.prev');
   const btnNext = root.querySelector('.rp-btn.next');
   const DATA_URL = root.getAttribute('data-src') || '/products.json';
+  const PLACEHOLDER = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="1" height="1"%3E%3C/svg%3E';
 
 //   const IS_DEV = /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
   const IS_PROD = /^(www\.)?kvgarage\.com$/.test(location.hostname);
@@ -304,16 +554,33 @@ function createAddonCard(caseProduct) {
     ? `/products/${encodeURIComponent(p.slug || p.id)}/`
     : `/product/?slug=${encodeURIComponent(p.slug || p.id)}`;
 
-  const card = p => `
+  const card = p => {
+    const productId = p.id || p.slug || p.title?.toLowerCase().replace(/\s+/g, '-');
+    const productName = p.title || p.name || 'Product';
+    const productSlug = p.slug || productId;
+    const productPrice = p.price ?? p.base_price ?? 0;
+    const productImage = p.image || (Array.isArray(p.images) && p.images.length > 0 ? p.images[0] : PLACEHOLDER);
+    
+    return `
     <article class="rel-card">
       <a class="rel-card__img" href="${esc(productUrl(p))}">
-        <img src="${esc(p.image || '/images/placeholder.jpg')}"
-             alt="${esc(p.imageAlt || p.title || p.name || p.slug || 'Product')}" loading="lazy">
+        <img src="${esc(productImage)}"
+             alt="${esc(p.imageAlt || productName)}" loading="lazy">
       </a>
-      <h3 class="rel-card__title"><a href="${esc(productUrl(p))}">${esc(p.title || p.name || p.slug)}</a></h3>
-      <div class="rel-card__price">$${money(p.price ?? p.base_price ?? 0)}</div>
-      <a class="rel-card__cta" href="${esc(productUrl(p))}">Add to cart</a>
+      <div class="rel-card__content">
+        <h3 class="rel-card__title"><a href="${esc(productUrl(p))}">${esc(productName)}</a></h3>
+        <div class="rel-card__price">$${money(productPrice)}</div>
+        <button class="rel-card__cta add-to-cart" 
+                data-pack-id="${esc(productId)}"
+                data-pack-name="${esc(productName)}"
+                data-pack-price="${productPrice}"
+                data-pack-image="${esc(productImage)}"
+                data-pack-slug="${esc(productSlug)}">
+          Add to cart
+        </button>
+      </div>
     </article>`;
+  };
 
   function pickRelated(list, me, limit=20){
     const myId = me.slug || me.id;
@@ -363,10 +630,14 @@ function createAddonCard(caseProduct) {
       if (!me) { root.style.display = 'none'; return; }
       const rel = pickRelated(list, me, 20);
       if (!rel.length) { root.style.display = 'none'; return; }
-      track.innerHTML = rel.map(card).join('');
+      // Use ProductTemplates.relatedCard if available, otherwise fallback to local card function
+      if (window.ProductTemplates) {
+        track.innerHTML = rel.map(p => window.ProductTemplates.relatedCard(p)).join('');
+      } else {
+        track.innerHTML = rel.map(card).join('');
+      }
       requestAnimationFrame(updateButtons);
     } catch (e) {
-      console.error('Related products failed:', e);
       root.style.display = 'none';
     }
   })();

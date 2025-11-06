@@ -194,6 +194,9 @@ eleventyNavigation:
   </div> <!-- End filter-container -->
 </div>
 
+<!-- Load Product Templates -->
+<script src="/assets/js/templates/product-templates.js"></script>
+
 <script>
 (function () {
   const root = document.getElementById('catalog');
@@ -622,7 +625,7 @@ eleventyNavigation:
         const endIndex = startIndex + this.productsPerPage;
         const paginatedProducts = sortedProducts.slice(startIndex, endIndex);
 
-        root.innerHTML = paginatedProducts.map(card).join('');
+        root.innerHTML = paginatedProducts.map(p => window.ProductTemplates.card(p)).join('');
     } else {
         root.innerHTML = `<p class="muted" style="grid-column:1/-1; text-align: center; padding: 2rem;">No products match your filters.</p>`;
       }
@@ -819,72 +822,24 @@ eleventyNavigation:
         this.populateFilterOptions();
         this.applyFilters();
     } catch (err) {
-      console.error('Failed to load products:', err);
       root.innerHTML = `<p class="muted" style="grid-column:1/-1">Failed to load products.</p>`;
     }
     }
   }
 
-  // Product card function
-function card(p) {
-  const href = productUrl(p);
-  const img = p.image || '/images/placeholder.jpg';
-  const title = esc(p.title || p.name || 'Untitled');
-  const price = p.price ? money(p.price) : '0.00';
-  const currency = p.currency || 'USD';
-  const isOutOfStock = p.price === 0 || p.inStock === false;
-  const status = p.status || '';
-  const quantity = p.quantity || '';
+  // Product card function - now using ProductTemplates.card()
+  // The card function is now provided by product-templates.js
 
-  // Create status badge if status exists
-  const statusBadge = status
-    ? `<span class="status-badge status-${status.toLowerCase().replace(/\s+/g, '-')}">${status}</span>`
-    : '';
 
-  // Format price display
-  let priceDisplay = '';
-  if (isOutOfStock) {
-    priceDisplay = 'Out of Stock';
-  } else if (quantity && status === 'Wholesale Deal') {
-    priceDisplay = `$${price} ${currency} (${quantity})`;
-  } else {
-    priceDisplay = `$${price} ${currency}`;
-  }
-
-  // --- ✅ Build Add-to-Cart Button (with proper data attributes) ---
-  const addToCartButton = `
-    <button 
-      class="add-to-cart ${isOutOfStock ? 'disabled' : ''}" 
-      ${isOutOfStock ? 'disabled' : ''}
-      data-pack-id="${esc(p.id || p.slug || title)}"
-      data-pack-name="${esc(title)}"
-      data-pack-price="${parseFloat(p.price || 0)}"
-      data-pack-image="${esc(img)}"
-      data-pack-slug="${esc(p.slug || title.toLowerCase().replace(/\s+/g, '-'))}">
-      ${isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
-    </button>
-  `;
-
-  // --- ✅ Return the completed card ---
-  return `
-  <article class="card ${isOutOfStock ? 'out-of-stock' : ''}">
-    <div class="card__link">
-      <picture class="card__img">
-        <img src="${esc(img)}" alt="${esc(title)}" loading="lazy" decoding="async">
-        ${statusBadge}
-      </picture>
-    </div>
-    <div class="card__content">
-      <h3 class="card__title">
-        ${title}
-      </h3>
-      <p class="card__price">${priceDisplay}</p>
-      ${p.description ? `<p class="card__description">${esc(p.description)}</p>` : ''}
-      ${addToCartButton}
-    </div>
-  </article>`;
-}
-
+  // Prevent navigation when clicking "Add to Cart" button
+  document.addEventListener('click', (e) => {
+    const addToCartBtn = e.target.closest('.add-to-cart');
+    if (addToCartBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      // Add to cart functionality can be handled here if needed
+    }
+  }, true); // Use capture phase to catch before link navigation
 
   // Initialize the advanced filter system
   const filterSystem = new AdvancedFilterSystem();

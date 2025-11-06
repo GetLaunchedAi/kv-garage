@@ -242,7 +242,6 @@ class PartnerInvestManager {
                     }
                 }
             } catch (formError) {
-                console.log('Form action submission failed, trying API endpoint...', formError);
             }
 
             // Fallback to API endpoint
@@ -263,7 +262,6 @@ class PartnerInvestManager {
             }
 
         } catch (error) {
-            console.error('Error submitting partnership inquiry:', error);
             this.showNotification('Failed to submit your inquiry. Please try again or contact us directly at kvgarage@kvgarage.com', 'error');
         } finally {
             // Remove loading state
@@ -313,7 +311,7 @@ class PartnerInvestManager {
             borderRadius: '8px',
             color: 'white',
             fontWeight: '600',
-            zIndex: '10000',
+            zIndex: '99999999',
             transform: 'translateX(100%)',
             transition: 'transform 0.3s ease',
             maxWidth: '400px',

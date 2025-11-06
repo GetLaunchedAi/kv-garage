@@ -1,0 +1,45 @@
+{
+  "products": {
+    "card": {
+      "showDescription": true,
+      "showStatus": true,
+      "showCategory": false,
+      "imageAspectRatio": "4:3",
+      "cardSize": "default"
+    },
+    "list": {
+      "itemsPerRow": 4,
+      "showFilters": true,
+      "pagination": true
+    },
+    "detail": {
+      "showRelated": true,
+      "showAddons": true,
+      "maxRelated": 20
+    }
+  },
+  "packs": {
+    "card": {
+      "showDescription": true,
+      "showStats": true,
+      "showStockBadge": true,
+      "imageAspectRatio": "16:9"
+    },
+    "list": {
+      "itemsPerRow": 3,
+      "showFilters": false,
+      "pagination": false
+    },
+    "detail": {
+      "showManifest": true,
+      "showRelated": true,
+      "maxRelated": 4
+    }
+  },
+  "homepage": {
+    "packsDisplay": "table",
+    "maxPacks": 10,
+    "showFeatured": true
+  }
+}
+

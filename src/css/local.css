@@ -803,6 +803,10 @@ body.dark-mode #trust-signals .cs-text {
 
 .catalog-download {
     margin-top: 1.5rem;
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
 }
 
 .catalog-btn {
