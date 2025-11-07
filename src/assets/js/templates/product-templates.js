@@ -7,7 +7,6 @@
   'use strict';
 
   // Configuration
-  const IS_PROD = /^(www\.)?kvgarage\.com$/.test(location.hostname);
   const PLACEHOLDER = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="1" height="1"%3E%3C/svg%3E';
 
   // Utility functions
@@ -21,9 +20,7 @@
 
   const money = v => (Number(v) || 0).toFixed(2);
 
-  const productUrl = p => IS_PROD
-    ? `/products/${encodeURIComponent(p.slug || p.id)}/`
-    : `/product/?slug=${encodeURIComponent(p.slug || p.id)}`;
+  const productUrl = p => `/product/?slug=${encodeURIComponent(p.slug || p.id)}`;
 
   /**
    * Render product card HTML

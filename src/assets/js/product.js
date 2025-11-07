@@ -230,7 +230,7 @@
       // Keep Snipcart attributes for backward compatibility (if needed)
       btn.setAttribute('data-item-id', productId);
       btn.setAttribute('data-item-name', productName);
-      btn.setAttribute('data-item-url', `/products/${encodeURIComponent(productSlug)}/`);
+      btn.setAttribute('data-item-url', `/product/?slug=${encodeURIComponent(productSlug)}`);
       btn.setAttribute('data-item-image', primaryImage);
       btn.setAttribute('data-item-description', p.description || '');
       btn.setAttribute('data-item-price', currentPrice.toFixed(2));
@@ -495,11 +495,8 @@ function getRelevantPhoneCases(currentProduct, allProducts) {
 function createAddonCard(caseProduct) {
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const money = v => (Number(v) || 0).toFixed(2);
-  
-  const IS_PROD = /^(www\.)?kvgarage\.com$/.test(location.hostname);
-  const productUrl = IS_DEV
-    ? `/product/?slug=${encodeURIComponent(caseProduct.slug || caseProduct.id)}`
-    : `/products/${encodeURIComponent(caseProduct.slug || caseProduct.id)}/`;
+
+  const productUrl = `/product/?slug=${encodeURIComponent(caseProduct.slug || caseProduct.id)}`;
 
   return `
     <div class="addon-card">
@@ -540,8 +537,6 @@ function createAddonCard(caseProduct) {
   const PLACEHOLDER = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="1" height="1"%3E%3C/svg%3E';
 
 //   const IS_DEV = /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
-  const IS_PROD = /^(www\.)?kvgarage\.com$/.test(location.hostname);
-
   const esc = s => String(s ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const money = v => (Number(v)||0).toFixed(2);
   const currSlug = (() => {
@@ -550,9 +545,7 @@ function createAddonCard(caseProduct) {
     const seg = location.pathname.replace(/\/+$/,'').split('/').pop();
     return seg === 'product' ? '' : seg;
   })();
-  const productUrl = p => IS_PROD
-    ? `/products/${encodeURIComponent(p.slug || p.id)}/`
-    : `/product/?slug=${encodeURIComponent(p.slug || p.id)}`;
+  const productUrl = p => `/product/?slug=${encodeURIComponent(p.slug || p.id)}`;
 
   const card = p => {
     const productId = p.id || p.slug || p.title?.toLowerCase().replace(/\s+/g, '-');
