@@ -54,15 +54,30 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $scriptDir = __DIR__;
 $projectRoot = dirname($scriptDir);
 
+// Determine if we're in production (Cloudways)
+$isProduction = !in_array($_SERVER['HTTP_HOST'] ?? '', ['localhost', '127.0.0.1']) 
+    && strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') === false;
+
 // Try to find public directory (check multiple common locations)
+// On production, prioritize DOCUMENT_ROOT as it's most reliable
 $publicDir = null;
-$possiblePublicDirs = [
-    $projectRoot . '/public',
-    $projectRoot . '/public_html',  // Cloudways
-    $projectRoot . '/../public',
-    $projectRoot . '/../public_html',  // Cloudways
-    $_SERVER['DOCUMENT_ROOT'] ?? null,  // Web server document root
-];
+$possiblePublicDirs = [];
+
+if ($isProduction && !empty($_SERVER['DOCUMENT_ROOT'])) {
+    // Production: prioritize document root
+    $possiblePublicDirs[] = $_SERVER['DOCUMENT_ROOT'];
+    $possiblePublicDirs[] = $projectRoot . '/public_html';  // Cloudways
+    $possiblePublicDirs[] = $projectRoot . '/../public_html';  // Cloudways
+    $possiblePublicDirs[] = $projectRoot . '/public';
+    $possiblePublicDirs[] = $projectRoot . '/../public';
+} else {
+    // Development: check local paths first
+    $possiblePublicDirs[] = $projectRoot . '/public';
+    $possiblePublicDirs[] = $projectRoot . '/../public';
+    $possiblePublicDirs[] = $_SERVER['DOCUMENT_ROOT'] ?? null;
+    $possiblePublicDirs[] = $projectRoot . '/public_html';
+    $possiblePublicDirs[] = $projectRoot . '/../public_html';
+}
 
 foreach ($possiblePublicDirs as $dir) {
     if ($dir && is_dir($dir)) {
@@ -114,6 +129,30 @@ $productsFilePublic = $publicDir . '/products.json';
 $productsFileData = $dataDir . '/products.json';
 $productsFile = $productsFilePublic; // Primary file to read/write
 $uploadDir = $publicDir . '/images/products/';
+
+// Ensure upload directory exists with proper permissions
+// Create parent directories if they don't exist
+$imagesDir = $publicDir . '/images';
+$productsDir = $imagesDir . '/products';
+
+if (!is_dir($imagesDir)) {
+    @mkdir($imagesDir, 0775, true);
+    if (is_dir($imagesDir)) {
+        @chmod($imagesDir, 0775);
+    }
+}
+
+if (!is_dir($uploadDir)) {
+    $created = @mkdir($uploadDir, 0775, true);
+    if (!$created && !is_dir($uploadDir)) {
+        // Try with 0755 if 0775 fails
+        $created = @mkdir($uploadDir, 0755, true);
+    }
+    // Set permissions on the directory if it exists
+    if (is_dir($uploadDir)) {
+        @chmod($uploadDir, 0775);
+    }
+}
 
 // Helper function
 function slug($s) {
@@ -237,10 +276,32 @@ if (!empty($product['removed_images'])) {
 if (!empty($files['images']['name']) && is_array($files['images']['name'])) {
     $allowed = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
     $maxSize = 8 * 1024 * 1024;
-    @mkdir($uploadDir, 0755, true);
+    
+    // Ensure directory exists
+    if (!is_dir($uploadDir)) {
+        @mkdir($uploadDir, 0775, true);
+        if (is_dir($uploadDir)) {
+            @chmod($uploadDir, 0775);
+        }
+    }
+    
+    // Check if directory is writable
+    if (!is_writable($uploadDir)) {
+        http_response_code(500);
+        echo json_encode([
+            'ok' => false, 
+            'error' => 'Upload directory is not writable',
+            'upload_dir' => $uploadDir,
+            'public_dir' => $publicDir,
+            'document_root' => $_SERVER['DOCUMENT_ROOT'] ?? 'not set'
+        ]);
+        exit;
+    }
     
     for ($i = 0; $i < count($files['images']['name']); $i++) {
-        if ($files['images']['error'][$i] !== UPLOAD_ERR_OK) continue;
+        if ($files['images']['error'][$i] !== UPLOAD_ERR_OK) {
+            continue;
+        }
         if ($files['images']['size'][$i] > $maxSize) {
             http_response_code(413);
             echo json_encode(['ok' => false, 'error' => 'File too large']);
@@ -262,7 +323,29 @@ if (!empty($files['images']['name']) && is_array($files['images']['name'])) {
         
         if (move_uploaded_file($files['images']['tmp_name'][$i], $dest)) {
             @chmod($dest, 0644);
-            $newImages[] = '/images/products/' . $filename;
+            // Verify file was created and is readable
+            if (file_exists($dest) && is_readable($dest)) {
+                $newImages[] = '/images/products/' . $filename;
+            } else {
+                http_response_code(500);
+                echo json_encode([
+                    'ok' => false, 
+                    'error' => 'File uploaded but not accessible',
+                    'file' => $dest,
+                    'exists' => file_exists($dest),
+                    'readable' => is_readable($dest)
+                ]);
+                exit;
+            }
+        } else {
+            http_response_code(500);
+            echo json_encode([
+                'ok' => false, 
+                'error' => 'Failed to move uploaded file',
+                'dest' => $dest,
+                'upload_dir_writable' => is_writable($uploadDir)
+            ]);
+            exit;
         }
     }
 } elseif (!empty($files['image']['tmp_name']) && $files['image']['error'] === UPLOAD_ERR_OK) {
@@ -283,7 +366,27 @@ if (!empty($files['images']['name']) && is_array($files['images']['name'])) {
         exit;
     }
     
-    @mkdir($uploadDir, 0755, true);
+    // Ensure directory exists
+    if (!is_dir($uploadDir)) {
+        @mkdir($uploadDir, 0775, true);
+        if (is_dir($uploadDir)) {
+            @chmod($uploadDir, 0775);
+        }
+    }
+    
+    // Check if directory is writable
+    if (!is_writable($uploadDir)) {
+        http_response_code(500);
+        echo json_encode([
+            'ok' => false, 
+            'error' => 'Upload directory is not writable',
+            'upload_dir' => $uploadDir,
+            'public_dir' => $publicDir,
+            'document_root' => $_SERVER['DOCUMENT_ROOT'] ?? 'not set'
+        ]);
+        exit;
+    }
+    
     $slug = slug($product['title'] ?? 'product');
     $ext = $allowed[$mime];
     $filename = $slug . '_' . time() . '.' . $ext;
@@ -291,7 +394,29 @@ if (!empty($files['images']['name']) && is_array($files['images']['name'])) {
     
     if (move_uploaded_file($files['image']['tmp_name'], $dest)) {
         @chmod($dest, 0644);
-        $newImages[] = '/images/products/' . $filename;
+        // Verify file was created and is readable
+        if (file_exists($dest) && is_readable($dest)) {
+            $newImages[] = '/images/products/' . $filename;
+        } else {
+            http_response_code(500);
+            echo json_encode([
+                'ok' => false, 
+                'error' => 'File uploaded but not accessible',
+                'file' => $dest,
+                'exists' => file_exists($dest),
+                'readable' => is_readable($dest)
+            ]);
+            exit;
+        }
+    } else {
+        http_response_code(500);
+        echo json_encode([
+            'ok' => false, 
+            'error' => 'Failed to move uploaded file',
+            'dest' => $dest,
+            'upload_dir_writable' => is_writable($uploadDir)
+        ]);
+        exit;
     }
 }
 
@@ -403,7 +528,21 @@ if ($result1 === false && $result2 === false) {
         'php_error' => $error['message'] ?? 'Unknown error'
     ]);
 } else {
-    echo json_encode([
+    // Build debug info (only include in non-production or if there are new images)
+    $debugInfo = [];
+    if (!empty($newImages) || $isProduction) {
+        $debugInfo = [
+            'public_dir' => $publicDir,
+            'upload_dir' => $uploadDir,
+            'document_root' => $_SERVER['DOCUMENT_ROOT'] ?? 'not set',
+            'upload_dir_exists' => is_dir($uploadDir),
+            'upload_dir_writable' => is_writable($uploadDir),
+            'new_images_count' => count($newImages),
+            'new_images' => $newImages
+        ];
+    }
+    
+    $response = [
         'ok' => true,
         'message' => $idx !== null ? 'Updated' : 'Created',
         'product' => $product,
@@ -411,5 +550,12 @@ if ($result1 === false && $result2 === false) {
             'public' => $result1 !== false,
             'data' => $result2 !== false
         ]
-    ]);
+    ];
+    
+    // Add debug info if available
+    if (!empty($debugInfo)) {
+        $response['debug'] = $debugInfo;
+    }
+    
+    echo json_encode($response);
 }
