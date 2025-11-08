@@ -1,19 +1,14 @@
 /**
- * Admin Product Management System
- * Handles product creation, editing, and management
+ * Simple Admin Product Management
  */
 
-// Using JSON data instead of API
-const JSON_DATA_URL = '/data';
-// Detect if we're in development (localhost) and use PHP server, otherwise use relative path
-const PRODUCTS_API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+const PRODUCTS_API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? 'http://localhost:8000/api/save-products.php'
     : '/api/save-products.php';
 
 class AdminProducts {
     constructor() {
         this.isAuthenticated = false;
-        this.authToken = null;
         this.products = [];
         this.init();
     }
@@ -24,91 +19,73 @@ class AdminProducts {
     }
 
     bindEvents() {
-        // Login form
         const loginForm = document.getElementById('admin-login-form');
         if (loginForm) {
             loginForm.addEventListener('submit', (e) => this.handleLogin(e));
-        } else {
         }
 
-        // Logout button
         const logoutBtn = document.getElementById('logout-btn');
         if (logoutBtn) {
             logoutBtn.addEventListener('click', () => this.handleLogout());
         }
 
-        // Create product button
         const createBtn = document.getElementById('create-product-btn');
         if (createBtn) {
             createBtn.addEventListener('click', () => this.openCreateProductModal());
         }
 
-        // Refresh products
         const refreshBtn = document.getElementById('refresh-products');
         if (refreshBtn) {
             refreshBtn.addEventListener('click', () => this.loadProducts());
         }
 
-        // Search and filter
         const searchInput = document.getElementById('search-products');
         if (searchInput) {
-            searchInput.addEventListener('input', (e) => this.filterProducts());
+            searchInput.addEventListener('input', () => this.filterProducts());
         }
 
         const filterCategory = document.getElementById('filter-category');
         if (filterCategory) {
-            filterCategory.addEventListener('change', (e) => this.filterProducts());
+            filterCategory.addEventListener('change', () => this.filterProducts());
         }
 
         const filterStatus = document.getElementById('filter-status');
         if (filterStatus) {
-            filterStatus.addEventListener('change', (e) => this.filterProducts());
+            filterStatus.addEventListener('change', () => this.filterProducts());
         }
 
-        // Multiple images preview
         const imagesInput = document.getElementById('product-images');
         if (imagesInput) {
             imagesInput.addEventListener('change', (e) => this.handleImagesPreview(e));
         }
 
-        // Auto-generate slug from title
         const titleInput = document.getElementById('product-title');
         if (titleInput) {
             titleInput.addEventListener('input', (e) => this.generateSlugFromTitle(e));
         }
 
-        // Close modals on overlay click
         document.addEventListener('click', (e) => {
             if (e.target.classList.contains('modal-overlay')) {
                 this.closeProductModal();
             }
+            if (e.target.matches('[data-action]')) {
+                const action = e.target.getAttribute('data-action');
+                const productId = e.target.getAttribute('data-product-id');
+                const productSlug = e.target.getAttribute('data-product-slug');
+                if (action === 'edit') {
+                    this.editProduct(productId, productSlug);
+                } else if (action === 'delete') {
+                    this.deleteProduct(productId, productSlug);
+                }
+            }
         });
 
-        // Close modals on escape key
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 this.closeProductModal();
             }
         });
 
-        // Handle action buttons in products table
-        document.addEventListener('click', (e) => {
-            if (e.target.matches('[data-action]')) {
-                const action = e.target.getAttribute('data-action');
-                const productId = e.target.getAttribute('data-product-id');
-                
-                switch (action) {
-                    case 'edit':
-                        this.editProduct(productId);
-                        break;
-                    case 'delete':
-                        this.deleteProduct(productId);
-                        break;
-                }
-            }
-        });
-
-        // Handle product form submission
         const productForm = document.getElementById('product-form');
         if (productForm) {
             productForm.addEventListener('submit', (e) => this.handleProductSubmit(e));
@@ -117,21 +94,15 @@ class AdminProducts {
 
     async checkAuthentication() {
         try {
-            // Use shared authentication system with persistent login
             if (window.sharedAdminAuth) {
-                // Try to auto-login from stored token
                 const autoLoginSuccess = window.sharedAdminAuth.shouldAutoLogin();
-                
                 if (autoLoginSuccess && window.sharedAdminAuth.isLoggedIn()) {
                     this.isAuthenticated = true;
-                    this.authToken = window.sharedAdminAuth.getToken();
                     this.showProductsSection();
                     await this.loadProducts();
                     return;
                 }
             }
-            
-            // No valid stored token, show login form
             this.showLogin();
         } catch (error) {
             this.showLogin();
@@ -140,7 +111,6 @@ class AdminProducts {
 
     async handleLogin(e) {
         e.preventDefault();
-        
         const formData = new FormData(e.target);
         const email = formData.get('email');
         const password = formData.get('password');
@@ -150,12 +120,10 @@ class AdminProducts {
         loginBtn.textContent = 'Logging in...';
 
         try {
-            // Use shared authentication system
             if (window.sharedAdminAuth) {
                 const result = window.sharedAdminAuth.login(email, password);
                 if (result.success) {
                     this.isAuthenticated = true;
-                    this.authToken = result.token;
                     this.showProductsSection();
                     await this.loadProducts();
                     this.showNotification('Login successful!', 'success');
@@ -165,7 +133,6 @@ class AdminProducts {
             } else {
                 throw new Error('Authentication system not available');
             }
-
         } catch (error) {
             this.showNotification(`Login failed: ${error.message}`, 'error');
         } finally {
@@ -175,52 +142,46 @@ class AdminProducts {
     }
 
     handleLogout() {
-        // 1. Use shared authentication system to clear the storage
         if (window.sharedAdminAuth) {
             window.sharedAdminAuth.logout();
         }
-        
-        // 2. Clear AdminProducts' internal state
-        this.authToken = null;
         this.isAuthenticated = false;
-    
-        // 3. Update the UI
         this.showLogin();
         this.showNotification('Logged out successfully', 'info');
     }
 
     showLogin() {
-        document.getElementById('login-section').style.display = 'block';
-        document.getElementById('products-section').style.display = 'none';
+        const loginSection = document.getElementById('login-section');
+        const productsSection = document.getElementById('products-section');
+        if (loginSection) loginSection.style.display = 'block';
+        if (productsSection) productsSection.style.display = 'none';
     }
 
     showProductsSection() {
-        document.getElementById('login-section').style.display = 'none';
-        document.getElementById('products-section').style.display = 'block';
+        const loginSection = document.getElementById('login-section');
+        const productsSection = document.getElementById('products-section');
+        if (loginSection) loginSection.style.display = 'none';
+        if (productsSection) productsSection.style.display = 'block';
     }
 
     async loadProducts() {
         if (!this.isAuthenticated) return;
 
         try {
-            // Try loading from /data/products.json first, fallback to /products.json
-            let response = await fetch(`${JSON_DATA_URL}/products.json`);
+            const url = '/products.json?cb=' + Date.now();
+            const response = await fetch(url, { cache: 'no-store' });
+            
             if (!response.ok) {
-                response = await fetch('/products.json');
+                throw new Error(`Failed to load: ${response.status}`);
             }
 
-            if (response.ok) {
-                const data = await response.json();
-                this.products = Array.isArray(data) ? data : (data.products || []);
-                this.renderProducts();
-                this.updateStats();
-                this.populateCategoryFilter();
-            } else {
-                throw new Error('Failed to load products');
-            }
-
+            const data = await response.json();
+            this.products = Array.isArray(data) ? data : (data.products || []);
+            this.renderProducts();
+            this.updateStats();
+            this.populateCategoryFilter();
         } catch (error) {
-            this.showNotification('Failed to load products', 'error');
+            this.showNotification(`Failed to load products: ${error.message}`, 'error');
         }
     }
 
@@ -238,11 +199,13 @@ class AdminProducts {
             const statusClass = `status-${(product.status || '').toLowerCase().replace(/\s+/g, '-')}`;
             const imageUrl = product.image || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="1" height="1"%3E%3C/svg%3E';
             const inStock = product.inStock !== false && (product.price > 0);
-            const stockBadge = inStock ? '<span class="stock-badge in-stock">In Stock</span>' : '<span class="stock-badge out-of-stock">Out of Stock</span>';
+            const stockBadge = inStock 
+                ? '<span class="stock-badge in-stock">In Stock</span>' 
+                : '<span class="stock-badge out-of-stock">Out of Stock</span>';
             
             return `
                 <tr>
-                    <td><img src="${imageUrl}" alt="${product.title}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;"></td>
+                    <td><img src="${imageUrl}" alt="${this.escapeHtml(product.title)}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;"></td>
                     <td>${this.escapeHtml(product.title)}</td>
                     <td><span class="category-badge">${this.escapeHtml(product.category)}</span></td>
                     <td>$${parseFloat(product.price || 0).toFixed(2)}</td>
@@ -251,8 +214,12 @@ class AdminProducts {
                     <td>${stockBadge}</td>
                     <td>${createdDate}</td>
                     <td>
-                        <button class="btn btn-sm btn-primary" data-action="edit" data-product-id="${product.id}">Edit</button>
-                        <button class="btn btn-sm btn-danger" data-action="delete" data-product-id="${product.id}">Delete</button>
+                        <button class="btn btn-sm btn-primary" data-action="edit" 
+                                data-product-id="${this.escapeHtml(String(product.id ?? ''))}" 
+                                data-product-slug="${this.escapeHtml(product.slug || '')}">Edit</button>
+                        <button class="btn btn-sm btn-danger" data-action="delete" 
+                                data-product-id="${this.escapeHtml(String(product.id ?? ''))}" 
+                                data-product-slug="${this.escapeHtml(product.slug || '')}">Delete</button>
                     </td>
                 </tr>
             `;
@@ -299,45 +266,45 @@ class AdminProducts {
     }
 
     filterProducts() {
-        const searchTerm = document.getElementById('search-products')?.value.toLowerCase() || '';
+        const searchTerm = (document.getElementById('search-products')?.value || '').toLowerCase();
         const categoryFilter = document.getElementById('filter-category')?.value || '';
         const statusFilter = document.getElementById('filter-status')?.value || '';
 
-        let filteredProducts = this.products;
+        let filtered = this.products;
 
         if (searchTerm) {
-            filteredProducts = filteredProducts.filter(product => 
-                product.title?.toLowerCase().includes(searchTerm) ||
-                product.category?.toLowerCase().includes(searchTerm) ||
-                product.sku?.toLowerCase().includes(searchTerm) ||
-                product.slug?.toLowerCase().includes(searchTerm)
+            filtered = filtered.filter(p => 
+                (p.title || '').toLowerCase().includes(searchTerm) ||
+                (p.category || '').toLowerCase().includes(searchTerm) ||
+                (p.sku || '').toLowerCase().includes(searchTerm) ||
+                (p.slug || '').toLowerCase().includes(searchTerm)
             );
         }
 
         if (categoryFilter) {
-            filteredProducts = filteredProducts.filter(product => product.category === categoryFilter);
+            filtered = filtered.filter(p => p.category === categoryFilter);
         }
 
         if (statusFilter) {
-            filteredProducts = filteredProducts.filter(product => {
-                if (statusFilter === 'in_stock') {
-                    return product.inStock !== false && (product.price > 0);
-                } else if (statusFilter === 'out_of_stock') {
-                    return product.inStock === false || (product.price === 0);
-                }
-                return product.status === statusFilter;
-            });
+            if (statusFilter === 'in_stock') {
+                filtered = filtered.filter(p => p.inStock !== false && (p.price > 0));
+            } else if (statusFilter === 'out_of_stock') {
+                filtered = filtered.filter(p => p.inStock === false || (p.price === 0));
+            } else {
+                filtered = filtered.filter(p => p.status === statusFilter);
+            }
         }
 
-        // Temporarily store original products and show filtered results
-        const originalProducts = this.products;
-        this.products = filteredProducts;
+        const original = this.products;
+        this.products = filtered;
         this.renderProducts();
-        this.products = originalProducts;
+        this.products = original;
     }
 
     openCreateProductModal() {
         const modal = document.getElementById('product-modal');
+        if (!modal) return;
+
         document.getElementById('modal-title').textContent = 'Create New Product';
         document.getElementById('product-form').reset();
         document.getElementById('product-id').value = '';
@@ -348,16 +315,20 @@ class AdminProducts {
         document.body.style.overflow = 'hidden';
     }
 
-    editProduct(productId) {
-        const product = this.products.find(p => p.id == productId);
+    editProduct(productId, productSlug) {
+        const product = this.products.find(p => {
+            const matchesId = productId && p.id !== undefined && p.id !== null && String(p.id) === String(productId);
+            const matchesSlug = productSlug && p.slug && p.slug === productSlug;
+            return matchesId || matchesSlug;
+        });
+
         if (!product) {
             this.showNotification('Product not found', 'error');
             return;
         }
 
-        // Populate form
         document.getElementById('modal-title').textContent = 'Edit Product';
-        document.getElementById('product-id').value = product.id;
+        document.getElementById('product-id').value = product.id ?? '';
         document.getElementById('product-title').value = product.title || '';
         document.getElementById('product-category').value = product.category || '';
         document.getElementById('product-price').value = product.price || 0;
@@ -366,14 +337,12 @@ class AdminProducts {
         document.getElementById('product-sku').value = product.sku || product.slug || '';
         document.getElementById('product-status').value = product.status || 'New Arrival';
         document.getElementById('product-quantity').value = product.quantity || '';
-        // Set checkbox based on actual inStock value (explicitly check for false)
+
         const inStockCheckbox = document.getElementById('product-in-stock');
         if (inStockCheckbox) {
-            // Explicitly check if inStock is false, otherwise default to true
             inStockCheckbox.checked = product.inStock !== false;
         }
 
-        // Show existing images if any
         this.clearImagePreviews();
         const images = product.images || (product.image ? [product.image] : []);
         if (images.length > 0) {
@@ -386,61 +355,76 @@ class AdminProducts {
         document.body.style.overflow = 'hidden';
     }
 
-    async deleteProduct(productId) {
+    async deleteProduct(productId, productSlug) {
         if (!confirm('Are you sure you want to delete this product? This action cannot be undone.')) {
             return;
         }
 
         try {
-            // Remove from local array (for now, actual deletion would require API endpoint)
-            this.products = this.products.filter(p => p.id != productId);
-            this.renderProducts();
-            this.updateStats();
+            const formData = new FormData();
+            formData.append('action', 'delete');
+            if (productId) formData.append('id', productId);
+            if (productSlug) formData.append('slug', productSlug);
+
+            const response = await fetch(PRODUCTS_API_URL, {
+                method: 'POST',
+                body: formData,
+            });
+
+            const text = await response.text();
+            let result;
+            try {
+                result = JSON.parse(text);
+            } catch (parseError) {
+                console.error('Response text:', text);
+                throw new Error('Invalid server response: ' + text.substring(0, 100));
+            }
+
+            if (!response.ok || !result.ok) {
+                const errorMsg = result.error || 'Delete failed';
+                console.error('Delete error:', result);
+                throw new Error(errorMsg);
+            }
+
             this.showNotification('Product deleted successfully!', 'success');
-            // TODO: Implement actual API deletion endpoint if needed
+            await this.loadProducts();
         } catch (error) {
-            this.showNotification('Failed to delete product', 'error');
+            console.error('Delete error:', error);
+            this.showNotification(`Failed to delete: ${error.message}`, 'error');
         }
     }
 
     async handleProductSubmit(e) {
         e.preventDefault();
 
-        const form = e.currentTarget;
-        const formData = new FormData(form);
-
-        // Log to verify what's being sent
-        for (let [key, value] of formData.entries()) {
-        }
-
         try {
+            const formData = new FormData(e.currentTarget);
             const response = await fetch(PRODUCTS_API_URL, {
                 method: 'POST',
                 body: formData,
             });
 
-            // Always read as text first (helps debug)
             const text = await response.text();
-
             let result;
             try {
                 result = JSON.parse(text);
-            } catch (err) {
-                alert("❌ Invalid server response (check console).");
-                return;
+            } catch (parseError) {
+                console.error('Response text:', text);
+                throw new Error('Invalid server response: ' + text.substring(0, 100));
             }
 
-            if (!response.ok || !result.success) {
-                throw new Error(result.error || 'Failed to save product');
+            if (!response.ok || !result.ok) {
+                const errorMsg = result.error || 'Save failed';
+                console.error('Save error:', result);
+                throw new Error(errorMsg);
             }
 
-            this.showNotification(`✅ Product ${result.message?.includes('updated') ? 'updated' : 'created'} successfully!`, 'success');
-
-            // Refresh products list and close modal
+            this.showNotification(`Product ${result.message?.toLowerCase()} successfully!`, 'success');
             this.closeProductModal();
             await this.loadProducts();
-        } catch (err) {
-            this.showNotification(`❌ Failed to save product: ${err.message}`, 'error');
+        } catch (error) {
+            console.error('Submit error:', error);
+            this.showNotification(`Failed to save: ${error.message}`, 'error');
         }
     }
 
@@ -452,13 +436,11 @@ class AdminProducts {
         if (!container) return;
 
         files.forEach((file, index) => {
-            // Validate file size (8MB max)
             if (file.size > 8 * 1024 * 1024) {
                 this.showNotification(`File "${file.name}" is too large (max 8MB)`, 'error');
                 return;
             }
 
-            // Validate file type
             if (!file.type.startsWith('image/')) {
                 this.showNotification(`File "${file.name}" is not an image`, 'error');
                 return;
@@ -469,21 +451,17 @@ class AdminProducts {
                 const previewId = `preview-${Date.now()}-${index}`;
                 const previewItem = document.createElement('div');
                 previewItem.className = 'image-preview-item';
+                previewItem.id = previewId;
                 previewItem.dataset.fileIndex = index;
                 previewItem.innerHTML = `
                     <div style="position: relative; border-radius: 8px; overflow: hidden; border: 2px solid #e5e7eb; background: #f8fafc;">
-                        <img src="${event.target.result}" alt="Preview ${index + 1}" 
-                             style="width: 100%; height: 120px; object-fit: cover; display: block;">
-                        <button type="button" class="remove-image-btn" data-preview-id="${previewId}" 
-                                style="position: absolute; top: 4px; right: 4px; background: rgba(239, 68, 68, 0.9); color: white; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; font-size: 14px; line-height: 1; display: flex; align-items: center; justify-content: center;" 
-                                title="Remove image">×</button>
-                        <div style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.6); color: white; padding: 4px; font-size: 10px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${file.name}</div>
+                        <img src="${event.target.result}" alt="Preview" style="width: 100%; height: 120px; object-fit: cover; display: block;">
+                        <button type="button" class="remove-image-btn" style="position: absolute; top: 4px; right: 4px; background: rgba(239, 68, 68, 0.9); color: white; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; font-size: 14px; line-height: 1;">×</button>
+                        <div style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.6); color: white; padding: 4px; font-size: 10px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${this.escapeHtml(file.name)}</div>
                     </div>
                 `;
-                previewItem.id = previewId;
                 container.appendChild(previewItem);
 
-                // Add remove button handler
                 const removeBtn = previewItem.querySelector('.remove-image-btn');
                 if (removeBtn) {
                     removeBtn.addEventListener('click', () => this.removeImagePreview(previewId, index));
@@ -498,23 +476,19 @@ class AdminProducts {
         if (!container) return;
 
         container.innerHTML = '';
-        imageUrls.forEach((url, index) => {
+        imageUrls.forEach((url) => {
             const previewItem = document.createElement('div');
             previewItem.className = 'existing-image-item';
             previewItem.dataset.imageUrl = url;
             previewItem.innerHTML = `
                 <div style="position: relative; border-radius: 8px; overflow: hidden; border: 2px solid #10b981; background: #f8fafc;">
-                    <img src="${url}" alt="Existing image ${index + 1}" 
-                         style="width: 100%; height: 120px; object-fit: cover; display: block;">
-                    <button type="button" class="remove-existing-image-btn" data-image-url="${url}" 
-                            style="position: absolute; top: 4px; right: 4px; background: rgba(239, 68, 68, 0.9); color: white; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; font-size: 14px; line-height: 1; display: flex; align-items: center; justify-content: center;" 
-                            title="Remove image">×</button>
+                    <img src="${url}" alt="Existing" style="width: 100%; height: 120px; object-fit: cover; display: block;">
+                    <button type="button" class="remove-existing-image-btn" style="position: absolute; top: 4px; right: 4px; background: rgba(239, 68, 68, 0.9); color: white; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; font-size: 14px; line-height: 1;">×</button>
                     <div style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(16, 185, 129, 0.8); color: white; padding: 4px; font-size: 10px; text-align: center;">Existing</div>
                 </div>
             `;
             container.appendChild(previewItem);
 
-            // Add remove button handler
             const removeBtn = previewItem.querySelector('.remove-existing-image-btn');
             if (removeBtn) {
                 removeBtn.addEventListener('click', () => this.removeExistingImage(url));
@@ -528,7 +502,6 @@ class AdminProducts {
             previewItem.remove();
         }
 
-        // Remove file from input
         const input = document.getElementById('product-images');
         if (input && input.files) {
             const dt = new DataTransfer();
@@ -550,12 +523,20 @@ class AdminProducts {
             item.remove();
         }
 
-        // Store removed images in a hidden field for backend processing
-        let removedImages = JSON.parse(document.getElementById('removed-images')?.value || '[]');
+        let removedImages = [];
+        try {
+            const existing = document.getElementById('removed-images');
+            if (existing && existing.value) {
+                removedImages = JSON.parse(existing.value);
+            }
+        } catch (e) {
+            removedImages = [];
+        }
+
         if (!removedImages.includes(imageUrl)) {
             removedImages.push(imageUrl);
         }
-        
+
         let hiddenInput = document.getElementById('removed-images');
         if (!hiddenInput) {
             hiddenInput = document.createElement('input');
@@ -572,12 +553,10 @@ class AdminProducts {
         const existingContainer = document.getElementById('existing-images-container');
         if (previewContainer) previewContainer.innerHTML = '';
         if (existingContainer) existingContainer.innerHTML = '';
-        
-        // Clear removed images
+
         const removedInput = document.getElementById('removed-images');
         if (removedInput) removedInput.remove();
-        
-        // Clear file input
+
         const imagesInput = document.getElementById('product-images');
         if (imagesInput) imagesInput.value = '';
     }
@@ -586,7 +565,6 @@ class AdminProducts {
         const title = e.target.value;
         const slugInput = document.getElementById('product-sku');
         if (slugInput && !slugInput.value) {
-            // Auto-generate slug from title
             const slug = title.toLowerCase()
                 .replace(/[^a-z0-9]+/g, '-')
                 .replace(/(^-|-$)/g, '');
@@ -596,19 +574,19 @@ class AdminProducts {
 
     closeProductModal() {
         const modal = document.getElementById('product-modal');
-        if (modal) {
-            modal.classList.remove('show');
-            setTimeout(() => {
-                modal.style.display = 'none';
-                document.body.style.overflow = 'auto';
-                const form = document.getElementById('product-form');
-                if (form) {
-                    form.reset();
-                    document.getElementById('product-id').value = '';
-                    this.clearImagePreviews();
-                }
-            }, 300);
-        }
+        if (!modal) return;
+
+        modal.classList.remove('show');
+        setTimeout(() => {
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+            const form = document.getElementById('product-form');
+            if (form) {
+                form.reset();
+                document.getElementById('product-id').value = '';
+                this.clearImagePreviews();
+            }
+        }, 300);
     }
 
     showNotification(message, type = 'info') {
@@ -616,7 +594,13 @@ class AdminProducts {
         notification.className = `notification notification-${type}`;
         notification.textContent = message;
         
-        // Add styles
+        const colors = {
+            success: '#10b981',
+            error: '#ef4444',
+            warning: '#f59e0b',
+            info: '#3b82f6'
+        };
+
         Object.assign(notification.style, {
             position: 'fixed',
             top: '20px',
@@ -626,6 +610,7 @@ class AdminProducts {
             color: 'white',
             fontWeight: '600',
             zIndex: '99999999',
+            backgroundColor: colors[type] || colors.info,
             transform: 'translateX(100%)',
             transition: 'transform 0.3s ease',
             maxWidth: '400px',
@@ -633,23 +618,12 @@ class AdminProducts {
             boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
         });
 
-        // Set background color based on type
-        const colors = {
-            success: '#10b981',
-            error: '#ef4444',
-            warning: '#f59e0b',
-            info: '#3b82f6'
-        };
-        notification.style.backgroundColor = colors[type] || colors.info;
-
         document.body.appendChild(notification);
 
-        // Animate in
         setTimeout(() => {
             notification.style.transform = 'translateX(0)';
         }, 100);
 
-        // Auto remove
         setTimeout(() => {
             notification.style.transform = 'translateX(100%)';
             setTimeout(() => {
@@ -667,27 +641,23 @@ class AdminProducts {
     }
 }
 
-// Global functions for onclick handlers
 window.closeProductModal = function() {
     if (window.adminProducts) {
         window.adminProducts.closeProductModal();
     }
 };
 
-// Make sure the instance is available globally
 document.addEventListener('DOMContentLoaded', () => {
-    
-    // Wait for shared authentication system to be ready
     function waitForSharedAuth() {
         if (window.sharedAdminAuth) {
             try {
                 window.adminProducts = new AdminProducts();
             } catch (error) {
+                console.error('Failed to initialize AdminProducts:', error);
             }
         } else {
             setTimeout(waitForSharedAuth, 100);
         }
     }
-    
     waitForSharedAuth();
 });
