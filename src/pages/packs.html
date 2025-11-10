@@ -641,7 +641,7 @@ eleventyNavigation:
             </div>
             <div class="price-row">
               <span class="price-label">Est. Profit:</span>
-              <span class="price-value profit">${pack.estimated_resale_value.replace(/\$([0-9,]+)–\$([0-9,]+)/, (match, min, max) => `$${(parseFloat(min.replace(/,/g, '')) - pack.price).toFixed(0)}–$${(parseFloat(max.replace(/,/g, '')) - pack.price).toFixed(0)}`)}</span>
+              <span class="price-value profit">${pack.estimated_resale_value.replace(/\$([0-9,]+)[–-]\$([0-9,]+)/, (match, min, max) => `$${(parseFloat(min.replace(/,/g, '')) - pack.price).toFixed(0)}-$${(parseFloat(max.replace(/,/g, '')) - pack.price).toFixed(0)}`)}</span>
             </div>
           </div>
           
@@ -921,7 +921,7 @@ eleventyNavigation:
       document.getElementById('modal-pack-image').src = pack.image_url || '/images/products/collage_1.png';
       document.getElementById('modal-pack-price').textContent = `$${pack.price.toFixed(2)}`;
       document.getElementById('modal-pack-resale').textContent = pack.estimated_resale_value;
-      document.getElementById('modal-pack-profit').textContent = pack.estimated_resale_value.replace(/\$([0-9,]+)–\$([0-9,]+)/, (match, min, max) => `$${(parseFloat(min.replace(/,/g, '')) - pack.price).toFixed(0)}–$${(parseFloat(max.replace(/,/g, '')) - pack.price).toFixed(0)}`);
+      document.getElementById('modal-pack-profit').textContent = pack.estimated_resale_value.replace(/\$([0-9,]+)[–-]\$([0-9,]+)/, (match, min, max) => `$${(parseFloat(min.replace(/,/g, '')) - pack.price).toFixed(0)}-$${(parseFloat(max.replace(/,/g, '')) - pack.price).toFixed(0)}`);
       document.getElementById('modal-pack-units').textContent = `${pack.number_of_units}`;
       document.getElementById('modal-pack-available').textContent = pack.available_quantity;
       document.getElementById('modal-pack-description').textContent = pack.description;
@@ -1061,7 +1061,7 @@ eleventyNavigation:
         </div>
         <div class="summary-item">
           <span class="summary-label">Est. Profit:</span>
-          <span class="summary-value profit">${estimatedValue.replace(/\$([0-9,]+)–\$([0-9,]+)/, (match, min, max) => `$${(parseFloat(min.replace(/,/g, '')) - totalCost).toFixed(0)}–$${(parseFloat(max.replace(/,/g, '')) - totalCost).toFixed(0)}`)}</span>
+          <span class="summary-value profit">${estimatedValue.replace(/\$([0-9,]+)[–-]\$([0-9,]+)/, (match, min, max) => `$${(parseFloat(min.replace(/,/g, '')) - totalCost).toFixed(0)}-$${(parseFloat(max.replace(/,/g, '')) - totalCost).toFixed(0)}`)}</span>
         </div>
       </div>
       

@@ -189,13 +189,13 @@
       const availableQty = pack.available_quantity || 0;
       const isOutOfStock = availableQty === 0;
 
-      // Calculate estimated profit from resale value range
-      const profitMatch = resaleValue.match(/\$([0-9,]+)–\$([0-9,]+)/);
+      // Calculate estimated profit from resale value range (handle both en dash and hyphen)
+      const profitMatch = resaleValue.match(/\$([0-9,]+)[–-]\$([0-9,]+)/);
       let profitDisplay = '';
       if (profitMatch) {
         const min = parseFloat(profitMatch[1].replace(/,/g, '')) - packPrice;
         const max = parseFloat(profitMatch[2].replace(/,/g, '')) - packPrice;
-        profitDisplay = `$${money(min)}–$${money(max)}`;
+        profitDisplay = `$${money(min)}-$${money(max)}`;
       }
 
       return `

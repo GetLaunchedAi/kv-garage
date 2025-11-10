@@ -157,9 +157,21 @@ permalink: "admin/packs/"
                     
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="estimated-resale">Estimated Resale Value *</label>
-                            <input type="number" id="estimated-resale" name="estimated_resale_value" step="0.01" min="0" required>
+                            <label for="min-resale">Min Resale Value *</label>
+                            <div style="position: relative;">
+                                <span style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #6b7280; font-weight: 600;">$</span>
+                                <input type="number" id="min-resale" name="min_resale_value" step="0.01" min="0" required style="padding-left: 25px;">
+                            </div>
                         </div>
+                        <div class="form-group">
+                            <label for="max-resale">Max Resale Value *</label>
+                            <div style="position: relative;">
+                                <span style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #6b7280; font-weight: 600;">$</span>
+                                <input type="number" id="max-resale" name="max_resale_value" step="0.01" min="0" required style="padding-left: 25px;">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
                         <div class="form-group">
                             <label for="number-units">Number of Units *</label>
                             <input type="number" id="number-units" name="number_of_units" min="1" required>
@@ -259,8 +271,29 @@ document.addEventListener('DOMContentLoaded', () => {
    async function handleCustomPackSubmit(e) {
   e.preventDefault();
   const form = e.currentTarget;
+  
+  // Get min and max resale values
+  const minResale = parseFloat(document.getElementById('min-resale').value);
+  const maxResale = parseFloat(document.getElementById('max-resale').value);
+  
+  // Validate max >= min
+  if (maxResale < minResale) {
+    alert('❌ Max Resale Value must be greater than or equal to Min Resale Value');
+    return;
+  }
+  
+  // Format as "$X,XXX-$Y,YYY" with hyphen
+  const formatCurrency = (value) => {
+    return '$' + value.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+  };
+  const estimatedResaleValue = `${formatCurrency(minResale)}-${formatCurrency(maxResale)}`;
+  
+  // Create form data and add formatted range
   const formData = new FormData(form);
-
+  formData.set('estimated_resale_value', estimatedResaleValue);
+  // Remove min/max from form data as they're not needed in the backend
+  formData.delete('min_resale_value');
+  formData.delete('max_resale_value');
 
   // --- Do NOT JSON.stringify here ---
   // Send as multipart/form-data (PHP can read $_POST + $_FILES)

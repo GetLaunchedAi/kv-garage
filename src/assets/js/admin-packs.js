@@ -315,6 +315,24 @@ class AdminPacks {
             return;
         }
 
+        // Parse estimated_resale_value range (handle both en dash and hyphen)
+        let minResale = 0;
+        let maxResale = 0;
+        if (pack.estimated_resale_value) {
+            // Match both en dash (–) and hyphen (-)
+            const rangeMatch = pack.estimated_resale_value.match(/\$([0-9,]+)[–-]\$([0-9,]+)/);
+            if (rangeMatch) {
+                minResale = parseFloat(rangeMatch[1].replace(/,/g, ''));
+                maxResale = parseFloat(rangeMatch[2].replace(/,/g, ''));
+            } else {
+                // If it's a single value, use it for both
+                const singleMatch = pack.estimated_resale_value.match(/\$([0-9,]+)/);
+                if (singleMatch) {
+                    minResale = maxResale = parseFloat(singleMatch[1].replace(/,/g, ''));
+                }
+            }
+        }
+
         // Populate form
         document.getElementById('modal-title').textContent = 'Edit Pack';
         document.getElementById('pack-id').value = pack.id;
@@ -322,7 +340,8 @@ class AdminPacks {
         document.getElementById('pack-type').value = pack.type;
         document.getElementById('pack-price').value = pack.price;
         document.getElementById('deposit-price').value = pack.deposit_price || '';
-        document.getElementById('estimated-resale').value = pack.estimated_resale_value;
+        document.getElementById('min-resale').value = minResale;
+        document.getElementById('max-resale').value = maxResale;
         document.getElementById('number-units').value = pack.number_of_units;
         document.getElementById('pack-description').value = pack.description || '';
         document.getElementById('image-preview').src = pack.image_url || '';
@@ -381,7 +400,7 @@ class AdminPacks {
             
             // Wait a brief moment to ensure file system has updated, then refresh
             await new Promise(resolve => setTimeout(resolve, 300));
-            await this.loadPacks(true);
+            await this.loadPacks(false); // Don't show refresh notification after delete
 
         } catch (error) {
             this.showNotification(`Failed to delete pack: ${error.message}`, 'error');
