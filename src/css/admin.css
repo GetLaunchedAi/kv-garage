@@ -449,7 +449,8 @@ body.dark-mode .upload-form small {
     display: flex;
     gap: 1rem;
     justify-content: flex-end;
-    margin-top: 2rem;
+    /* margin-top: 2rem; */
+    padding: 1rem 3rem 2rem;
 }
 
 /* Custom Requests */

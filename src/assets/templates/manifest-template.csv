@@ -1,0 +1,4 @@
+sku,item_name,product_name,quantity,condition,condition_grade,estimated_value,category,brand,notes
+CASE-001,iPhone 12/13 Clear Case,iPhone 12/13 Clear Case,25,new,new,12.00,Phone Cases,Generic,"Clear protective case, various colors"
+CBL-001,Lightning Cable 6ft,Lightning Cable 6ft,40,new,new,15.00,Cables,Generic,"MFi certified, braided cable"
+PROT-001,iPhone 12/13 Screen Protector,iPhone 12/13 Screen Protector,30,new,new,8.00,Screen Protectors,Generic,"Tempered glass, 9H hardness"

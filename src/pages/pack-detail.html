@@ -201,13 +201,20 @@ class PackDetailSystem {
         throw new Error('Manifest not found for this pack');
       }
       
+      // Normalize numeric values (ensure they're numbers, not strings)
+      const normalizedItems = manifestItems.map(item => ({
+        ...item,
+        quantity: parseInt(item.quantity) || 0,
+        estimated_value: parseFloat(item.estimated_value) || 0
+      }));
+      
       // Create manifest object in the expected format
       const manifest = {
         pack_name: this.packs.find(p => p.id == this.packId)?.name || 'Pack',
-        total_items: manifestItems.length,
-        total_estimated_value: manifestItems.reduce((sum, item) => sum + (item.estimated_value * item.quantity), 0),
+        total_items: normalizedItems.length,
+        total_estimated_value: normalizedItems.reduce((sum, item) => sum + (item.estimated_value * item.quantity), 0),
         created_date: new Date().toISOString(),
-        items: manifestItems
+        items: normalizedItems
       };
       
       this.renderManifest(manifest);
@@ -501,12 +508,19 @@ class PackDetailSystem {
         return;
       }
       
+      // Normalize numeric values (ensure they're numbers, not strings)
+      const normalizedItems = manifestItems.map(item => ({
+        ...item,
+        quantity: parseInt(item.quantity) || 0,
+        estimated_value: parseFloat(item.estimated_value) || 0
+      }));
+      
       // Create manifest data in the expected format
       const manifestData = {
-        manifest: manifestItems,
+        manifest: normalizedItems,
         totals: {
-          total_items: manifestItems.length,
-          total_estimated_value: manifestItems.reduce((sum, item) => sum + (item.estimated_value * item.quantity), 0)
+          total_items: normalizedItems.length,
+          total_estimated_value: normalizedItems.reduce((sum, item) => sum + (item.estimated_value * item.quantity), 0)
         },
         pack: this.packs.find(p => p.id == packId) || { price: 0 }
       };

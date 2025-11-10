@@ -40,7 +40,17 @@ class CatalogPDFGenerator {
       // Load manifests data
       const manifestsResponse = await fetch("/data/manifests.json");
       const manifestsData = await manifestsResponse.json();
-      this.manifests = manifestsData.manifests || {};
+      const rawManifests = manifestsData.manifests || {};
+      
+      // Normalize numeric values in all manifests
+      this.manifests = {};
+      for (const [packId, items] of Object.entries(rawManifests)) {
+        this.manifests[packId] = items.map(item => ({
+          ...item,
+          quantity: parseInt(item.quantity) || 0,
+          estimated_value: parseFloat(item.estimated_value) || 0
+        }));
+      }
 
     } catch (error) {
       throw error;

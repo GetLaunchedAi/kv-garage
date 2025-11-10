@@ -803,9 +803,9 @@ eleventyNavigation:
         `;
         
         categoryItems.forEach(item => {
-          const quantity = item.quantity || 1;
+          const quantity = parseInt(item.quantity) || 1;
           const condition = (item.condition || 'new').toLowerCase();
-          const estimatedValue = item.estimated_value || 0;
+          const estimatedValue = parseFloat(item.estimated_value) || 0;
           const itemName = item.item_name || item.product_name || 'Unknown Item';
           const sku = item.sku || 'N/A';
           const brand = item.brand || 'Generic';
@@ -1039,8 +1039,15 @@ eleventyNavigation:
     populateManifestModal(pack, manifestItems) {
       document.getElementById('manifest-modal-title').textContent = `${pack.name} Manifest`;
 
+      // Normalize numeric values (ensure they're numbers, not strings)
+      const normalizedItems = manifestItems.map(item => ({
+        ...item,
+        quantity: parseInt(item.quantity) || 0,
+        estimated_value: parseFloat(item.estimated_value) || 0
+      }));
+
       // Calculate totals
-      const totalItems = manifestItems.reduce((sum, item) => sum + item.quantity, 0);
+      const totalItems = normalizedItems.reduce((sum, item) => sum + item.quantity, 0);
       const totalCost = pack.price;
       const estimatedValue = pack.estimated_resale_value; // Now a string range
 
@@ -1077,7 +1084,7 @@ eleventyNavigation:
             </tr>
           </thead>
           <tbody>
-            ${manifestItems.map(item => `
+            ${normalizedItems.map(item => `
               <tr>
                 <td>${item.sku}</td>
                 <td>${item.item_name}</td>
@@ -1192,14 +1199,21 @@ eleventyNavigation:
           throw new Error('No manifest data found for this pack');
         }
         
+        // Normalize numeric values (ensure they're numbers, not strings)
+        const normalizedItems = manifestItems.map(item => ({
+          ...item,
+          quantity: parseInt(item.quantity) || 0,
+          estimated_value: parseFloat(item.estimated_value) || 0
+        }));
+        
         // Create manifest object in the expected format
         const pack = this.packs.find(p => p.id == packId);
         const manifest = {
           pack_name: pack?.name || 'Pack',
-          total_items: manifestItems.length,
-          total_estimated_value: manifestItems.reduce((sum, item) => sum + (item.estimated_value * item.quantity), 0),
+          total_items: normalizedItems.length,
+          total_estimated_value: normalizedItems.reduce((sum, item) => sum + (item.estimated_value * item.quantity), 0),
           created_date: new Date().toISOString(),
-          items: manifestItems
+          items: normalizedItems
         };
         
         this.renderManifest(manifest);

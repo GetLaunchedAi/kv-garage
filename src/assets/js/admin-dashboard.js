@@ -540,6 +540,15 @@ window.closeManifestUpload = function() {
     }
 };
 
+window.downloadManifestTemplate = function() {
+    const link = document.createElement('a');
+    link.href = '/assets/templates/manifest-template.csv';
+    link.download = 'manifest-template.csv';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+};
+
 window.openCustomPackRequests = function() {
     if (window.adminDashboard) {
         window.adminDashboard.openCustomPackRequests();

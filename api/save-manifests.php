@@ -1,4 +1,12 @@
 <?php
+// Suppress error display and capture errors
+error_reporting(E_ALL);
+ini_set('display_errors', 0);
+ini_set('log_errors', 1);
+
+// Start output buffering to catch any unexpected output
+ob_start();
+
 // Handle CORS for local development and production
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 $allowedOrigins = [
@@ -23,8 +31,10 @@ if (in_array($origin, $allowedOrigins)) {
         header('Access-Control-Allow-Origin: *');
     } else {
         // In production, reject unknown origins
+        ob_clean();
         http_response_code(403);
         echo json_encode(['error' => 'Origin not allowed']);
+        ob_end_flush();
         exit;
     }
 }
@@ -36,19 +46,111 @@ header('Access-Control-Max-Age: 86400'); // 24 hours
 
 // Handle preflight OPTIONS request
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    ob_clean();
     http_response_code(200);
+    ob_end_flush();
     exit;
 }
 
 header('Content-Type: application/json');
 
-// ✅ Correct relative path for your setup
-$manifestFile = __DIR__ . '/../data/manifests.json';
-$packsFile = __DIR__ . '/../data/packs.json';
+// Find project root and public directory (same logic as save-packs.php)
+$scriptDir = __DIR__;
+$projectRoot = dirname($scriptDir);
+
+// Determine if we're in production (Cloudways)
+$isProduction = !in_array($_SERVER['HTTP_HOST'] ?? '', ['localhost', '127.0.0.1']) 
+    && strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') === false;
+
+// Try to find public directory (check multiple common locations)
+$publicDir = null;
+$possiblePublicDirs = [];
+
+if ($isProduction && !empty($_SERVER['DOCUMENT_ROOT'])) {
+    // Production: prioritize document root
+    $possiblePublicDirs[] = $_SERVER['DOCUMENT_ROOT'];
+    $possiblePublicDirs[] = $projectRoot . '/public_html';  // Cloudways
+    $possiblePublicDirs[] = $projectRoot . '/../public_html';  // Cloudways
+    $possiblePublicDirs[] = $projectRoot . '/public';
+    $possiblePublicDirs[] = $projectRoot . '/../public';
+} else {
+    // Development: check local paths first
+    $possiblePublicDirs[] = $projectRoot . '/public';
+    $possiblePublicDirs[] = $projectRoot . '/../public';
+    $possiblePublicDirs[] = $_SERVER['DOCUMENT_ROOT'] ?? null;
+    $possiblePublicDirs[] = $projectRoot . '/public_html';
+    $possiblePublicDirs[] = $projectRoot . '/../public_html';
+}
+
+foreach ($possiblePublicDirs as $dir) {
+    if ($dir && is_dir($dir)) {
+        $publicDir = realpath($dir);
+        break;
+    }
+}
+
+// Fallback: if script is in /api, try parent/public or parent/public_html
+if (!$publicDir) {
+    if (basename($projectRoot) === 'api') {
+        $parent = dirname($projectRoot);
+        if (is_dir($parent . '/public')) {
+            $publicDir = realpath($parent . '/public');
+        } elseif (is_dir($parent . '/public_html')) {
+            $publicDir = realpath($parent . '/public_html');
+        }
+    }
+}
+
+// Final fallback
+if (!$publicDir) {
+    $publicDir = $projectRoot;
+}
+
+// Find data directory
+$dataDir = null;
+$possibleDataDirs = [
+    $publicDir . '/data',
+    $projectRoot . '/public/data',
+    $projectRoot . '/../public/data',
+    $projectRoot . '/data',
+    $projectRoot . '/../data',
+];
+
+foreach ($possibleDataDirs as $dir) {
+    if (is_dir($dir)) {
+        $dataDir = realpath($dir);
+        break;
+    }
+}
+
+// Fallback for data directory
+if (!$dataDir) {
+    $dataDir = $publicDir . '/data';
+}
+
+// Set file paths
+$manifestFileData = $dataDir . '/manifests.json';
+$manifestFilePublic = $publicDir . '/data/manifests.json';
+$manifestFile = file_exists($manifestFilePublic) ? $manifestFilePublic : $manifestFileData;
+
+$packsFileData = $dataDir . '/packs.json';
+$packsFilePublic = $publicDir . '/data/packs.json';
+$packsFile = file_exists($packsFilePublic) ? $packsFilePublic : $packsFileData;
+
+// Ensure data directory exists with proper permissions
+$dataDirPath = dirname($manifestFile);
+if (!is_dir($dataDirPath)) {
+    @mkdir($dataDirPath, 0775, true);
+    if (is_dir($dataDirPath)) {
+        @chmod($dataDirPath, 0775);
+    }
+}
 
 // --- Ensure manifests.json exists ---
 if (!file_exists($manifestFile)) {
-    file_put_contents($manifestFile, json_encode(['manifests' => new stdClass()], JSON_PRETTY_PRINT));
+    $initialData = ['manifests' => []];
+    @mkdir(dirname($manifestFile), 0775, true);
+    file_put_contents($manifestFile, json_encode($initialData, JSON_PRETTY_PRINT));
 }
 $manifestsData = json_decode(file_get_contents($manifestFile), true);
 if (!isset($manifestsData['manifests']) || !is_array($manifestsData['manifests'])) {
@@ -57,33 +159,43 @@ if (!isset($manifestsData['manifests']) || !is_array($manifestsData['manifests']
 
 // --- Load packs.json and verify ID exists ---
 if (!file_exists($packsFile)) {
+    ob_clean();
     http_response_code(500);
-    echo json_encode(['error' => 'packs.json not found']);
+    echo json_encode(['error' => 'packs.json not found at: ' . $packsFile]);
+    ob_end_flush();
     exit;
 }
 $packsData = json_decode(file_get_contents($packsFile), true);
 if (!isset($packsData['packs']) || !is_array($packsData['packs'])) {
+    ob_clean();
     http_response_code(500);
     echo json_encode(['error' => 'Invalid packs.json structure']);
+    ob_end_flush();
     exit;
 }
 
 // --- Validate request ---
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    ob_clean();
     http_response_code(405);
     echo json_encode(['error' => 'Method not allowed']);
+    ob_end_flush();
     exit;
 }
 
 if (!isset($_POST['pack_id']) || $_POST['pack_id'] === '') {
+    ob_clean();
     http_response_code(400);
     echo json_encode(['error' => 'Missing pack_id']);
+    ob_end_flush();
     exit;
 }
 
 if (!isset($_FILES['manifest']) || $_FILES['manifest']['error'] !== UPLOAD_ERR_OK) {
+    ob_clean();
     http_response_code(400);
     echo json_encode(['error' => 'Missing manifest file or upload error']);
+    ob_end_flush();
     exit;
 }
 
@@ -98,23 +210,29 @@ foreach ($packsData['packs'] as $pack) {
     }
 }
 if (!$packExists) {
+    ob_clean();
     http_response_code(404);
     echo json_encode(['error' => 'Pack ID ' . $packId . ' not found in packs.json']);
+    ob_end_flush();
     exit;
 }
 
 // --- Parse uploaded CSV ---
 $tmpPath = $_FILES['manifest']['tmp_name'];
 if (!($csv = fopen($tmpPath, 'r'))) {
+    ob_clean();
     http_response_code(400);
     echo json_encode(['error' => 'Failed to read uploaded CSV']);
+    ob_end_flush();
     exit;
 }
 
 $headers = fgetcsv($csv);
 if (!$headers) {
+    ob_clean();
     http_response_code(400);
     echo json_encode(['error' => 'Invalid CSV (missing header row)']);
+    ob_end_flush();
     exit;
 }
 
@@ -169,13 +287,44 @@ fclose($csv);
 // --- Write to manifests.json ---
 $manifestsData['manifests'][(string)$packId] = $items;
 
-if (!is_writable(dirname($manifestFile))) {
+// Ensure directory exists and is writable
+$manifestDir = dirname($manifestFile);
+if (!is_dir($manifestDir)) {
+    @mkdir($manifestDir, 0775, true);
+    if (is_dir($manifestDir)) {
+        @chmod($manifestDir, 0775);
+    }
+}
+
+if (!is_writable($manifestDir)) {
+    ob_clean();
     http_response_code(500);
-    echo json_encode(['error' => 'Directory not writable: ' . dirname($manifestFile)]);
+    echo json_encode(['error' => 'Directory not writable: ' . $manifestDir]);
+    ob_end_flush();
     exit;
 }
 
-if (file_put_contents($manifestFile, json_encode($manifestsData, JSON_PRETTY_PRINT))) {
+// Save to both locations if they differ
+$jsonData = json_encode($manifestsData, JSON_PRETTY_PRINT);
+if ($jsonData === false) {
+    ob_clean();
+    http_response_code(500);
+    echo json_encode(['error' => 'JSON encode failed: ' . json_last_error_msg()]);
+    ob_end_flush();
+    exit;
+}
+
+// Clear any output that might have been generated
+ob_clean();
+
+// Save to primary location
+if (file_put_contents($manifestFile, $jsonData)) {
+    // Also save to data directory if different
+    if ($manifestFileData !== $manifestFile && is_dir(dirname($manifestFileData))) {
+        @mkdir(dirname($manifestFileData), 0775, true);
+        file_put_contents($manifestFileData, $jsonData);
+    }
+    
     echo json_encode([
         'success' => true,
         'message' => 'Manifest uploaded successfully',
@@ -183,7 +332,11 @@ if (file_put_contents($manifestFile, json_encode($manifestsData, JSON_PRETTY_PRI
         'item_count' => count($items)
     ]);
 } else {
+    ob_clean();
     http_response_code(500);
-    echo json_encode(['error' => 'Failed to save manifests.json']);
+    echo json_encode(['error' => 'Failed to save manifests.json to: ' . $manifestFile]);
 }
+
+// End output buffering and send output
+ob_end_flush();
 ?>

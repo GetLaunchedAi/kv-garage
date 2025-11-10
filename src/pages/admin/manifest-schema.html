@@ -1,0 +1,196 @@
+---
+layout: "base.html"
+description: "Manifest Product Schema Documentation - CSV format guide for uploading pack manifests"
+metaTitle: "Manifest Schema Documentation | KV Garage Admin"
+tagTitle: "Manifest Schema"
+title: "Manifest Schema Documentation"
+preloadImg: "/images/about_banner_img.png"
+preloadCSS: "/css/admin.css"
+permalink: "admin/manifest-schema/"
+---
+
+<section id="int-hero">
+    <h1 id="home-h">Manifest Schema Documentation</h1>
+    {% image './src/images/banner_img.png', 'vinyl floors', '', 'lazy',
+    '(max-width: 850px) 850px, 1920px'%}
+</section>
+
+<div class="admin-dashboard-container" style="max-width: 1200px; margin: 40px auto; padding: 20px;">
+    <div class="schema-documentation">
+        <div style="margin-bottom: 30px;">
+            <h2>Product Manifest CSV Format</h2>
+            <p>This document describes the required format for CSV manifest files used to upload product data for packs.</p>
+            <div style="margin-top: 20px;">
+                <a href="/assets/templates/manifest-template.csv" download="manifest-template.csv" class="btn btn-primary" style="display: inline-block;">
+                    📥 Download CSV Template
+                </a>
+                <a href="/api/product-schema.php" target="_blank" class="btn btn-secondary" style="display: inline-block; margin-left: 10px;">
+                    📋 View JSON Schema
+                </a>
+            </div>
+        </div>
+
+        <div class="schema-section" style="margin-bottom: 40px;">
+            <h3>Required Fields</h3>
+            <div class="field-table" style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+                    <thead>
+                        <tr style="background-color: #f5f5f5;">
+                            <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Field Name</th>
+                            <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Type</th>
+                            <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Description</th>
+                            <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Example</th>
+                            <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Aliases</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="padding: 12px; border: 1px solid #ddd;"><strong>sku</strong></td>
+                            <td style="padding: 12px; border: 1px solid #ddd;">string</td>
+                            <td style="padding: 12px; border: 1px solid #ddd;">Stock Keeping Unit - Unique identifier for the product</td>
+                            <td style="padding: 12px; border: 1px solid #ddd;"><code>CASE-001</code></td>
+                            <td style="padding: 12px; border: 1px solid #ddd;">-</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 12px; border: 1px solid #ddd;"><strong>item_name</strong></td>
+                            <td style="padding: 12px; border: 1px solid #ddd;">string</td>
+                            <td style="padding: 12px; border: 1px solid #ddd;">Name of the product/item</td>
+                            <td style="padding: 12px; border: 1px solid #ddd;"><code>iPhone 12/13 Clear Case</code></td>
+                            <td style="padding: 12px; border: 1px solid #ddd;">product_name, name, product</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 12px; border: 1px solid #ddd;"><strong>quantity</strong></td>
+                            <td style="padding: 12px; border: 1px solid #ddd;">integer</td>
+                            <td style="padding: 12px; border: 1px solid #ddd;">Number of units available</td>
+                            <td style="padding: 12px; border: 1px solid #ddd;"><code>25</code></td>
+                            <td style="padding: 12px; border: 1px solid #ddd;">qty, qnty, amount</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 12px; border: 1px solid #ddd;"><strong>estimated_value</strong></td>
+                            <td style="padding: 12px; border: 1px solid #ddd;">float</td>
+                            <td style="padding: 12px; border: 1px solid #ddd;">Estimated resale value per unit in USD</td>
+                            <td style="padding: 12px; border: 1px solid #ddd;"><code>12.00</code></td>
+                            <td style="padding: 12px; border: 1px solid #ddd;">value, est_value, est_val, price, est</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="schema-section" style="margin-bottom: 40px;">
+            <h3>Optional Fields</h3>
+            <div class="field-table" style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+                    <thead>
+                        <tr style="background-color: #f5f5f5;">
+                            <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Field Name</th>
+                            <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Type</th>
+                            <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Description</th>
+                            <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Default</th>
+                            <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Example</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="padding: 12px; border: 1px solid #ddd;">product_name</td>
+                            <td style="padding: 12px; border: 1px solid #ddd;">string</td>
+                            <td style="padding: 12px; border: 1px solid #ddd;">Product name (alias for item_name)</td>
+                            <td style="padding: 12px; border: 1px solid #ddd;">-</td>
+                            <td style="padding: 12px; border: 1px solid #ddd;"><code>iPhone 12/13 Clear Case</code></td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 12px; border: 1px solid #ddd;">condition</td>
+                            <td style="padding: 12px; border: 1px solid #ddd;">string</td>
+                            <td style="padding: 12px; border: 1px solid #ddd;">Condition of the product</td>
+                            <td style="padding: 12px; border: 1px solid #ddd;"><code>new</code></td>
+                            <td style="padding: 12px; border: 1px solid #ddd;"><code>new</code></td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 12px; border: 1px solid #ddd;">condition_grade</td>
+                            <td style="padding: 12px; border: 1px solid #ddd;">string</td>
+                            <td style="padding: 12px; border: 1px solid #ddd;">Grade of condition (e.g., excellent, good, fair)</td>
+                            <td style="padding: 12px; border: 1px solid #ddd;">-</td>
+                            <td style="padding: 12px; border: 1px solid #ddd;"><code>new</code></td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 12px; border: 1px solid #ddd;">category</td>
+                            <td style="padding: 12px; border: 1px solid #ddd;">string</td>
+                            <td style="padding: 12px; border: 1px solid #ddd;">Product category</td>
+                            <td style="padding: 12px; border: 1px solid #ddd;"><code>Misc</code></td>
+                            <td style="padding: 12px; border: 1px solid #ddd;"><code>Phone Cases</code></td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 12px; border: 1px solid #ddd;">brand</td>
+                            <td style="padding: 12px; border: 1px solid #ddd;">string</td>
+                            <td style="padding: 12px; border: 1px solid #ddd;">Brand name of the product</td>
+                            <td style="padding: 12px; border: 1px solid #ddd;"><code>Generic</code></td>
+                            <td style="padding: 12px; border: 1px solid #ddd;"><code>Generic</code></td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 12px; border: 1px solid #ddd;">notes</td>
+                            <td style="padding: 12px; border: 1px solid #ddd;">string</td>
+                            <td style="padding: 12px; border: 1px solid #ddd;">Additional notes or description about the product</td>
+                            <td style="padding: 12px; border: 1px solid #ddd;"><code>""</code></td>
+                            <td style="padding: 12px; border: 1px solid #ddd;"><code>"Clear protective case, various colors"</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="schema-section" style="margin-bottom: 40px;">
+            <h3>CSV Format Specifications</h3>
+            <ul style="line-height: 1.8;">
+                <li><strong>Delimiter:</strong> Comma (,)</li>
+                <li><strong>Enclosure:</strong> Double quotes (")</li>
+                <li><strong>Encoding:</strong> UTF-8</li>
+                <li><strong>Header Row:</strong> Required (first row must contain field names)</li>
+                <li><strong>Fields with commas:</strong> Must be enclosed in double quotes</li>
+            </ul>
+        </div>
+
+        <div class="schema-section" style="margin-bottom: 40px;">
+            <h3>Example CSV</h3>
+            <pre style="background-color: #f5f5f5; padding: 20px; border-radius: 4px; overflow-x: auto;"><code>sku,item_name,product_name,quantity,condition,condition_grade,estimated_value,category,brand,notes
+CASE-001,iPhone 12/13 Clear Case,iPhone 12/13 Clear Case,25,new,new,12.00,Phone Cases,Generic,"Clear protective case, various colors"
+CBL-001,Lightning Cable 6ft,Lightning Cable 6ft,40,new,new,15.00,Cables,Generic,"MFi certified, braided cable"
+PROT-001,iPhone 12/13 Screen Protector,iPhone 12/13 Screen Protector,30,new,new,8.00,Screen Protectors,Generic,"Tempered glass, 9H hardness"</code></pre>
+        </div>
+
+        <div class="schema-section" style="margin-bottom: 40px;">
+            <h3>Validation Rules</h3>
+            <ul style="line-height: 1.8;">
+                <li><strong>sku:</strong> Required, must be unique within the manifest</li>
+                <li><strong>item_name:</strong> Required, string</li>
+                <li><strong>quantity:</strong> Required, must be a positive integer</li>
+                <li><strong>estimated_value:</strong> Required, must be a positive number (float)</li>
+                <li><strong>condition:</strong> Optional, defaults to "new" if not provided</li>
+                <li><strong>category:</strong> Optional, defaults to "Misc" if not provided</li>
+                <li><strong>brand:</strong> Optional, defaults to "Generic" if not provided</li>
+                <li><strong>notes:</strong> Optional, can contain commas (will be quoted in CSV)</li>
+            </ul>
+        </div>
+
+        <div class="schema-section" style="margin-bottom: 40px;">
+            <h3>Field Aliases</h3>
+            <p>The system accepts alternative field names (aliases) for convenience:</p>
+            <ul style="line-height: 1.8;">
+                <li><strong>item_name</strong> can also be: <code>product_name</code>, <code>name</code>, <code>product</code></li>
+                <li><strong>quantity</strong> can also be: <code>qty</code>, <code>qnty</code>, <code>amount</code></li>
+                <li><strong>estimated_value</strong> can also be: <code>value</code>, <code>est_value</code>, <code>est_val</code>, <code>price</code>, <code>est</code></li>
+            </ul>
+        </div>
+
+        <div class="schema-section" style="background-color: #e8f4f8; padding: 20px; border-radius: 4px; border-left: 4px solid #2196F3;">
+            <h3 style="margin-top: 0;">💡 Tips</h3>
+            <ul style="line-height: 1.8; margin-bottom: 0;">
+                <li>Use the downloadable template to ensure correct formatting</li>
+                <li>Fields containing commas must be enclosed in double quotes</li>
+                <li>All numeric fields (quantity, estimated_value) should not include currency symbols</li>
+                <li>The CSV file must have a header row with field names</li>
+                <li>Empty rows will be ignored during processing</li>
+            </ul>
+        </div>
+    </div>
+</div>
+

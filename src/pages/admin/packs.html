@@ -239,6 +239,11 @@ permalink: "admin/packs/"
                         <label for="manifest-file">Manifest File (CSV)</label>
                         <input type="file" id="manifest-file" name="manifest" accept=".csv" required>
                         <small>Upload a CSV file with columns: sku, item_name, quantity, condition, notes</small>
+                        <div style="margin-top: 8px;">
+                            <button type="button" class="btn btn-link" onclick="downloadManifestTemplate()" style="padding: 4px 0; font-size: 0.875rem; text-decoration: underline;">
+                                📥 Download CSV Template
+                            </button>
+                        </div>
                     </div>
                     <div class="form-actions">
                         <button type="button" class="btn btn-secondary" onclick="closeManifestUpload()">Cancel</button>

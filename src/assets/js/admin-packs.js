@@ -477,16 +477,31 @@ class AdminPacks {
                 body: uploadData
             });
 
-            const data = await response.json();
+            // Get response text first to handle non-JSON responses
+            const responseText = await response.text();
+            let data;
+            
+            try {
+                data = JSON.parse(responseText);
+            } catch (parseError) {
+                // If response is not valid JSON, it might contain PHP errors
+                console.error('Invalid JSON response:', responseText);
+                throw new Error('Server returned an invalid response. Please check the server logs.');
+            }
 
-            if (response.ok) {
+            if (response.ok && data.success) {
                 this.showNotification('Manifest uploaded successfully!', 'success');
                 this.closeManifestUpload();
+                // Refresh packs data if needed
+                if (this.loadPacks) {
+                    this.loadPacks();
+                }
             } else {
-                throw new Error(data.error || 'Upload failed');
+                throw new Error(data.error || data.message || 'Upload failed');
             }
 
         } catch (error) {
+            console.error('Manifest upload error:', error);
             this.showNotification(`Upload failed: ${error.message}`, 'error');
         } finally {
             submitBtn.disabled = false;
@@ -612,6 +627,15 @@ window.openManifestUpload = function() {
     if (window.adminPacks) {
         window.adminPacks.openManifestUpload();
     }
+};
+
+window.downloadManifestTemplate = function() {
+    const link = document.createElement('a');
+    link.href = '/assets/templates/manifest-template.csv';
+    link.download = 'manifest-template.csv';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 };
 // Make sure the instance is available globally
 document.addEventListener('DOMContentLoaded', () => {
