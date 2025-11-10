@@ -13,6 +13,7 @@ class AdminDashboard {
     constructor() {
         this.isAuthenticated = false;
         this.authToken = null;
+        this.packs = []; // Store packs for manifest upload
         this.init();
     }
 
@@ -161,14 +162,14 @@ class AdminDashboard {
             const response = await fetch(`${JSON_DATA_URL}/packs.json`);
             if (response.ok) {
                 const data = await response.json();
-                const packs = data.packs || [];
+                this.packs = data.packs || []; // Store packs for manifest upload
                 
                 // Create mock dashboard stats
                 const stats = {
-                    total_packs: packs.length,
-                    active_packs: packs.filter(p => p.status === 'active').length,
-                    total_revenue: packs.reduce((sum, p) => sum + (p.price || 0), 0),
-                    total_units: packs.reduce((sum, p) => sum + (p.units || 0), 0),
+                    total_packs: this.packs.length,
+                    active_packs: this.packs.filter(p => p.status === 'active').length,
+                    total_revenue: this.packs.reduce((sum, p) => sum + (p.price || 0), 0),
+                    total_units: this.packs.reduce((sum, p) => sum + (p.units || 0), 0),
                     total_orders: Math.floor(Math.random() * 50) + 10, // Mock orders
                     pending_orders: Math.floor(Math.random() * 5) + 1 // Mock pending orders
                 };
@@ -268,43 +269,82 @@ class AdminDashboard {
     async openManifestUpload() {
         if (!this.isAuthenticated) return;
 
+        // Always ensure packs are loaded (reload to get latest data)
         try {
-            // Load packs for selection
-            const response = await fetch(`${API_BASE_URL}/packs`, {
-                headers: {
-                    'Authorization': `Bearer ${this.authToken}`
-                }
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                this.populatePackSelect(data.packs || data.data);
+            const response = await fetch(`${JSON_DATA_URL}/packs.json`);
+            if (!response.ok) {
+                throw new Error(`Failed to fetch packs: ${response.status}`);
             }
-
-            document.getElementById('manifest-upload-modal').classList.add('show');
-            document.body.style.overflow = 'hidden';
-
+            const data = await response.json();
+            this.packs = data.packs || [];
+            
+            if (this.packs.length === 0) {
+                this.showNotification('No packs available. Please create a pack first.', 'error');
+                return;
+            }
         } catch (error) {
-            this.showNotification('Failed to load packs', 'error');
+            console.error('Error loading packs:', error);
+            this.showNotification('Failed to load packs: ' + error.message, 'error');
+            return;
         }
+
+        // Populate pack select
+        const select = document.getElementById('pack-select');
+        if (!select) {
+            console.error('Pack select element not found');
+            this.showNotification('Error: Pack select element not found', 'error');
+            return;
+        }
+
+        this.populatePackSelect(this.packs);
+
+        const modal = document.getElementById('manifest-upload-modal');
+        if (!modal) {
+            console.error('Manifest upload modal not found');
+            return;
+        }
+        
+        modal.style.display = 'flex';
+        setTimeout(() => modal.classList.add('show'), 10);
+        document.body.style.overflow = 'hidden';
     }
 
-    populatePackSelect(packs) {
+    populatePackSelect(packs, selectedPackId = null) {
         const select = document.getElementById('pack-select');
+        if (!select) {
+            console.error('Pack select element not found in populatePackSelect');
+            return;
+        }
+        
         select.innerHTML = '<option value="">Choose a pack...</option>';
+        
+        if (!packs || packs.length === 0) {
+            console.warn('No packs provided to populatePackSelect');
+            return;
+        }
         
         packs.forEach(pack => {
             const option = document.createElement('option');
             option.value = pack.id;
-            option.textContent = pack.name;
+            option.textContent = pack.name || `Pack ${pack.id}`;
+            if (selectedPackId && pack.id === selectedPackId) {
+                option.selected = true;
+            }
             select.appendChild(option);
         });
+        
+        console.log(`Populated pack select with ${packs.length} packs`);
     }
 
     closeManifestUpload() {
-        document.getElementById('manifest-upload-modal').classList.remove('show');
-        document.body.style.overflow = 'auto';
-        document.getElementById('manifest-upload-form').reset();
+        const modal = document.getElementById('manifest-upload-modal');
+        modal.classList.remove('show');
+        setTimeout(() => {
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+            const form = document.getElementById('manifest-upload-form');
+            if (form) form.reset();
+        }, 300);
     }
 
     async handleManifestUpload(e) {
@@ -330,25 +370,39 @@ class AdminDashboard {
             uploadData.append('pack_id', packId);
             uploadData.append('manifest', file);
 
-            const response = await fetch(`${API_BASE_URL}/admin/manifests/upload`, {
+            // Detect if we're in development (localhost) and use PHP server, otherwise use relative path
+            const MANIFESTS_API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+                ? 'http://localhost:8000/api/save-manifests.php'
+                : '/api/save-manifests.php';
+
+            const response = await fetch(MANIFESTS_API_URL, {
                 method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${this.authToken}`
-                },
                 body: uploadData
             });
 
-            const data = await response.json();
+            // Get response text first to handle non-JSON responses
+            const responseText = await response.text();
+            let data;
+            
+            try {
+                data = JSON.parse(responseText);
+            } catch (parseError) {
+                // If response is not valid JSON, it might contain PHP errors
+                console.error('Invalid JSON response:', responseText);
+                throw new Error('Server returned an invalid response. Please check the server logs.');
+            }
 
-            if (response.ok) {
+            if (response.ok && data.success) {
                 this.showNotification('Manifest uploaded successfully!', 'success');
                 this.closeManifestUpload();
-                this.loadDashboardData(); // Refresh dashboard
+                // Refresh dashboard data
+                this.loadDashboardData();
             } else {
-                throw new Error(data.error || 'Upload failed');
+                throw new Error(data.error || data.message || 'Upload failed');
             }
 
         } catch (error) {
+            console.error('Manifest upload error:', error);
             this.showNotification(`Upload failed: ${error.message}`, 'error');
         } finally {
             submitBtn.disabled = false;
