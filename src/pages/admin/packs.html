@@ -290,12 +290,20 @@ document.addEventListener('DOMContentLoaded', () => {
       throw new Error(result.error || 'Failed to save pack');
     }
 
-    alert(`✅ Pack ${result.message?.includes('updated') ? 'updated' : 'created'} successfully!`);
-
-    // Refresh packs list and close modal
-    closePackModal?.();
+    // Show success message
+    const action = result.message?.includes('updated') ? 'updated' : 'created';
     if (window.adminPacks) {
-      await window.adminPacks.loadPacks();
+      window.adminPacks.showNotification(`Pack ${action} successfully!`, 'success');
+    }
+
+    // Close modal first
+    closePackModal?.();
+    
+    // Wait a brief moment to ensure file system has updated, then refresh
+    if (window.adminPacks) {
+      // Small delay to allow file system to sync
+      await new Promise(resolve => setTimeout(resolve, 300));
+      await window.adminPacks.loadPacks(false); // Don't show refresh notification after create/update
     }
   } catch (err) {
     alert("❌ Failed to save pack. Please try again.");

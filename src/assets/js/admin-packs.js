@@ -42,7 +42,14 @@ class AdminPacks {
         // Refresh packs
         const refreshBtn = document.getElementById('refresh-packs');
         if (refreshBtn) {
-            refreshBtn.addEventListener('click', () => this.loadPacks());
+            refreshBtn.addEventListener('click', () => {
+                refreshBtn.disabled = true;
+                refreshBtn.textContent = 'Refreshing...';
+                this.loadPacks(true).finally(() => {
+                    refreshBtn.disabled = false;
+                    refreshBtn.textContent = 'Refresh';
+                });
+            });
         }
 
         // Manifest upload form
@@ -187,23 +194,36 @@ class AdminPacks {
         document.getElementById('packs-section').style.display = 'block';
     }
 
-    async loadPacks() {
+    async loadPacks(showNotification = false) {
         if (!this.isAuthenticated) return;
 
         try {
-            const response = await fetch(`${JSON_DATA_URL}/packs.json`);
+            // Add cache-busting parameter to ensure fresh data
+            const timestamp = new Date().getTime();
+            const response = await fetch(`${JSON_DATA_URL}/packs.json?t=${timestamp}`, {
+                cache: 'no-store',
+                headers: {
+                    'Cache-Control': 'no-cache',
+                    'Pragma': 'no-cache'
+                }
+            });
 
             if (response.ok) {
                 const data = await response.json();
                 this.packs = data.packs || [];
                 this.renderPacks();
                 this.updateStats();
+                
+                if (showNotification) {
+                    this.showNotification('Packs refreshed successfully', 'success');
+                }
             } else {
                 throw new Error('Failed to load packs');
             }
 
         } catch (error) {
             this.showNotification('Failed to load packs', 'error');
+            console.error('Error loading packs:', error);
         }
     }
 
@@ -323,13 +343,49 @@ class AdminPacks {
         }
 
         try {
-            // Demo mode - just show success message
-            // In a real app, you'd delete from a database
-            this.showNotification('Pack deleted successfully! (Demo mode)', 'success');
-            this.loadPacks();
+            // Detect if we're in development (localhost) and use PHP server, otherwise use relative path
+            const PACKS_API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+                ? 'http://localhost:8000/api/save-packs.php'
+                : '/api/save-packs.php';
+
+            const response = await fetch(`${PACKS_API_URL}?id=${packId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }).catch(err => {
+                // Handle network errors
+                console.error('Network error:', err);
+                throw new Error(`Network error: ${err.message}. Please check if the server is running and accessible.`);
+            });
+
+            if (!response) {
+                throw new Error('No response from server');
+            }
+
+            const text = await response.text();
+            let result;
+            
+            try {
+                result = JSON.parse(text);
+            } catch (err) {
+                console.error('Response text:', text);
+                throw new Error(`Invalid server response: ${text.substring(0, 100)}`);
+            }
+
+            if (!response.ok || !result.ok) {
+                throw new Error(result.error || `Server error: ${response.status} ${response.statusText}`);
+            }
+
+            this.showNotification('Pack deleted successfully!', 'success');
+            
+            // Wait a brief moment to ensure file system has updated, then refresh
+            await new Promise(resolve => setTimeout(resolve, 300));
+            await this.loadPacks(true);
 
         } catch (error) {
-            this.showNotification('Failed to delete pack', 'error');
+            this.showNotification(`Failed to delete pack: ${error.message}`, 'error');
+            console.error('Error deleting pack:', error);
         }
     }
 

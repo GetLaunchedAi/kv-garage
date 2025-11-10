@@ -35,7 +35,7 @@ if (in_array($origin, $allowedOrigins)) {
     }
 }
 
-header('Access-Control-Allow-Methods: POST, OPTIONS');
+header('Access-Control-Allow-Methods: POST, DELETE, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
 header('Access-Control-Allow-Credentials: true');
 header('Access-Control-Max-Age: 86400'); // 24 hours
@@ -50,23 +50,117 @@ header('Content-Type: application/json');
 header('X-Content-Type-Options: nosniff');
 header('Referrer-Policy: no-referrer');
 
-// POST only
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-  http_response_code(405);
-  echo json_encode(['ok' => false, 'error' => 'Method not allowed']);
-  exit;
+// File paths - handle /api, /public/api, and Cloudways public_html
+$scriptDir = __DIR__;
+$projectRoot = dirname($scriptDir);
+
+// Determine if we're in production (Cloudways)
+$isProduction = !in_array($_SERVER['HTTP_HOST'] ?? '', ['localhost', '127.0.0.1']) 
+    && strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost') === false;
+
+// Try to find public directory (check multiple common locations)
+// On production, prioritize DOCUMENT_ROOT as it's most reliable
+$publicDir = null;
+$possiblePublicDirs = [];
+
+if ($isProduction && !empty($_SERVER['DOCUMENT_ROOT'])) {
+    // Production: prioritize document root
+    $possiblePublicDirs[] = $_SERVER['DOCUMENT_ROOT'];
+    $possiblePublicDirs[] = $projectRoot . '/public_html';  // Cloudways
+    $possiblePublicDirs[] = $projectRoot . '/../public_html';  // Cloudways
+    $possiblePublicDirs[] = $projectRoot . '/public';
+    $possiblePublicDirs[] = $projectRoot . '/../public';
+} else {
+    // Development: check local paths first
+    $possiblePublicDirs[] = $projectRoot . '/public';
+    $possiblePublicDirs[] = $projectRoot . '/../public';
+    $possiblePublicDirs[] = $_SERVER['DOCUMENT_ROOT'] ?? null;
+    $possiblePublicDirs[] = $projectRoot . '/public_html';
+    $possiblePublicDirs[] = $projectRoot . '/../public_html';
 }
 
-// Check if packs.json exists in data directory, otherwise use public/data/packs.json
-$packsFileData = __DIR__ . '/../data/packs.json';
-$packsFilePublic = __DIR__ . '/../public/data/packs.json';
-$packsFile = file_exists($packsFileData) ? $packsFileData : $packsFilePublic;
-$uploadDir = __DIR__ . '/../public/images/products/';
+foreach ($possiblePublicDirs as $dir) {
+    if ($dir && is_dir($dir)) {
+        $publicDir = realpath($dir);
+        break;
+    }
+}
 
-// Ensure the directory exists
+// Fallback: if script is in /api, try parent/public or parent/public_html
+if (!$publicDir) {
+    if (basename($projectRoot) === 'api') {
+        $parent = dirname($projectRoot);
+        if (is_dir($parent . '/public')) {
+            $publicDir = realpath($parent . '/public');
+        } elseif (is_dir($parent . '/public_html')) {
+            $publicDir = realpath($parent . '/public_html');
+        }
+    }
+}
+
+// Final fallback
+if (!$publicDir) {
+    $publicDir = $projectRoot;
+}
+
+// Find data directory
+$dataDir = null;
+$possibleDataDirs = [
+    $publicDir . '/data',
+    $projectRoot . '/public/data',
+    $projectRoot . '/../public/data',
+    $projectRoot . '/data',
+    $projectRoot . '/../data',
+];
+
+foreach ($possibleDataDirs as $dir) {
+    if (is_dir($dir)) {
+        $dataDir = realpath($dir);
+        break;
+    }
+}
+
+// Fallback for data directory
+if (!$dataDir) {
+    $dataDir = $publicDir . '/data';
+}
+
+// Set file paths
+$packsFileData = $dataDir . '/packs.json';
+$packsFilePublic = $publicDir . '/data/packs.json';
+$packsFile = file_exists($packsFilePublic) ? $packsFilePublic : $packsFileData;
+$uploadDir = $publicDir . '/images/products/';
+
+// Ensure directories exist with proper permissions
 $packsDir = dirname($packsFile);
 if (!is_dir($packsDir)) {
-  mkdir($packsDir, 0755, true);
+  @mkdir($packsDir, 0775, true);
+  if (is_dir($packsDir)) {
+    @chmod($packsDir, 0775);
+  }
+}
+
+// Ensure upload directory exists with proper permissions
+$imagesDir = $publicDir . '/images';
+$productsDir = $imagesDir . '/products';
+
+if (!is_dir($imagesDir)) {
+  @mkdir($imagesDir, 0775, true);
+  if (is_dir($imagesDir)) {
+    @chmod($imagesDir, 0775);
+  }
+}
+
+if (!is_dir($uploadDir)) {
+  $created = @mkdir($uploadDir, 0775, true);
+  if (!$created && !is_dir($uploadDir)) {
+    // Try with 0755 if 0775 fails
+    $created = @mkdir($uploadDir, 0755, true);
+  }
+  // Set permissions on the directory if it exists
+  if (is_dir($uploadDir)) {
+    @chmod($uploadDir, 0775);
+  }
 }
 
 if (!file_exists($packsFile)) {
@@ -75,6 +169,71 @@ if (!file_exists($packsFile)) {
 
 $store = json_decode(file_get_contents($packsFile), true);
 if (!isset($store['packs']) || !is_array($store['packs'])) $store = ['packs' => []];
+
+// Handle DELETE request (must be before POST-only check)
+if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
+  // Get pack ID from query string or JSON body
+  $packId = null;
+  
+  // Try query string first
+  if (isset($_GET['id'])) {
+    $packId = (int)$_GET['id'];
+  } else {
+    // Try JSON body
+    $input = file_get_contents('php://input');
+    if (!empty($input)) {
+      $data = json_decode($input, true);
+      if (isset($data['id'])) {
+        $packId = (int)$data['id'];
+      }
+    }
+  }
+  
+  if ($packId === null) {
+    http_response_code(400);
+    echo json_encode(['ok' => false, 'error' => 'Pack ID is required']);
+    exit;
+  }
+  
+  // Find and remove the pack
+  $idx = null;
+  foreach ($store['packs'] as $i => $p) {
+    if ((int)$p['id'] === $packId) {
+      $idx = $i;
+      break;
+    }
+  }
+  
+  if ($idx === null) {
+    http_response_code(404);
+    echo json_encode(['ok' => false, 'error' => 'Pack not found']);
+    exit;
+  }
+  
+  // Remove the pack from array
+  $deletedPack = $store['packs'][$idx];
+  array_splice($store['packs'], $idx, 1);
+  
+  // Save updated packs
+  if (file_put_contents($packsFile, json_encode($store, JSON_PRETTY_PRINT))) {
+    echo json_encode([
+      'ok' => true,
+      'message' => 'Pack deleted successfully',
+      'pack' => $deletedPack
+    ]);
+  } else {
+    http_response_code(500);
+    echo json_encode(['ok' => false, 'error' => 'Failed to save packs.json']);
+  }
+  exit;
+}
+
+// POST only for create/update
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+  http_response_code(405);
+  echo json_encode(['ok' => false, 'error' => 'Method not allowed']);
+  exit;
+}
 
 // Accept JSON (API) or multipart form (admin UI)
 if (!empty($_SERVER['CONTENT_TYPE']) && strpos($_SERVER['CONTENT_TYPE'], 'application/json') !== false) {
@@ -125,18 +284,55 @@ if (isset($files['image']) && $files['image']['error'] === UPLOAD_ERR_OK) {
   $slug = slug($pack['name'] ?? $pack['productName'] ?? 'pack');
   $ext  = $allowed[$mime];
 
-  if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
-
   $filename  = "{$slug}_" . time() . ".{$ext}";
   $destPath  = $uploadDir . $filename;
 
   if (!move_uploaded_file($files['image']['tmp_name'], $destPath)) {
     http_response_code(500);
-    echo json_encode(['ok' => false, 'error' => 'Failed to save file']);
+    echo json_encode([
+      'ok' => false, 
+      'error' => 'Failed to save file',
+      'dest' => $destPath,
+      'upload_dir_writable' => is_writable($uploadDir),
+      'upload_dir_exists' => is_dir($uploadDir)
+    ]);
     exit;
   }
   @chmod($destPath, 0644);
-  $newImageUrl = '/images/products/' . $filename;
+  
+  // Verify file was created and is readable
+  if (file_exists($destPath) && is_readable($destPath)) {
+    // Calculate the correct URL path relative to document root
+    // On Cloudways, ensure we use the correct path from document root
+    $docRoot = $_SERVER['DOCUMENT_ROOT'] ?? $publicDir;
+    $docRoot = rtrim($docRoot, '/');
+    $destPathNormalized = str_replace('\\', '/', $destPath);
+    $docRootNormalized = str_replace('\\', '/', $docRoot);
+    
+    // If file is within document root, use relative path
+    if (strpos($destPathNormalized, $docRootNormalized) === 0) {
+      $relativePath = substr($destPathNormalized, strlen($docRootNormalized));
+      $newImageUrl = $relativePath;
+    } else {
+      // Fallback to standard path
+      $newImageUrl = '/images/products/' . $filename;
+    }
+    
+    // Ensure path starts with /
+    if (strpos($newImageUrl, '/') !== 0) {
+      $newImageUrl = '/' . $newImageUrl;
+    }
+  } else {
+    http_response_code(500);
+    echo json_encode([
+      'ok' => false, 
+      'error' => 'File uploaded but not accessible',
+      'file' => $destPath,
+      'exists' => file_exists($destPath),
+      'readable' => is_readable($destPath)
+    ]);
+    exit;
+  }
 }
 
 // ---- RESOLVE ID ----
