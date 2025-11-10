@@ -680,11 +680,178 @@ eleventyNavigation:
           btn.addEventListener('click', (e) => {
             e.stopPropagation();
             const action = btn.dataset.action;
+            
+            // Handle expand/collapse separately
+            if (action === 'expand') {
+              this.togglePackExpansion(card, pack, btn);
+              return;
+            }
+            
             // Pass the button element for visual feedback
             this.handlePackAction(action, pack, btn);
           });
         });
       });
+    }
+
+    async togglePackExpansion(card, pack, button) {
+      const isExpanded = card.classList.contains('expanded');
+      const itemsContainer = card.querySelector('.pack-items-container');
+      const itemsContent = card.querySelector('.pack-items-content');
+      const loadingState = card.querySelector('.pack-items-loading');
+      
+      if (isExpanded) {
+        // Collapse
+        card.classList.remove('expanded');
+        button.classList.remove('expanded');
+        button.querySelector('.expand-text').textContent = 'View Items';
+        // Reset container display after animation
+        setTimeout(() => {
+          if (!card.classList.contains('expanded')) {
+            itemsContainer.style.display = 'none';
+          }
+        }, 400);
+      } else {
+        // Expand
+        card.classList.add('expanded');
+        button.classList.add('expanded');
+        button.querySelector('.expand-text').textContent = 'Hide Items';
+        itemsContainer.style.display = 'block';
+        
+        // Check if items are already loaded
+        if (itemsContent.innerHTML.trim() === '') {
+          // Load manifest items
+          await this.loadPackItems(pack, itemsContent, loadingState);
+        }
+        
+        // Smooth scroll to expanded pack
+        setTimeout(() => {
+          card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }, 100);
+      }
+    }
+
+    async loadPackItems(pack, container, loadingState) {
+      try {
+        // Show loading state
+        loadingState.style.display = 'block';
+        container.style.display = 'none';
+        
+        // Load manifest from JSON
+        const response = await fetch('/data/manifests.json');
+        if (!response.ok) {
+          throw new Error('Failed to load manifest');
+        }
+        
+        const data = await response.json();
+        const manifestItems = data.manifests[pack.id];
+        
+        if (!manifestItems || manifestItems.length === 0) {
+          container.innerHTML = `
+            <div class="pack-items-empty">
+              <p>No items available for this pack.</p>
+            </div>
+          `;
+          loadingState.style.display = 'none';
+          container.style.display = 'block';
+          return;
+        }
+        
+        // Render items
+        this.renderPackItems(manifestItems, container);
+        
+        // Hide loading, show content
+        loadingState.style.display = 'none';
+        container.style.display = 'block';
+      } catch (error) {
+        console.error('Error loading pack items:', error);
+        container.innerHTML = `
+          <div class="pack-items-empty">
+            <p>Failed to load items. Please try again.</p>
+          </div>
+        `;
+        loadingState.style.display = 'none';
+        container.style.display = 'block';
+      }
+    }
+
+    renderPackItems(items, container) {
+      // Group items by category
+      const grouped = items.reduce((acc, item) => {
+        const category = item.category || 'Other';
+        if (!acc[category]) acc[category] = [];
+        acc[category].push(item);
+        return acc;
+      }, {});
+      
+      const totalItems = items.reduce((sum, item) => sum + (item.quantity || 1), 0);
+      
+      let html = `
+        <div class="pack-items-header">
+          <h4>Pack Contents</h4>
+          <p>${totalItems} total items across ${Object.keys(grouped).length} categories</p>
+        </div>
+        <div class="pack-items-grouped">
+      `;
+      
+      // Render each category
+      Object.entries(grouped).forEach(([category, categoryItems]) => {
+        html += `
+          <div class="pack-items-category">
+            <h5 class="pack-items-category-title">${this.escapeHtml(category)}</h5>
+            <div class="pack-items-grid">
+        `;
+        
+        categoryItems.forEach(item => {
+          const quantity = item.quantity || 1;
+          const condition = (item.condition || 'new').toLowerCase();
+          const estimatedValue = item.estimated_value || 0;
+          const itemName = item.item_name || item.product_name || 'Unknown Item';
+          const sku = item.sku || 'N/A';
+          const brand = item.brand || 'Generic';
+          
+          html += `
+            <div class="pack-item-card">
+              <div class="pack-item-header">
+                <h6 class="pack-item-name">${this.escapeHtml(itemName)}</h6>
+                <span class="pack-item-quantity">${quantity}x</span>
+              </div>
+              <div class="pack-item-details">
+                <div class="pack-item-detail-row">
+                  <span class="pack-item-label">SKU:</span>
+                  <span class="pack-item-value">${this.escapeHtml(sku)}</span>
+                </div>
+                <div class="pack-item-detail-row">
+                  <span class="pack-item-label">Brand:</span>
+                  <span class="pack-item-value">${this.escapeHtml(brand)}</span>
+                </div>
+                <div class="pack-item-detail-row">
+                  <span class="pack-item-label">Condition:</span>
+                  <span class="pack-item-value condition-${condition}">${this.escapeHtml(item.condition || 'new')}</span>
+                </div>
+                <div class="pack-item-detail-row">
+                  <span class="pack-item-label">Est. Value:</span>
+                  <span class="pack-item-value price">$${estimatedValue.toFixed(2)}</span>
+                </div>
+              </div>
+            </div>
+          `;
+        });
+        
+        html += `
+            </div>
+          </div>
+        `;
+      });
+      
+      html += `</div>`;
+      container.innerHTML = html;
+    }
+
+    escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
     }
 
     async handlePackAction(action, pack, buttonElement = null) {

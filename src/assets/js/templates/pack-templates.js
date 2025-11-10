@@ -89,6 +89,10 @@
             ${opts.showDescription && packDescription ? `<p class="pack-description">${esc(packDescription)}</p>` : ''}
             
             <div class="pack-actions">
+              <button class="pack-btn expand-toggle" data-action="expand" data-pack-id="${esc(packId)}" aria-label="View items in pack">
+                <span class="expand-icon">▼</span>
+                <span class="expand-text">View Items</span>
+              </button>
               <a href="/pack/${esc(packSlug)}/" class="pack-btn primary">View Details</a>
               ${!isOutOfStock ? `
                 <button class="pack-btn buy add-to-cart" 
@@ -101,6 +105,15 @@
                 </button>
               ` : ''}
             </div>
+          </div>
+          
+          <!-- Expandable Items Section -->
+          <div class="pack-items-container" data-pack-items="${esc(packId)}" style="display: none;">
+            <div class="pack-items-loading" style="display: none;">
+              <div class="spinner-small"></div>
+              <p>Loading items...</p>
+            </div>
+            <div class="pack-items-content"></div>
           </div>
         </div>
       `;
