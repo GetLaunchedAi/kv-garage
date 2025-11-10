@@ -128,31 +128,41 @@ if (!$dataDir) {
     $dataDir = $publicDir . '/data';
 }
 
-// Set file paths
-$manifestFileData = $dataDir . '/manifests.json';
+// Set file paths - ALWAYS prioritize public directory for web accessibility
 $manifestFilePublic = $publicDir . '/data/manifests.json';
-$manifestFile = file_exists($manifestFilePublic) ? $manifestFilePublic : $manifestFileData;
+$manifestFileData = $dataDir . '/manifests.json';
+// Primary file is always the public one (web-accessible)
+$manifestFile = $manifestFilePublic;
 
 $packsFileData = $dataDir . '/packs.json';
 $packsFilePublic = $publicDir . '/data/packs.json';
 $packsFile = file_exists($packsFilePublic) ? $packsFilePublic : $packsFileData;
 
-// Ensure data directory exists with proper permissions
-$dataDirPath = dirname($manifestFile);
-if (!is_dir($dataDirPath)) {
-    @mkdir($dataDirPath, 0775, true);
-    if (is_dir($dataDirPath)) {
-        @chmod($dataDirPath, 0775);
+// Ensure public data directory exists with proper permissions
+$publicDataDir = dirname($manifestFilePublic);
+if (!is_dir($publicDataDir)) {
+    @mkdir($publicDataDir, 0775, true);
+    if (is_dir($publicDataDir)) {
+        @chmod($publicDataDir, 0775);
     }
 }
 
-// --- Ensure manifests.json exists ---
+// --- Ensure manifests.json exists in public directory ---
 if (!file_exists($manifestFile)) {
     $initialData = ['manifests' => []];
     @mkdir(dirname($manifestFile), 0775, true);
     file_put_contents($manifestFile, json_encode($initialData, JSON_PRETTY_PRINT));
 }
-$manifestsData = json_decode(file_get_contents($manifestFile), true);
+
+// Load from public directory first, fallback to data directory if needed
+if (file_exists($manifestFilePublic)) {
+    $manifestsData = json_decode(file_get_contents($manifestFilePublic), true);
+} elseif (file_exists($manifestFileData)) {
+    $manifestsData = json_decode(file_get_contents($manifestFileData), true);
+} else {
+    $manifestsData = ['manifests' => []];
+}
+
 if (!isset($manifestsData['manifests']) || !is_array($manifestsData['manifests'])) {
     $manifestsData = ['manifests' => []];
 }
@@ -285,10 +295,12 @@ fclose($csv);
 
 
 // --- Write to manifests.json ---
-$manifestsData['manifests'][(string)$packId] = $items;
+// Normalize pack ID to string for consistent key storage
+$packIdKey = (string)$packId;
+$manifestsData['manifests'][$packIdKey] = $items;
 
-// Ensure directory exists and is writable
-$manifestDir = dirname($manifestFile);
+// Ensure public directory exists and is writable
+$manifestDir = dirname($manifestFilePublic);
 if (!is_dir($manifestDir)) {
     @mkdir($manifestDir, 0775, true);
     if (is_dir($manifestDir)) {
@@ -317,24 +329,34 @@ if ($jsonData === false) {
 // Clear any output that might have been generated
 ob_clean();
 
-// Save to primary location
-if (file_put_contents($manifestFile, $jsonData)) {
-    // Also save to data directory if different
-    if ($manifestFileData !== $manifestFile && is_dir(dirname($manifestFileData))) {
-        @mkdir(dirname($manifestFileData), 0775, true);
-        file_put_contents($manifestFileData, $jsonData);
+// ALWAYS save to public directory first (web-accessible)
+$savedToPublic = file_put_contents($manifestFilePublic, $jsonData);
+
+// Also save to data directory if different (for Eleventy builds)
+$savedToData = true;
+if ($manifestFileData !== $manifestFilePublic) {
+    $dataDirPath = dirname($manifestFileData);
+    if (!is_dir($dataDirPath)) {
+        @mkdir($dataDirPath, 0775, true);
     }
-    
+    if (is_dir($dataDirPath)) {
+        $savedToData = file_put_contents($manifestFileData, $jsonData);
+    }
+}
+
+if ($savedToPublic) {
     echo json_encode([
         'success' => true,
         'message' => 'Manifest uploaded successfully',
         'pack_id' => $packId,
-        'item_count' => count($items)
+        'pack_id_key' => $packIdKey, // Include the string key for debugging
+        'item_count' => count($items),
+        'saved_to' => $manifestFilePublic, // Include save path for debugging
+        'saved_to_data' => $savedToData ? $manifestFileData : false
     ]);
 } else {
-    ob_clean();
     http_response_code(500);
-    echo json_encode(['error' => 'Failed to save manifests.json to: ' . $manifestFile]);
+    echo json_encode(['error' => 'Failed to save manifests.json to: ' . $manifestFilePublic]);
 }
 
 // End output buffering and send output

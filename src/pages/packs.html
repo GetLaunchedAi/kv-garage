@@ -737,14 +737,18 @@ eleventyNavigation:
         loadingState.style.display = 'block';
         container.style.display = 'none';
         
-        // Load manifest from JSON
-        const response = await fetch('/data/manifests.json');
+        // Load manifest from JSON with cache-busting
+        const cacheBuster = `?t=${Date.now()}`;
+        const response = await fetch(`/data/manifests.json${cacheBuster}`);
         if (!response.ok) {
           throw new Error('Failed to load manifest');
         }
         
         const data = await response.json();
-        const manifestItems = data.manifests[pack.id];
+        // Try both string and number key
+        const packIdStr = String(pack.id);
+        const packIdNum = Number(pack.id);
+        const manifestItems = data.manifests[packIdStr] || data.manifests[packIdNum] || data.manifests[pack.id];
         
         if (!manifestItems || manifestItems.length === 0) {
           container.innerHTML = `
@@ -895,11 +899,15 @@ eleventyNavigation:
     async openPackModal(pack) {
       this.currentPack = pack;
 
-      // Load manifest data from JSON
+      // Load manifest data from JSON with cache-busting
       try {
-        const response = await fetch('/data/manifests.json');
+        const cacheBuster = `?t=${Date.now()}`;
+        const response = await fetch(`/data/manifests.json${cacheBuster}`);
         const data = await response.json();
-        const manifestItems = data.manifests[pack.id];
+        // Try both string and number key
+        const packIdStr = String(pack.id);
+        const packIdNum = Number(pack.id);
+        const manifestItems = data.manifests[packIdStr] || data.manifests[packIdNum] || data.manifests[pack.id];
 
         // Add manifest to pack object
         pack.manifest = manifestItems || [];
@@ -1186,17 +1194,25 @@ eleventyNavigation:
 
     async viewManifest(packId) {
       try {
-        // Load manifest from JSON file
-        const response = await fetch('/data/manifests.json');
+        // Load manifest from JSON file with cache-busting
+        const cacheBuster = `?t=${Date.now()}`;
+        const response = await fetch(`/data/manifests.json${cacheBuster}`);
         if (!response.ok) {
           throw new Error('Failed to load manifest');
         }
         
         const data = await response.json();
-        const manifestItems = data.manifests[packId];
+        
+        // Try both string and number key (pack IDs might be stored as strings)
+        const packIdStr = String(packId);
+        const packIdNum = Number(packId);
+        const manifestItems = data.manifests[packIdStr] || data.manifests[packIdNum] || data.manifests[packId];
         
         if (!manifestItems) {
-          throw new Error('No manifest data found for this pack');
+          // Debug: log available keys
+          console.log('Available manifest keys:', Object.keys(data.manifests || {}));
+          console.log('Looking for pack ID:', packId, 'as string:', packIdStr, 'as number:', packIdNum);
+          throw new Error(`No manifest data found for pack ID: ${packId}`);
         }
         
         // Normalize numeric values (ensure they're numbers, not strings)
